@@ -22,12 +22,8 @@ data class GameState(
         val right = rightEnd ?: return emptyList()
         for (domino in player.hand) {
             if (domino.canConnectTo(left)) moves.add(domino to BoardEnd.LEFT)
-            if (domino.canConnectTo(right)) {
-                if (left != right || !domino.canConnectTo(left)) {
-                    moves.add(domino to BoardEnd.RIGHT)
-                } else if (!moves.any { it.first == domino && it.second == BoardEnd.RIGHT }) {
-                    moves.add(domino to BoardEnd.RIGHT)
-                }
+            if (domino.canConnectTo(right) && (left != right || moves.none { it.first == domino })) {
+                moves.add(domino to BoardEnd.RIGHT)
             }
         }
         return moves

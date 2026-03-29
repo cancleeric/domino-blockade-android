@@ -166,8 +166,10 @@ class GameViewModel @Inject constructor(
     }
 
     fun canPlaceAt(end: BoardEnd): Boolean {
-        val state = _uiState.value.gameState ?: return false
-        val domino = _uiState.value.selectedDomino ?: return false
+        val uiState = _uiState.value
+        val state = uiState.gameState ?: return false
+        val domino = uiState.selectedDomino ?: return false
+        if (domino !in uiState.playableDominoes) return false
         return state.validMovesFor(state.currentPlayer).any { it.first == domino && it.second == end }
     }
 }
