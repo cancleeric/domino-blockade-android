@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Splash screen icon: simple domino tile representation -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Domino tile background (ivory) -->
+    <path
+        android:fillColor="#FFFDE7"
+        android:pathData="M20,10 L88,10 Q98,10 98,20 L98,88 Q98,98 88,98 L20,98 Q10,98 10,88 L10,20 Q10,10 20,10 Z" />
+
+    <!-- Divider line -->
+    <path
+        android:fillColor="#9E9E9E"
+        android:pathData="M10,54 L98,54 L98,56 L10,56 Z" />
+
+    <!-- Upper pips (3 pips) -->
+    <path
+        android:fillColor="#212121"
+        android:pathData="M30,26 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" />
+    <path
+        android:fillColor="#212121"
+        android:pathData="M54,32 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" />
+    <path
+        android:fillColor="#212121"
+        android:pathData="M78,26 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" />
+
+    <!-- Lower pips (2 pips) -->
+    <path
+        android:fillColor="#212121"
+        android:pathData="M34,76 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" />
+    <path
+        android:fillColor="#212121"
+        android:pathData="M74,76 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" />
+
+</vector>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 繁體中文 -->
+<resources>
+    <string name="app_name">骨牌封鎖</string>
+
+    <!-- 主畫面 -->
+    <string name="home_welcome_title">歡迎來到骨牌封鎖</string>
+    <string name="home_welcome_subtitle">策略性骨牌棋盤遊戲，挑戰 AI 對手</string>
+
+    <!-- 主題 -->
+    <string name="theme_title">主題</string>
+    <string name="theme_light">淺色</string>
+    <string name="theme_dark">深色</string>
+    <string name="theme_system">跟隨系統</string>
+
+    <!-- 操作 -->
+    <string name="action_play_vs_ai">對戰 AI</string>
+    <string name="action_play_local_multiplayer">本地多人遊戲</string>
+    <string name="action_view_stats">查看統計</string>
+    <string name="action_settings">設定</string>
+
+    <!-- 遊戲 -->
+    <string name="game_score">分數：%1$d</string>
+    <string name="game_turn_player">你的回合</string>
+    <string name="game_turn_ai">AI 的回合</string>
+    <string name="game_over_win">你贏了！</string>
+    <string name="game_over_lose">遊戲結束</string>
+    <string name="game_over_draw">平局！</string>
+    <string name="game_blockade">封鎖！</string>
+    <string name="game_draw_tile">抽牌</string>
+    <string name="game_pass">跳過</string>
+
+    <!-- AI 難度 -->
+    <string name="difficulty_easy">簡單</string>
+    <string name="difficulty_medium">中等</string>
+    <string name="difficulty_hard">困難</string>
+
+    <!-- 統計 -->
+    <string name="stats_total_games">總場次</string>
+    <string name="stats_wins">勝場</string>
+    <string name="stats_losses">敗場</string>
+    <string name="stats_win_rate">勝率</string>
+
+    <!-- 設定 -->
+    <string name="settings_title">設定</string>
+    <string name="settings_theme">主題</string>
+    <string name="settings_sound">音效</string>
+    <string name="settings_haptic">震動回饋</string>
+    <string name="settings_language">語言</string>
+    <string name="settings_privacy_policy">隱私權政策</string>
+    <string name="settings_about">關於</string>
+    <string name="settings_version">版本</string>
+
+    <!-- 錯誤 -->
+    <string name="error_invalid_move">無效的移動</string>
+    <string name="error_no_tiles">沒有可用的骨牌</string>
+
+    <!-- 無障礙 -->
+    <string name="cd_domino_tile">骨牌 %1$d-%2$d</string>
+    <string name="cd_back">返回</string>
+    <string name="cd_settings">設定</string>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base application theme (Material 3) -->
+    <style name="Theme.DominoBlockade" parent="Theme.Material3.DayNight.NoActionBar" />
+
+    <!-- Splash screen theme — shown before Compose is ready -->
+    <style name="Theme.DominoBlockade.SplashScreen" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_icon</item>
+        <item name="windowSplashScreenAnimationDuration">300</item>
+        <item name="postSplashScreenTheme">@style/Theme.DominoBlockade</item>
+    </style>
+
+</resources>

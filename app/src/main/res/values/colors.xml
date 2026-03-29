@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Splash screen background color (light mode) -->
+    <color name="splash_background">#1B5E20</color>
+
+    <!-- Domino tile colors -->
+    <color name="domino_tile_light">#FFFDE7</color>
+    <color name="domino_tile_dark">#37474F</color>
+    <color name="domino_pip">#212121</color>
+    <color name="domino_pip_dark">#ECEFF1</color>
+</resources>
