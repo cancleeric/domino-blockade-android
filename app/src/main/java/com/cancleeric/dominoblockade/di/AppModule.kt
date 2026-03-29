@@ -1,17 +1,17 @@
 package com.cancleeric.dominoblockade.di
 
-import com.cancleeric.dominoblockade.data.repository.GameRepositoryImpl
-import com.cancleeric.dominoblockade.domain.repository.GameRepository
-import dagger.Binds
+import com.cancleeric.dominoblockade.domain.GameEngine
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class AppModule {
-    @Binds
+object AppModule {
+
+    @Provides
     @Singleton
-    abstract fun bindGameRepository(impl: GameRepositoryImpl): GameRepository
+    fun provideGameEngine(): GameEngine = GameEngine()
 }
