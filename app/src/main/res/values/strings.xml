@@ -1,4 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Domino Blockade</string>
+
+    <!-- Navigation -->
+    <string name="navigate_back">返回</string>
+
+    <!-- Settings -->
+    <string name="settings_title">設定</string>
+    <string name="settings_ai_difficulty">AI 難度</string>
+    <string name="settings_audio">音效</string>
+    <string name="settings_sound_effects">音效</string>
+    <string name="settings_background_music">背景音樂</string>
+    <string name="settings_haptics">震動</string>
+    <string name="settings_vibration">震動回饋</string>
+    <string name="settings_language">語系</string>
+    <string name="settings_dark_mode">深色模式</string>
+
+    <!-- AI Difficulty -->
+    <string name="difficulty_easy">簡單</string>
+    <string name="difficulty_medium">普通</string>
+    <string name="difficulty_hard">困難</string>
+
+    <!-- Language options -->
+    <string name="language_zh_tw">繁中</string>
+    <string name="language_zh_cn">簡中</string>
+    <string name="language_en">English</string>
+
+    <!-- Dark Mode options -->
+    <string name="dark_mode_light">淺色</string>
+    <string name="dark_mode_dark">深色</string>
+    <string name="dark_mode_system">跟隨系統</string>
 </resources>

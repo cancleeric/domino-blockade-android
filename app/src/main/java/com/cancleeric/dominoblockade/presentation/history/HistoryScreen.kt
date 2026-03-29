@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -33,6 +34,7 @@ import java.util.Locale
 @Composable
 fun HistoryScreen(
     onNavigateToStats: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     viewModel: HistoryViewModel = hiltViewModel()
 ) {
     val records by viewModel.records.collectAsState(initial = emptyList())
@@ -44,6 +46,9 @@ fun HistoryScreen(
                 actions = {
                     IconButton(onClick = onNavigateToStats) {
                         Icon(Icons.Default.BarChart, contentDescription = "統計")
+                    }
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(Icons.Default.Settings, contentDescription = "設定")
                     }
                 }
             )

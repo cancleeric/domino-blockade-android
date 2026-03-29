@@ -72,4 +72,52 @@ class SettingsRepositoryImplTest {
             awaitComplete()
         }
     }
+
+    @Test
+    fun `language returns zh-TW by default`() = runTest {
+        val prefs = mockk<Preferences>()
+        every { prefs[stringPreferencesKey("language")] } returns null
+        every { dataStore.data } returns flowOf(prefs)
+
+        repository.language.test {
+            assertEquals("zh-TW", awaitItem())
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `language returns stored value`() = runTest {
+        val prefs = mockk<Preferences>()
+        every { prefs[stringPreferencesKey("language")] } returns "en"
+        every { dataStore.data } returns flowOf(prefs)
+
+        repository.language.test {
+            assertEquals("en", awaitItem())
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `darkMode returns system by default`() = runTest {
+        val prefs = mockk<Preferences>()
+        every { prefs[stringPreferencesKey("dark_mode")] } returns null
+        every { dataStore.data } returns flowOf(prefs)
+
+        repository.darkMode.test {
+            assertEquals("system", awaitItem())
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `darkMode returns stored value`() = runTest {
+        val prefs = mockk<Preferences>()
+        every { prefs[stringPreferencesKey("dark_mode")] } returns "dark"
+        every { dataStore.data } returns flowOf(prefs)
+
+        repository.darkMode.test {
+            assertEquals("dark", awaitItem())
+            awaitComplete()
+        }
+    }
 }

@@ -21,6 +21,8 @@ class SettingsRepositoryImpl @Inject constructor(
         val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
         val DEFAULT_AI_DIFFICULTY = stringPreferencesKey("default_ai_difficulty")
         val DEFAULT_PLAYER_COUNT = intPreferencesKey("default_player_count")
+        val LANGUAGE = stringPreferencesKey("language")
+        val DARK_MODE = stringPreferencesKey("dark_mode")
     }
 
     override val soundEnabled: Flow<Boolean> = dataStore.data.map { prefs ->
@@ -43,6 +45,14 @@ class SettingsRepositoryImpl @Inject constructor(
         prefs[Keys.DEFAULT_PLAYER_COUNT] ?: 2
     }
 
+    override val language: Flow<String> = dataStore.data.map { prefs ->
+        prefs[Keys.LANGUAGE] ?: "zh-TW"
+    }
+
+    override val darkMode: Flow<String> = dataStore.data.map { prefs ->
+        prefs[Keys.DARK_MODE] ?: "system"
+    }
+
     override suspend fun setSoundEnabled(enabled: Boolean) {
         dataStore.edit { prefs -> prefs[Keys.SOUND_ENABLED] = enabled }
     }
@@ -61,5 +71,13 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setDefaultPlayerCount(count: Int) {
         dataStore.edit { prefs -> prefs[Keys.DEFAULT_PLAYER_COUNT] = count }
+    }
+
+    override suspend fun setLanguage(language: String) {
+        dataStore.edit { prefs -> prefs[Keys.LANGUAGE] = language }
+    }
+
+    override suspend fun setDarkMode(mode: String) {
+        dataStore.edit { prefs -> prefs[Keys.DARK_MODE] = mode }
     }
 }
