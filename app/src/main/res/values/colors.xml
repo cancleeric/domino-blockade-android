@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#3DDC84</color>
+    <!-- Brand colours for Domino Blockade -->
+    <!-- Icon background: dark ivory board colour -->
+    <color name="ic_launcher_background">#1C2B3A</color>
+    <!-- Splash screen background matches the icon background -->
+    <color name="splash_background">#1C2B3A</color>
 </resources>

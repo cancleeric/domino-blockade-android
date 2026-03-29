@@ -1,4 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Main app theme (used after the splash screen finishes) -->
     <style name="Theme.DominoBlockade" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!--
+      Splash screen theme (Android 12+ / core-splashscreen).
+      Set on the <activity> in AndroidManifest.xml so the system shows the
+      branded splash before the app's first frame is drawn.
+    -->
+    <style name="Theme.DominoBlockade.Starting" parent="Theme.SplashScreen">
+        <!-- Solid background colour that matches the app icon background -->
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+
+        <!--
+          Animated (or static) icon displayed in the centre of the splash screen.
+          Android scales this to fit inside a circle of diameter 240 dp.
+        -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_icon</item>
+
+        <!-- Duration the icon animation plays (ms). Keep it short and snappy. -->
+        <item name="windowSplashScreenAnimationDuration">600</item>
+
+        <!-- Colour of the post-splash transition scrim (should match the app's background) -->
+        <item name="postSplashScreenTheme">@style/Theme.DominoBlockade</item>
+    </style>
 </resources>

@@ -1,0 +1,81 @@
+<!--
+  Splash screen branded icon for Domino Blockade.
+  Used as the android:windowSplashScreenAnimatedIcon value.
+  Size: 288×288 dp (Android recommends 288×288 dp for splash icon);
+  the safe zone (optical) is the inner 192×192 dp.
+
+  Depicts two overlapping domino tiles (ivory/cream on transparent),
+  matching the adaptive launcher icon design.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="288"
+    android:viewportHeight="288">
+
+    <!-- Shadow layer for depth -->
+    <path
+        android:fillColor="#33000000"
+        android:pathData="M85,92 L85,196 Q85,202 91,202 L143,202 Q149,202 149,196 L149,92 Q149,86 143,86 L91,86 Q85,86 85,92 Z" />
+
+    <!-- Left domino tile -->
+    <path
+        android:fillColor="#F5F0E8"
+        android:pathData="M82,88 L82,192 Q82,198 88,198 L140,198 Q146,198 146,192 L146,88 Q146,82 140,82 L88,82 Q82,82 82,88 Z" />
+    <!-- Left tile divider -->
+    <path
+        android:fillColor="#CCBBAA"
+        android:pathData="M82,140 L146,140 L146,142 L82,142 Z" />
+
+    <!-- Left upper half: 3 pips -->
+    <path
+        android:fillColor="#1C2B3A"
+        android:pathData="M100,105 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z" />
+    <path
+        android:fillColor="#1C2B3A"
+        android:pathData="M114,120 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z" />
+    <path
+        android:fillColor="#1C2B3A"
+        android:pathData="M128,105 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z" />
+
+    <!-- Left lower half: 2 pips -->
+    <path
+        android:fillColor="#1C2B3A"
+        android:pathData="M100,165 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z" />
+    <path
+        android:fillColor="#1C2B3A"
+        android:pathData="M128,179 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z" />
+
+    <!-- Shadow for right tile -->
+    <path
+        android:fillColor="#33000000"
+        android:pathData="M147,96 L147,200 Q147,206 153,206 L205,206 Q211,206 211,200 L211,96 Q211,90 205,90 L153,90 Q147,90 147,96 Z" />
+
+    <!-- Right domino tile -->
+    <path
+        android:fillColor="#E8E0D0"
+        android:pathData="M144,92 L144,196 Q144,202 150,202 L202,202 Q208,202 208,196 L208,92 Q208,86 202,86 L150,86 Q144,86 144,92 Z" />
+    <!-- Right tile divider -->
+    <path
+        android:fillColor="#BBAA99"
+        android:pathData="M144,144 L208,144 L208,146 L144,146 Z" />
+
+    <!-- Right upper half: 1 pip -->
+    <path
+        android:fillColor="#1C2B3A"
+        android:pathData="M176,116 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z" />
+
+    <!-- Right lower half: 4 pips -->
+    <path
+        android:fillColor="#1C2B3A"
+        android:pathData="M158,160 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z" />
+    <path
+        android:fillColor="#1C2B3A"
+        android:pathData="M194,160 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z" />
+    <path
+        android:fillColor="#1C2B3A"
+        android:pathData="M158,178 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z" />
+    <path
+        android:fillColor="#1C2B3A"
+        android:pathData="M194,178 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0 Z" />
+</vector>
