@@ -3,6 +3,7 @@
 > 多米諾封鎖 Android 版 — 基於 LifeSnap iOS 版移植的多米諾骨牌對戰手遊
 >
 > [![CI Build](https://github.com/cancleeric/domino-blockade-android/actions/workflows/ci.yml/badge.svg)](https://github.com/cancleeric/domino-blockade-android/actions/workflows/ci.yml)
+> [![Release](https://github.com/cancleeric/domino-blockade-android/actions/workflows/release.yml/badge.svg)](https://github.com/cancleeric/domino-blockade-android/actions/workflows/release.yml)
 > [![Platform](https://img.shields.io/badge/platform-Android-green.svg)]()
 > [![Language](https://img.shields.io/badge/language-Kotlin-purple.svg)]()
 > [![Min SDK](https://img.shields.io/badge/minSdk-26-blue.svg)]()
@@ -128,3 +129,104 @@
 >           - ## 📄 授權
 >          
 >           - 此專案為私有專案，版權所有 © 2026 cancleeric (Eric Wang)。
+
+## 🚀 CI/CD Pipeline
+
+### 概覽
+
+| Workflow | 觸發條件 | 說明 |
+|----------|----------|------|
+| **CI Build** | push / PR to `main`, `develop` | 建置 Debug APK、執行單元測試 |
+| **Release** | push tag `v*.*.*` | 建置 Signed Release APK、建立 GitHub Release、上傳 Firebase / Google Play |
+
+---
+
+### 版號管理（自動）
+
+| 欄位 | 規則 |
+|------|------|
+| `versionCode` | `git rev-list --count HEAD`（每次 commit 自動遞增） |
+| `versionName` | 從 git tag 讀取（`v1.2.3` → `1.2.3`）；非 tag commit 加 `-SNAPSHOT` 後綴 |
+
+---
+
+### 發布 Release APK
+
+只需推送符合 `v*.*.*` 格式的 tag：
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+Release workflow 將自動：
+1. 建置 Signed Release APK
+2. 從 commit messages 產生 Release Notes（支援 Conventional Commits 分類）
+3. 在 GitHub Releases 上傳 APK
+4. 上傳至 Firebase App Distribution（beta 測試者）
+5. 上傳至 Google Play Internal Testing（正式版 tag）
+
+---
+
+### 必要的 GitHub Secrets
+
+前往 `Settings → Secrets and variables → Actions` 設定以下 secrets：
+
+#### 🔑 APK 簽署（必要）
+
+| Secret | 說明 |
+|--------|------|
+| `KEYSTORE_BASE64` | Base64 編碼的 `.jks` keystore 檔案 |
+| `STORE_PASSWORD` | Keystore 密碼 |
+| `KEY_ALIAS` | Key alias 名稱 |
+| `KEY_PASSWORD` | Key 密碼 |
+
+產生 Base64 keystore：
+```bash
+base64 -i release.jks | pbcopy   # macOS
+base64 release.jks | xclip       # Linux
+```
+
+#### 🔥 Firebase App Distribution（選用）
+
+| Secret | 說明 |
+|--------|------|
+| `FIREBASE_APP_ID` | Firebase 控制台中的 App ID（如 `1:123456789:android:abcdef`） |
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | Firebase Service Account JSON 金鑰內容 |
+
+#### 🛒 Google Play（選用）
+
+| Secret | 說明 |
+|--------|------|
+| `PLAY_STORE_JSON_KEY` | Google Play API Service Account JSON 金鑰內容 |
+
+---
+
+### 本地簽署設定
+
+```bash
+# 1. 複製範本
+cp keystore.properties.template keystore.properties
+
+# 2. 編輯 keystore.properties，填入你的簽署資訊
+# keystore.properties 已列於 .gitignore，不會被 commit
+
+# 3. 建置 Release APK
+./gradlew assembleRelease
+```
+
+### fastlane 軌道管理
+
+```bash
+# 上傳至 Internal Testing
+bundle exec fastlane android internal apk:app/build/outputs/apk/release/app-release.apk
+
+# 升級至 Alpha
+bundle exec fastlane android promote_to_alpha
+
+# 升級至 Beta（公開測試）
+bundle exec fastlane android promote_to_beta
+
+# 升級至 Production（分階段 10% 發布）
+bundle exec fastlane android promote_to_production rollout:0.1
+```

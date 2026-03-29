@@ -26,6 +26,17 @@ render.experimental.xml
 # Keystore files
 *.jks
 *.keystore
+keystore.properties
+keystore/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# Gemfile.lock (generated, keep out of VCS for flexibility)
+Gemfile.lock
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json

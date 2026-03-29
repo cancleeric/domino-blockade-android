@@ -1,0 +1,178 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'   # e.g. v1.0.0, v1.2.3-beta
+
+jobs:
+  release:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write   # Required to create GitHub Releases
+
+    steps:
+      # -----------------------------------------------------------------------
+      # 1. Checkout with full history so git describe / rev-list work correctly
+      # -----------------------------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # -----------------------------------------------------------------------
+      # 2. Set up Java & Gradle
+      # -----------------------------------------------------------------------
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: wrapper
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # -----------------------------------------------------------------------
+      # 3. Extract version info from the git tag
+      # -----------------------------------------------------------------------
+      - name: Extract version info
+        id: version
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Release tag: $TAG  →  version: $VERSION"
+
+      # -----------------------------------------------------------------------
+      # 4. Restore the release keystore from secrets
+      # -----------------------------------------------------------------------
+      - name: Setup keystore
+        run: |
+          mkdir -p keystore
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > keystore/release.jks
+          printf 'storeFile=keystore/release.jks\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
+            "${{ secrets.STORE_PASSWORD }}" \
+            "${{ secrets.KEY_ALIAS }}" \
+            "${{ secrets.KEY_PASSWORD }}" \
+            > keystore.properties
+
+      # -----------------------------------------------------------------------
+      # 5. Build signed release APK
+      # -----------------------------------------------------------------------
+      - name: Build release APK
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
+
+      # -----------------------------------------------------------------------
+      # 6. Rename APK to include version
+      # -----------------------------------------------------------------------
+      - name: Rename APK
+        id: apk
+        run: |
+          APK_SRC="app/build/outputs/apk/release/app-release.apk"
+          APK_NAME="DominoBlockade-${{ steps.version.outputs.version }}.apk"
+          APK_DEST="app/build/outputs/apk/release/$APK_NAME"
+          mv "$APK_SRC" "$APK_DEST"
+          echo "path=$APK_DEST" >> "$GITHUB_OUTPUT"
+          echo "name=$APK_NAME" >> "$GITHUB_OUTPUT"
+
+      # -----------------------------------------------------------------------
+      # 7. Generate Release Notes from commit messages since last tag
+      # -----------------------------------------------------------------------
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREVIOUS_TAG" ]; then
+            COMMIT_RANGE="${PREVIOUS_TAG}..HEAD"
+          else
+            COMMIT_RANGE="HEAD"
+          fi
+
+          # Categorise conventional commits
+          FEATURES=$(git log "$COMMIT_RANGE" --pretty=format:"- %s" --no-merges \
+            | grep -E "^- feat(\(.+\))?:" | sed 's/^- feat\(\([^)]*\)\)\?:/- /' || true)
+          FIXES=$(git log "$COMMIT_RANGE" --pretty=format:"- %s" --no-merges \
+            | grep -E "^- fix(\(.+\))?:" | sed 's/^- fix\(\([^)]*\)\)\?:/- /' || true)
+          CHORES=$(git log "$COMMIT_RANGE" --pretty=format:"- %s" --no-merges \
+            | grep -E "^- (chore|docs|refactor|test|style|perf|ci)(\(.+\))?:" || true)
+          OTHERS=$(git log "$COMMIT_RANGE" --pretty=format:"- %s" --no-merges \
+            | grep -vE "^- (feat|fix|chore|docs|refactor|test|style|perf|ci)(\(.+\))?:" || true)
+
+          NOTES="## What's Changed\n\n"
+          [ -n "$FEATURES" ] && NOTES+="### ✨ New Features\n${FEATURES}\n\n"
+          [ -n "$FIXES"    ] && NOTES+="### 🐛 Bug Fixes\n${FIXES}\n\n"
+          [ -n "$CHORES"   ] && NOTES+="### 🔧 Maintenance\n${CHORES}\n\n"
+          [ -n "$OTHERS"   ] && NOTES+="### 📝 Other Changes\n${OTHERS}\n\n"
+
+          NOTES+="**Full Changelog**: "
+          if [ -n "$PREVIOUS_TAG" ]; then
+            NOTES+="https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG}...${{ steps.version.outputs.tag }}"
+          else
+            NOTES+="https://github.com/${{ github.repository }}/commits/${{ steps.version.outputs.tag }}"
+          fi
+
+          # Write to file (multiline-safe)
+          printf "%b" "$NOTES" > release_notes.md
+          cat release_notes.md
+
+      # -----------------------------------------------------------------------
+      # 8. Create GitHub Release and upload APK
+      # -----------------------------------------------------------------------
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "Domino Blockade ${{ steps.version.outputs.version }}"
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.tag, '-') }}
+          files: ${{ steps.apk.outputs.path }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # -----------------------------------------------------------------------
+      # 9. Upload to Firebase App Distribution (beta testers)
+      # Requires secrets: FIREBASE_APP_ID, FIREBASE_SERVICE_ACCOUNT_JSON
+      # -----------------------------------------------------------------------
+      - name: Upload to Firebase App Distribution
+        if: ${{ secrets.FIREBASE_APP_ID != '' }}
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          groups: beta-testers
+          releaseNotes: ${{ steps.version.outputs.version }}
+          file: ${{ steps.apk.outputs.path }}
+
+      # -----------------------------------------------------------------------
+      # 10. Upload to Google Play (Internal Testing track) via fastlane
+      # Requires secrets: PLAY_STORE_JSON_KEY (service account JSON)
+      # Only runs on non-pre-release tags (i.e. no '-' in version)
+      # -----------------------------------------------------------------------
+      - name: Set up Ruby for fastlane
+        if: ${{ !contains(steps.version.outputs.tag, '-') && secrets.PLAY_STORE_JSON_KEY != '' }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - name: Upload to Google Play (Internal Testing)
+        if: ${{ !contains(steps.version.outputs.tag, '-') && secrets.PLAY_STORE_JSON_KEY != '' }}
+        env:
+          PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
+        run: |
+          echo "$PLAY_STORE_JSON_KEY" > /tmp/play-store-key.json
+          bundle exec fastlane supply \
+            --apk "${{ steps.apk.outputs.path }}" \
+            --track internal \
+            --json_key /tmp/play-store-key.json \
+            --package_name com.cancleeric.dominoblockade
+          rm -f /tmp/play-store-key.json

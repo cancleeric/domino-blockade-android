@@ -1,0 +1,62 @@
+default_platform(:android)
+
+platform :android do
+  # ---------------------------------------------------------------------------
+  # Lane: internal
+  # Uploads the release APK to Google Play Internal Testing track
+  # Usage: bundle exec fastlane android internal apk:/path/to/app.apk
+  # ---------------------------------------------------------------------------
+  desc "Upload APK to Google Play Internal Testing"
+  lane :internal do |options|
+    apk_path = options[:apk] || ENV["APK_PATH"]
+    raise "APK path not provided" unless apk_path
+
+    supply(
+      apk: apk_path,
+      track: "internal",
+      package_name: "com.cancleeric.dominoblockade",
+      release_status: "draft"
+    )
+  end
+
+  # ---------------------------------------------------------------------------
+  # Lane: promote_to_alpha
+  # Promotes a build from internal → alpha
+  # ---------------------------------------------------------------------------
+  desc "Promote Internal build to Alpha"
+  lane :promote_to_alpha do
+    supply(
+      track: "internal",
+      track_promote_to: "alpha",
+      package_name: "com.cancleeric.dominoblockade"
+    )
+  end
+
+  # ---------------------------------------------------------------------------
+  # Lane: promote_to_beta
+  # Promotes a build from alpha → beta (open testing)
+  # ---------------------------------------------------------------------------
+  desc "Promote Alpha build to Beta (Open Testing)"
+  lane :promote_to_beta do
+    supply(
+      track: "alpha",
+      track_promote_to: "beta",
+      package_name: "com.cancleeric.dominoblockade"
+    )
+  end
+
+  # ---------------------------------------------------------------------------
+  # Lane: promote_to_production
+  # Promotes a build from beta → production (staged rollout)
+  # ---------------------------------------------------------------------------
+  desc "Promote Beta build to Production (staged rollout)"
+  lane :promote_to_production do |options|
+    rollout = options[:rollout] || "0.1"
+    supply(
+      track: "beta",
+      track_promote_to: "production",
+      rollout: rollout,
+      package_name: "com.cancleeric.dominoblockade"
+    )
+  end
+end
