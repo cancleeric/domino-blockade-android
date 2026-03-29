@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Domino Blockade</string>
+
+    <!-- Menu -->
+    <string name="menu_subtitle">多米諾封鎖 — 策略對戰手遊</string>
+    <string name="menu_start_game">開始遊戲</string>
+    <string name="menu_leaderboard">排行榜</string>
+
+    <!-- Leaderboard -->
+    <string name="leaderboard_title">全球排行榜</string>
+    <string name="leaderboard_empty">目前沒有排行榜資料</string>
+    <string name="your_rank">你的排名：第 %d 名</string>
+    <string name="wins_count">勝場：%d</string>
+    <string name="anonymous_player">匿名玩家</string>
+
+    <!-- Auth -->
+    <string name="sign_in_anonymously">匿名登入</string>
+    <string name="sign_out">登出</string>
+
+    <!-- Navigation -->
+    <string name="navigate_back">返回</string>
+</resources>
