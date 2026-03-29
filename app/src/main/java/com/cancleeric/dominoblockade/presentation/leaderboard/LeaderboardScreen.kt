@@ -182,7 +182,8 @@ private fun LeaderboardEntryItem(
             // Player info
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = entry.displayName.ifBlank { stringResource(R.string.anonymous_player) },
+                    text = entry.displayName.takeIf { it.isNotBlank() }
+                        ?: stringResource(R.string.anonymous_player),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = if (isCurrentUser) FontWeight.Bold else FontWeight.Normal
                 )

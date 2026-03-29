@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop, "copilot/**" ]
+    branches: [ main, develop, "feature/**", "fix/**", "copilot/**" ]
   pull_request:
     branches: [ main, develop ]
 
@@ -10,6 +10,8 @@ jobs:
   build:
     name: Build & Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
