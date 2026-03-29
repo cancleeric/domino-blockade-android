@@ -3,6 +3,7 @@ package com.cancleeric.dominoblockade.di
 import android.content.Context
 import androidx.room.Room
 import com.cancleeric.dominoblockade.data.local.AppDatabase
+import com.cancleeric.dominoblockade.data.local.dao.AchievementDao
 import com.cancleeric.dominoblockade.data.local.dao.GameRecordDao
 import com.cancleeric.dominoblockade.data.local.dao.PlayerStatsDao
 import dagger.Module
@@ -23,7 +24,9 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "domino_blockade.db"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
@@ -34,5 +37,10 @@ object DatabaseModule {
     @Provides
     fun providePlayerStatsDao(database: AppDatabase): PlayerStatsDao {
         return database.playerStatsDao()
+    }
+
+    @Provides
+    fun provideAchievementDao(database: AppDatabase): AchievementDao {
+        return database.achievementDao()
     }
 }

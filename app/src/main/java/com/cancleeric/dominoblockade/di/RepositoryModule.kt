@@ -1,8 +1,10 @@
 package com.cancleeric.dominoblockade.di
 
+import com.cancleeric.dominoblockade.data.repository.AchievementRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.GameRecordRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.PlayerStatsRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.SettingsRepositoryImpl
+import com.cancleeric.dominoblockade.domain.repository.AchievementRepository
 import com.cancleeric.dominoblockade.domain.repository.GameRecordRepository
 import com.cancleeric.dominoblockade.domain.repository.PlayerStatsRepository
 import com.cancleeric.dominoblockade.domain.repository.SettingsRepository
@@ -33,4 +35,10 @@ abstract class RepositoryModule {
     abstract fun bindSettingsRepository(
         impl: SettingsRepositoryImpl
     ): SettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAchievementRepository(
+        impl: AchievementRepositoryImpl
+    ): AchievementRepository
 }
