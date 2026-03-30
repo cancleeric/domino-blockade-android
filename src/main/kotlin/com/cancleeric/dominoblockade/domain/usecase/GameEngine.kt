@@ -13,8 +13,15 @@ data class ValidMove(val domino: Domino, val end: BoardEnd, val needsFlip: Boole
 
 class GameEngine {
 
+    companion object {
+        private const val MIN_PLAYER_COUNT = 2
+        private const val MAX_PLAYER_COUNT = 4
+    }
+
     fun startGame(config: GameConfig): GameState {
-        require(config.playerCount in 2..4) { "Player count must be between 2 and 4" }
+        require(config.playerCount in MIN_PLAYER_COUNT..MAX_PLAYER_COUNT) {
+            "Player count must be between $MIN_PLAYER_COUNT and $MAX_PLAYER_COUNT"
+        }
         val shuffled = DominoSet.shuffled().toMutableList()
         val players = (0 until config.playerCount).map { index ->
             val hand = shuffled.take(config.dominoesPerPlayer)
@@ -30,42 +37,30 @@ class GameEngine {
 
     fun playDomino(state: GameState, domino: Domino, end: BoardEnd): GameState {
         val currentPlayer = state.players[state.currentPlayerIndex]
-        val validMoves = getValidMoves(state, currentPlayer)
-        val matchingMove = validMoves.firstOrNull { it.domino.id == domino.id && it.end == end }
+        val matchingMove = getValidMoves(state, currentPlayer)
+            .firstOrNull { it.domino.id == domino.id && it.end == end }
             ?: return state
 
         val actualDomino = if (matchingMove.needsFlip) domino.flip() else domino
+        return applyPlacement(state, currentPlayer, domino, actualDomino, end)
+    }
 
-        val newBoard = if (state.board.isEmpty()) {
-            listOf(actualDomino)
-        } else if (end == BoardEnd.LEFT) {
-            listOf(actualDomino) + state.board
-        } else {
-            state.board + actualDomino
-        }
-
-        val newLeftEnd = when {
-            state.board.isEmpty() -> actualDomino.left
-            end == BoardEnd.LEFT -> actualDomino.left
-            else -> state.leftEnd
-        }
-        val newRightEnd = when {
-            state.board.isEmpty() -> actualDomino.right
-            end == BoardEnd.RIGHT -> actualDomino.right
-            else -> state.rightEnd
-        }
-
-        val newHand = currentPlayer.hand.toMutableList().also { it.remove(domino) }
+    private fun applyPlacement(
+        state: GameState,
+        currentPlayer: Player,
+        original: Domino,
+        placed: Domino,
+        end: BoardEnd
+    ): GameState {
+        val newBoard = buildNewBoard(state.board, placed, end)
+        val newLeftEnd = newLeftEnd(state, placed, end)
+        val newRightEnd = newRightEnd(state, placed, end)
+        val newHand = currentPlayer.hand.filterNot { it.id == original.id }
         val updatedPlayer = currentPlayer.copy(hand = newHand)
         val newPlayers = state.players.toMutableList().also {
             it[state.currentPlayerIndex] = updatedPlayer
         }
-
-        val newStatus = when {
-            newHand.isEmpty() -> GameStatus.FINISHED
-            else -> GameStatus.PLAYING
-        }
-
+        val newStatus = if (newHand.isEmpty()) GameStatus.FINISHED else GameStatus.PLAYING
         return state.copy(
             players = newPlayers,
             board = newBoard,
@@ -73,6 +68,24 @@ class GameEngine {
             rightEnd = newRightEnd,
             status = newStatus
         )
+    }
+
+    private fun buildNewBoard(board: List<Domino>, placed: Domino, end: BoardEnd): List<Domino> = when {
+        board.isEmpty() -> listOf(placed)
+        end == BoardEnd.LEFT -> listOf(placed) + board
+        else -> board + placed
+    }
+
+    private fun newLeftEnd(state: GameState, placed: Domino, end: BoardEnd): Int? = when {
+        state.board.isEmpty() -> placed.left
+        end == BoardEnd.LEFT -> placed.left
+        else -> state.leftEnd
+    }
+
+    private fun newRightEnd(state: GameState, placed: Domino, end: BoardEnd): Int? = when {
+        state.board.isEmpty() -> placed.right
+        end == BoardEnd.RIGHT -> placed.right
+        else -> state.rightEnd
     }
 
     fun drawDomino(state: GameState): GameState {
@@ -90,14 +103,17 @@ class GameEngine {
     }
 
     fun getValidMoves(state: GameState, player: Player): List<ValidMove> {
-        if (state.board.isEmpty()) {
-            return player.hand.map { ValidMove(it, BoardEnd.RIGHT, false) }
+        val leftEnd = state.leftEnd
+        val rightEnd = state.rightEnd
+        return when {
+            state.board.isEmpty() -> player.hand.map { ValidMove(it, BoardEnd.RIGHT, false) }
+            leftEnd == null || rightEnd == null -> emptyList()
+            else -> buildMoveList(player, leftEnd, rightEnd)
         }
+    }
 
-        val leftEnd = state.leftEnd ?: return emptyList()
-        val rightEnd = state.rightEnd ?: return emptyList()
+    private fun buildMoveList(player: Player, leftEnd: Int, rightEnd: Int): List<ValidMove> {
         val moves = mutableListOf<ValidMove>()
-
         player.hand.forEach { domino ->
             if (domino.isDouble) {
                 if (domino.left == leftEnd) moves.add(ValidMove(domino, BoardEnd.LEFT, false))
@@ -113,7 +129,6 @@ class GameEngine {
                 if (domino.right == rightEnd) moves.add(ValidMove(domino, BoardEnd.RIGHT, true))
             }
         }
-
         return moves
     }
 

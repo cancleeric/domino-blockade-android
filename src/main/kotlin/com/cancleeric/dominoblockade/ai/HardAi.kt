@@ -30,14 +30,15 @@ class HardAi : AiStrategy {
         // For each pip value, count how many unknown dominoes contain it.
         // Fewer unknown dominoes with that value → opponents are less likely to hold it
         // → placing that value at an open end is a better blocking move.
-        val unknownCountByValue: Map<Int, Int> = (0..6).associateWith { v ->
+        val unknownCountByValue: Map<Int, Int> = (MIN_PIP_VALUE..MAX_PIP_VALUE).associateWith { v ->
             unknownDominoes.count { it.hasValue(v) }
         }
 
         return validMoves.maxByOrNull { move ->
             val newEndValue = newEndValue(move)
             // Blocking score: fewer unknowns for this value means better block
-            val blockingScore = (7 - (unknownCountByValue[newEndValue] ?: 7)) * 100
+            val blockingScore = (PIP_VALUES_COUNT - (unknownCountByValue[newEndValue] ?: PIP_VALUES_COUNT)) *
+                BLOCKING_SCORE_MULTIPLIER
             // Secondary criterion: shed high-pip dominoes
             val pipScore = move.domino.totalPips
             blockingScore + pipScore
@@ -52,6 +53,18 @@ class HardAi : AiStrategy {
         else -> move.domino.left // RIGHT + needsFlip
     }
 
+    /** Clears accumulated board tracking so this instance can be reused for a new game. */
+    fun reset() {
+        trackedBoardIds.clear()
+    }
+
     /** Exposes tracked board state for testing purposes. */
     fun trackedBoardSize(): Int = trackedBoardIds.size
+
+    companion object {
+        private const val MIN_PIP_VALUE = 0
+        private const val MAX_PIP_VALUE = 6
+        private const val PIP_VALUES_COUNT = 7 // values 0..6 inclusive
+        private const val BLOCKING_SCORE_MULTIPLIER = 100
+    }
 }

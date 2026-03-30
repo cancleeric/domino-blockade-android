@@ -13,14 +13,8 @@ import com.cancleeric.dominoblockade.domain.usecase.ValidMove
 class MediumAi : AiStrategy {
     override fun chooseMove(state: GameState, player: Player, validMoves: List<ValidMove>): ValidMove? {
         if (validMoves.isEmpty()) return null
-
-        // Doubles are harder to play later — get rid of them first
         val doubles = validMoves.filter { it.domino.isDouble }
-        if (doubles.isNotEmpty()) {
-            return doubles.maxByOrNull { it.domino.totalPips }
-        }
-
-        // Otherwise, shed the highest-pip domino to minimise points at game end
-        return validMoves.maxByOrNull { it.domino.totalPips }
+        val candidates = if (doubles.isNotEmpty()) doubles else validMoves
+        return candidates.maxByOrNull { it.domino.totalPips }
     }
 }
