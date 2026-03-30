@@ -67,6 +67,12 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
+    // DataStore
+    implementation(libs.datastore.preferences)
+
+    // ViewModel Compose
+    implementation(libs.lifecycle.viewmodel.compose)
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
