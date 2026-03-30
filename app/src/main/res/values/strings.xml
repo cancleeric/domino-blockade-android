@@ -1,3 +1,22 @@
 <resources>
     <string name="app_name">Domino Blockade</string>
+
+    <!-- Tutorial strings -->
+    <string name="tutorial_skip">Skip</string>
+    <string name="tutorial_next">Next</string>
+    <string name="tutorial_previous">Back</string>
+    <string name="tutorial_finish">Let\'s Play!</string>
+    <string name="tutorial_step1_title">Welcome to Domino Blockade!</string>
+    <string name="tutorial_step1_message">This interactive tutorial will guide you through the rules and controls of Domino Blockade. You can skip this at any time.</string>
+    <string name="tutorial_step2_title">The Board</string>
+    <string name="tutorial_step2_message">The board is where you place your dominoes. Each domino you place must match an open end of the chain already on the board.</string>
+    <string name="tutorial_step3_title">Your Hand</string>
+    <string name="tutorial_step3_message">These are your tiles. At the start, each player gets 7 tiles (5 in a 3-4 player game). Tap a tile to select it, then place it on a matching end of the board.</string>
+    <string name="tutorial_step4_title">Placing a Tile</string>
+    <string name="tutorial_step4_message">Match one end of your tile with an open end on the board. If you cannot play, you must draw from the boneyard or pass your turn.</string>
+    <string name="tutorial_step5_title">The Boneyard</string>
+    <string name="tutorial_step5_message">When you cannot play, draw tiles from the boneyard. If the boneyard is empty and you still cannot play, your turn is passed automatically.</string>
+    <string name="tutorial_step6_title">Scoring &amp; Winning</string>
+    <string name="tutorial_step6_message">The first player to empty their hand wins! If the game is blocked (no one can play), the player with the lowest total pip count wins. Good luck!</string>
+    <string name="menu_start_tutorial">Tutorial</string>
 </resources>
