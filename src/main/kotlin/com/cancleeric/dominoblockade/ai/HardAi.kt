@@ -30,7 +30,7 @@ class HardAi : AiStrategy {
         // For each pip value, count how many unknown dominoes contain it.
         // Fewer unknown dominoes with that value → opponents are less likely to hold it
         // → placing that value at an open end is a better blocking move.
-        val unknownCountByValue: Map<Int, Int> = (MIN_PIP_VALUE..MAX_PIP_VALUE).associateWith { v ->
+        val unknownCountByValue: Map<Int, Int> = (0..MAX_PIP_VALUE).associateWith { v ->
             unknownDominoes.count { it.hasValue(v) }
         }
 
@@ -62,7 +62,6 @@ class HardAi : AiStrategy {
     fun trackedBoardSize(): Int = trackedBoardIds.size
 
     companion object {
-        private const val MIN_PIP_VALUE = 0
         private const val MAX_PIP_VALUE = 6
         private const val PIP_VALUES_COUNT = 7 // values 0..6 inclusive
         private const val BLOCKING_SCORE_MULTIPLIER = 100
