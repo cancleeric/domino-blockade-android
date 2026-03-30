@@ -67,6 +67,10 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
+    // Glance App Widget
+    implementation(libs.glance.appwidget)
+    implementation(libs.glance.material3)
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

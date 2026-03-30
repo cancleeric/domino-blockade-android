@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Domino Blockade</string>
+    <string name="widget_description">Quick start Domino Blockade game from your home screen</string>
+    <string name="widget_app_name">Domino Blockade</string>
+    <string name="widget_start_game">▶ Start Game</string>
+    <string name="widget_win_rate">Win: %d%%</string>
 </resources>
