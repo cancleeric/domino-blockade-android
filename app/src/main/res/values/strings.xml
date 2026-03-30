@@ -1,3 +1,43 @@
 <resources>
     <string name="app_name">Domino Blockade</string>
+
+    <!-- Navigation -->
+    <string name="back">Back</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Menu -->
+    <string name="menu_history">Game History</string>
+    <string name="menu_stats">Statistics</string>
+
+    <!-- History Screen -->
+    <string name="history_title">Game History</string>
+    <string name="history_empty_title">No Records Yet</string>
+    <string name="history_empty_message">Play a game to see your history here.</string>
+    <string name="history_clear_title">Clear History</string>
+    <string name="history_clear_message">Are you sure you want to delete all game records? This action cannot be undone.</string>
+    <string name="history_clear_confirm">Clear</string>
+
+    <!-- Detail Screen -->
+    <string name="detail_title">Game Details</string>
+    <string name="detail_loading">Loading…</string>
+    <string name="detail_opponent">Opponent</string>
+    <string name="detail_difficulty">Difficulty</string>
+    <string name="detail_score">Score</string>
+    <string name="detail_duration">Duration</string>
+    <string name="detail_date">Date</string>
+
+    <!-- Stats Screen -->
+    <string name="stats_title">Statistics</string>
+    <string name="stats_empty_title">No Stats Yet</string>
+    <string name="stats_empty_message">Play a game to start tracking your stats.</string>
+    <string name="stats_overall">Overall</string>
+    <string name="stats_total_games">Total Games</string>
+    <string name="stats_total_wins">Total Wins</string>
+    <string name="stats_win_rate">Win Rate</string>
+    <string name="stats_best_score">Best Score</string>
+    <string name="stats_consecutive_wins">Consecutive Wins</string>
+    <string name="stats_vs_easy">vs Easy</string>
+    <string name="stats_vs_medium">vs Medium</string>
+    <string name="stats_vs_hard">vs Hard</string>
+    <string name="stats_no_games_at_difficulty">No games played at this difficulty.</string>
 </resources>
