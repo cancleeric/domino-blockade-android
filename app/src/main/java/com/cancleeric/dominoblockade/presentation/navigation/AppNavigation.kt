@@ -68,19 +68,16 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             val winnerName = backStackEntry.arguments?.getString("winnerName")
                 ?.let { if (it == "_") "" else it }.orEmpty()
             val isBlocked = backStackEntry.arguments?.getBoolean("isBlocked") ?: false
+            val navigateToMenu = {
+                navController.navigate(Screen.Menu.route) {
+                    popUpTo(Screen.Menu.route) { inclusive = true }
+                }
+            }
             ResultScreen(
                 winnerName = winnerName,
                 isBlocked = isBlocked,
-                onPlayAgain = {
-                    navController.navigate(Screen.Menu.route) {
-                        popUpTo(Screen.Menu.route) { inclusive = true }
-                    }
-                },
-                onMenu = {
-                    navController.navigate(Screen.Menu.route) {
-                        popUpTo(Screen.Menu.route) { inclusive = true }
-                    }
-                }
+                onPlayAgain = navigateToMenu,
+                onMenu = navigateToMenu
             )
         }
     }

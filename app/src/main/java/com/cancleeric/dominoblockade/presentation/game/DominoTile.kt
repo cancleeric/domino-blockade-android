@@ -108,11 +108,7 @@ fun DominoTile(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             PipFace(pips = left, dotColor = dotColor)
-            Spacer(
-                Modifier
-                    .height(DIVIDER_DP.dp)
-                    .background(MaterialTheme.colorScheme.outline)
-            )
+            TileDivider(isVertical = true, color = MaterialTheme.colorScheme.outline)
             PipFace(pips = right, dotColor = dotColor)
         }
     } else {
@@ -121,14 +117,20 @@ fun DominoTile(
             verticalAlignment = Alignment.CenterVertically
         ) {
             PipFace(pips = left, dotColor = dotColor)
-            Spacer(
-                Modifier
-                    .width(DIVIDER_DP.dp)
-                    .background(MaterialTheme.colorScheme.outline)
-            )
+            TileDivider(isVertical = false, color = MaterialTheme.colorScheme.outline)
             PipFace(pips = right, dotColor = dotColor)
         }
     }
+}
+
+@Composable
+private fun TileDivider(isVertical: Boolean, color: Color) {
+    val dividerModifier = if (isVertical) {
+        Modifier.height(DIVIDER_DP.dp)
+    } else {
+        Modifier.width(DIVIDER_DP.dp)
+    }
+    Spacer(dividerModifier.background(color))
 }
 
 @Composable
