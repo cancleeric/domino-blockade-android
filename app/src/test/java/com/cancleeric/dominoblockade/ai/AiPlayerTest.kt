@@ -48,7 +48,7 @@ class AiPlayerTest {
 
         aiPlayer.makeMove(state, player, validMoves)
 
-        assertEquals(1000L, currentTime)
+        assertEquals(1000L, testScheduler.currentTime)
     }
 
     @Test
@@ -58,6 +58,6 @@ class AiPlayerTest {
 
         aiPlayer.makeMove(state, player, validMoves)
 
-        assertEquals(0L, currentTime)
+        assertEquals(0L, testScheduler.currentTime)
     }
 }
