@@ -1,8 +1,8 @@
 package com.cancleeric.dominoblockade.ai
 
-import com.cancleeric.dominoblockade.domain.model.Domino
 import com.cancleeric.dominoblockade.domain.model.GameState
+import com.cancleeric.dominoblockade.domain.model.Player
 
 interface AiStrategy {
-    fun selectMove(hand: List<Domino>, gameState: GameState): Domino?
+    fun chooseMove(state: GameState, player: Player, validMoves: List<ValidMove>): ValidMove?
 }
