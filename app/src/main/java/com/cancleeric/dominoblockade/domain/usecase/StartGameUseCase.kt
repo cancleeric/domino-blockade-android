@@ -4,7 +4,7 @@ import com.cancleeric.dominoblockade.domain.model.Domino
 import com.cancleeric.dominoblockade.domain.model.GameState
 import com.cancleeric.dominoblockade.domain.model.Player
 
-class StartGameUseCase {
+class StartGameUseCase @javax.inject.Inject constructor() {
     operator fun invoke(playerNames: List<String>): GameState {
         val allDominoes = generateDominoSet().shuffled()
         val handSize = if (playerNames.size <= 2) 7 else 5

@@ -3,7 +3,6 @@ package com.cancleeric.dominoblockade.presentation.navigation
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit4.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
@@ -26,13 +25,11 @@ class NavigationTest {
     }
 
     @Test
-    fun appNavigation_startGame_navigatesToGameScreen() {
+    fun appNavigation_menuScreen_showsPlayerCountSelector() {
         composeTestRule.setContent {
             AppNavigation()
         }
 
-        composeTestRule.onNodeWithText("Start Game").performClick()
-
-        composeTestRule.onNodeWithText("Domino Blockade").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Number of Players").assertIsDisplayed()
     }
 }
