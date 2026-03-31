@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit4.runners.AndroidJUnit4
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -35,15 +36,38 @@ class MenuScreenTest {
     }
 
     @Test
-    fun menuScreen_startGameButton_invokesCallback() {
-        var startGameCalled = false
+    fun menuScreen_startGameButton_invokesCallbackWithPlayerCount() {
+        var receivedCount = 0
 
         composeTestRule.setContent {
-            MenuScreen(onStartGame = { startGameCalled = true })
+            MenuScreen(onStartGame = { count -> receivedCount = count })
         }
 
         composeTestRule.onNodeWithText("Start Game").performClick()
 
-        assertTrue(startGameCalled)
+        assertTrue(receivedCount >= 2)
+    }
+
+    @Test
+    fun menuScreen_displaysPlayerCountSelector() {
+        composeTestRule.setContent {
+            MenuScreen(onStartGame = {})
+        }
+
+        composeTestRule.onNodeWithText("Number of Players").assertIsDisplayed()
+    }
+
+    @Test
+    fun menuScreen_selectingPlayerCount_updatesSelection() {
+        var receivedCount = 0
+
+        composeTestRule.setContent {
+            MenuScreen(onStartGame = { count -> receivedCount = count })
+        }
+
+        composeTestRule.onNodeWithText("3").performClick()
+        composeTestRule.onNodeWithText("Start Game").performClick()
+
+        assertEquals(3, receivedCount)
     }
 }
