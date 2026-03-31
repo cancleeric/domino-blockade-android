@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,6 +29,8 @@ private const val CHIP_SPACING_DP = 8
 @Composable
 fun MenuScreen(
     onStartGame: (playerCount: Int) -> Unit,
+    onHistory: () -> Unit = {},
+    onStats: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var selectedPlayerCount by rememberSaveable { mutableIntStateOf(MIN_PLAYERS) }
@@ -59,6 +62,26 @@ fun MenuScreen(
                 .padding(top = TITLE_PADDING_DP.dp)
         ) {
             Text(text = "Start Game")
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = SECTION_PADDING_DP.dp)
+                .padding(top = CHIP_SPACING_DP.dp),
+            horizontalArrangement = Arrangement.spacedBy(CHIP_SPACING_DP.dp)
+        ) {
+            OutlinedButton(
+                onClick = onHistory,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(text = "History")
+            }
+            OutlinedButton(
+                onClick = onStats,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(text = "Stats")
+            }
         }
     }
 }
