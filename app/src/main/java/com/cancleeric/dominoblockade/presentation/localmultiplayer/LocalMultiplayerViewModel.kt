@@ -3,6 +3,7 @@ package com.cancleeric.dominoblockade.presentation.localmultiplayer
 import androidx.lifecycle.ViewModel
 import com.cancleeric.dominoblockade.domain.model.Domino
 import com.cancleeric.dominoblockade.domain.model.GameState
+import com.cancleeric.dominoblockade.domain.model.computePlacement
 import com.cancleeric.dominoblockade.domain.usecase.StartGameUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -92,12 +93,13 @@ class LocalMultiplayerViewModel @Inject constructor(
     }
 
     private fun applyPlacement(state: GameState, domino: Domino) {
-        val newState = computePlacement(state, domino) ?: return
+        val newState = state.computePlacement(domino) ?: return
         val updatedPlayer = newState.players[state.currentPlayerIndex]
         if (updatedPlayer.hand.isEmpty()) {
             _uiState.value = _uiState.value.copy(
                 gameState = newState, selectedDomino = null,
-                isGameOver = true, winnerName = updatedPlayer.name
+                isGameOver = true, winnerName = updatedPlayer.name,
+                isPassingDevice = false
             )
         } else {
             advanceGame(newState)
@@ -118,33 +120,5 @@ class LocalMultiplayerViewModel @Inject constructor(
     private fun checkBlocked(state: GameState): Boolean {
         if (state.boneyard.isNotEmpty()) return false
         return state.players.none { player -> player.hand.any { state.canPlace(it) } }
-    }
-
-    private fun computePlacement(state: GameState, domino: Domino): GameState? {
-        val updatedPlayers = state.players.toMutableList().also {
-            it[state.currentPlayerIndex] = state.currentPlayer.copy(
-                hand = state.currentPlayer.hand - domino
-            )
-        }
-        val base = state.copy(players = updatedPlayers)
-        return when {
-            state.board.isEmpty() ->
-                base.copy(board = listOf(domino), leftEnd = domino.left, rightEnd = domino.right)
-            domino.left == state.rightEnd ->
-                base.copy(board = base.board + domino, rightEnd = domino.right)
-            domino.right == state.rightEnd ->
-                base.copy(
-                    board = base.board + Domino(domino.right, domino.left),
-                    rightEnd = domino.left
-                )
-            domino.right == state.leftEnd ->
-                base.copy(board = listOf(domino) + base.board, leftEnd = domino.left)
-            domino.left == state.leftEnd ->
-                base.copy(
-                    board = listOf(Domino(domino.right, domino.left)) + base.board,
-                    leftEnd = domino.right
-                )
-            else -> null
-        }
     }
 }
