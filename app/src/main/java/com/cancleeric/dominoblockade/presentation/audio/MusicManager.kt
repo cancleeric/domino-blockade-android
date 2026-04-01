@@ -17,7 +17,7 @@ class MusicManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     private var mediaPlayer: MediaPlayer? = null
-    private var enabled = true
+    @Volatile private var enabled = true
 
     /** Starts looping menu background music. Stops any currently playing track. */
     fun playMenuMusic() {

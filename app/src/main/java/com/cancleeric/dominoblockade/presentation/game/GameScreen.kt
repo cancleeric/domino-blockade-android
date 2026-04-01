@@ -62,17 +62,19 @@ fun GameScreen(
         viewModel.startGame(playerCount)
     }
 
-    LaunchedEffect(uiState.isBlocked) {
-        if (uiState.isBlocked) {
-            soundManager?.playBlocked()
-            hapticManager?.strongFeedback()
-        }
-    }
-
     LaunchedEffect(uiState.isGameOver, uiState.isBlocked) {
-        if (uiState.isGameOver && !uiState.isBlocked) {
-            soundManager?.playWin()
-            hapticManager?.victoryFeedback()
+        when {
+            uiState.isBlocked -> {
+                soundManager?.playBlocked()
+                hapticManager?.strongFeedback()
+            }
+            uiState.isGameOver -> {
+                soundManager?.playWin()
+                hapticManager?.victoryFeedback()
+            }
+        }
+        if (uiState.isGameOver) {
+            onGameOver(uiState.winnerName.orEmpty(), uiState.isBlocked)
         }
     }
 
@@ -81,12 +83,6 @@ fun GameScreen(
         if (boardSize > 0) {
             soundManager?.playPlaceDomino()
             hapticManager?.lightFeedback()
-        }
-    }
-
-    LaunchedEffect(uiState.isGameOver) {
-        if (uiState.isGameOver) {
-            onGameOver(uiState.winnerName.orEmpty(), uiState.isBlocked)
         }
     }
 
