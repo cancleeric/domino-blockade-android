@@ -11,8 +11,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-private const val STOP_TIMEOUT_MS = 5000L
-
 data class SettingsUiState(
     val soundEnabled: Boolean = true,
     val musicEnabled: Boolean = true,
@@ -40,7 +38,7 @@ class SettingsViewModel @Inject constructor(
         ) { ai, lang, dark -> Triple(ai, lang, dark) }
     ) { (sound, music, vibration), (ai, lang, dark) ->
         SettingsUiState(sound, music, vibration, ai, lang, dark)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), SettingsUiState())
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, SettingsUiState())
 
     fun setSoundEnabled(enabled: Boolean) {
         viewModelScope.launch { repository.setSoundEnabled(enabled) }
