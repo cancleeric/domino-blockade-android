@@ -30,3 +30,8 @@ val HcTileBackground = Color(0xFFFFFFFF)
 val HcTileDot = Color(0xFF000000)
 val HcText = Color(0xFFFFFFFF)
 val HcError = Color(0xFFFF6B6B)
+
+// Widget color palette
+val WidgetBackground = Color(0xFF1B2838)
+val WidgetTextSecondary = Color(0xFFB0BEC5)
+val WidgetButtonGreen = Color(0xFF4CAF50)
