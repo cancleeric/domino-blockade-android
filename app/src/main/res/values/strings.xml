@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">Domino Blockade</string>
+    <string name="tutorial_step_0_title">Welcome to Domino Blockade!</string>
+    <string name="tutorial_step_0_desc">Learn how to play the classic domino game. Place tiles to connect matching numbers and block your opponents!</string>
+    <string name="tutorial_step_1_title">Domino Tiles</string>
+    <string name="tutorial_step_1_desc">Each tile has two numbers (0–6). Match a number on an open end of the board to place your tile.</string>
+    <string name="tutorial_step_2_title">Taking Your Turn</string>
+    <string name="tutorial_step_2_desc">Select a tile from your hand that matches either end of the board, then tap Place to play it.</string>
+    <string name="tutorial_step_3_title">Drawing Tiles</string>
+    <string name="tutorial_step_3_desc">If you cannot place any tile, tap Draw to take a tile from the boneyard. If the boneyard is empty, your turn passes.</string>
+    <string name="tutorial_step_4_title">How to Win</string>
+    <string name="tutorial_step_4_desc">Empty your hand first to win! If no one can move and the boneyard is empty, the lowest-score player wins.</string>
+    <string name="tutorial_next">Next</string>
+    <string name="tutorial_finish">Got it!</string>
+    <string name="tutorial_skip">Skip</string>
+    <string name="tutorial_step_of">Step %1$d of %2$d</string>
 </resources>
