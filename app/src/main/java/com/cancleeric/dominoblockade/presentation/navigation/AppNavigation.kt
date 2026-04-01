@@ -17,6 +17,7 @@ import androidx.navigation.navArgument
 import com.cancleeric.dominoblockade.presentation.achievements.AchievementsScreen
 import com.cancleeric.dominoblockade.presentation.game.GameScreen
 import com.cancleeric.dominoblockade.presentation.leaderboard.LeaderboardScreen
+import com.cancleeric.dominoblockade.presentation.localmultiplayer.LocalMultiplayerScreen
 import com.cancleeric.dominoblockade.presentation.menu.MenuScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultViewModel
@@ -33,6 +34,7 @@ sealed class Screen(val route: String) {
             "result/${winnerName.ifEmpty { "_" }}/$isBlocked"
     }
     object Leaderboard : Screen("leaderboard")
+    object LocalMultiplayer : Screen("localMultiplayer")
     object Achievements : Screen("achievements")
 }
 
@@ -55,6 +57,9 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 },
                 onLeaderboard = {
                     navController.navigate(Screen.Leaderboard.route)
+                },
+                onLocalMultiplayer = {
+                    navController.navigate(Screen.LocalMultiplayer.route)
                 },
                 onAchievements = {
                     navController.navigate(Screen.Achievements.route)
@@ -107,6 +112,16 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         }
         composable(Screen.Leaderboard.route) {
             LeaderboardScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.LocalMultiplayer.route) {
+            LocalMultiplayerScreen(
+                onGameOver = { winnerName, isBlocked ->
+                    navController.navigate(Screen.Result.createRoute(winnerName, isBlocked)) {
+                        popUpTo(Screen.LocalMultiplayer.route) { inclusive = true }
+                    }
+                },
                 onNavigateBack = { navController.popBackStack() }
             )
         }
