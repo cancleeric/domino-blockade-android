@@ -1,0 +1,14 @@
+Domino Blockade is a fast-paced domino game featuring the classic blockade ruleset.
+
+Features:
+• 2–4 player Pass & Play on a single device
+• AI opponents with Easy, Medium, and Hard difficulty
+• Game history, player statistics, and leaderboard
+• High-contrast accessibility theme
+• Adaptive layout for phones and tablets
+• Dark mode support
+
+How to play:
+Match the pips on your tiles to the open ends of the board. When no player can place a tile and the boneyard is empty, the game is blocked. The player with the lowest pip count wins!
+
+Domino Blockade is free to play and contains no ads.
