@@ -29,6 +29,7 @@ private const val CHIP_SPACING_DP = 8
 fun MenuScreen(
     onStartGame: (playerCount: Int) -> Unit,
     onLeaderboard: () -> Unit,
+    onAchievements: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var selectedPlayerCount by rememberSaveable { mutableIntStateOf(MIN_PLAYERS) }
@@ -69,6 +70,15 @@ fun MenuScreen(
                 .padding(top = CHIP_SPACING_DP.dp)
         ) {
             Text(text = "Leaderboard")
+        }
+        Button(
+            onClick = onAchievements,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = SECTION_PADDING_DP.dp)
+                .padding(top = CHIP_SPACING_DP.dp)
+        ) {
+            Text(text = "Achievements")
         }
     }
 }

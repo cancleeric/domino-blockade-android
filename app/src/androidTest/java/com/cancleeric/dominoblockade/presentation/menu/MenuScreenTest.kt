@@ -20,7 +20,7 @@ class MenuScreenTest {
     @Test
     fun menuScreen_displaysTitle() {
         composeTestRule.setContent {
-            MenuScreen(onStartGame = {}, onLeaderboard = {})
+            MenuScreen(onStartGame = {}, onLeaderboard = {}, onAchievements = {})
         }
 
         composeTestRule.onNodeWithText("Domino Blockade").assertIsDisplayed()
@@ -29,7 +29,7 @@ class MenuScreenTest {
     @Test
     fun menuScreen_displaysStartGameButton() {
         composeTestRule.setContent {
-            MenuScreen(onStartGame = {}, onLeaderboard = {})
+            MenuScreen(onStartGame = {}, onLeaderboard = {}, onAchievements = {})
         }
 
         composeTestRule.onNodeWithText("Start Game").assertIsDisplayed()
@@ -40,7 +40,7 @@ class MenuScreenTest {
         var receivedCount = 0
 
         composeTestRule.setContent {
-            MenuScreen(onStartGame = { count -> receivedCount = count }, onLeaderboard = {})
+            MenuScreen(onStartGame = { count -> receivedCount = count }, onLeaderboard = {}, onAchievements = {})
         }
 
         composeTestRule.onNodeWithText("Start Game").performClick()
@@ -51,7 +51,7 @@ class MenuScreenTest {
     @Test
     fun menuScreen_displaysPlayerCountSelector() {
         composeTestRule.setContent {
-            MenuScreen(onStartGame = {}, onLeaderboard = {})
+            MenuScreen(onStartGame = {}, onLeaderboard = {}, onAchievements = {})
         }
 
         composeTestRule.onNodeWithText("Number of Players").assertIsDisplayed()
@@ -62,7 +62,7 @@ class MenuScreenTest {
         var receivedCount = 0
 
         composeTestRule.setContent {
-            MenuScreen(onStartGame = { count -> receivedCount = count }, onLeaderboard = {})
+            MenuScreen(onStartGame = { count -> receivedCount = count }, onLeaderboard = {}, onAchievements = {})
         }
 
         composeTestRule.onNodeWithText("3").performClick()
@@ -74,7 +74,7 @@ class MenuScreenTest {
     @Test
     fun menuScreen_displaysLeaderboardButton() {
         composeTestRule.setContent {
-            MenuScreen(onStartGame = {}, onLeaderboard = {})
+            MenuScreen(onStartGame = {}, onLeaderboard = {}, onAchievements = {})
         }
 
         composeTestRule.onNodeWithText("Leaderboard").assertIsDisplayed()
@@ -85,7 +85,7 @@ class MenuScreenTest {
         var leaderboardClicked = false
 
         composeTestRule.setContent {
-            MenuScreen(onStartGame = {}, onLeaderboard = { leaderboardClicked = true })
+            MenuScreen(onStartGame = {}, onLeaderboard = { leaderboardClicked = true }, onAchievements = {})
         }
 
         composeTestRule.onNodeWithText("Leaderboard").performClick()

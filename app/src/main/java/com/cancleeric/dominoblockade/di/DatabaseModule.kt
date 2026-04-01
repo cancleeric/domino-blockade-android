@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.cancleeric.dominoblockade.data.local.AppDatabase
+import com.cancleeric.dominoblockade.data.local.dao.AchievementDao
 import com.cancleeric.dominoblockade.data.local.dao.GameRecordDao
 import com.cancleeric.dominoblockade.data.local.dao.PlayerStatsDao
 import dagger.Module
@@ -33,6 +34,9 @@ object DatabaseModule {
 
     @Provides
     fun providePlayerStatsDao(db: AppDatabase): PlayerStatsDao = db.playerStatsDao()
+
+    @Provides
+    fun provideAchievementDao(db: AppDatabase): AchievementDao = db.achievementDao()
 
     @Provides
     @Singleton

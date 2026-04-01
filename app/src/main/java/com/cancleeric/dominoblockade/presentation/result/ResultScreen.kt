@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.cancleeric.dominoblockade.domain.model.AchievementType
 
 private const val TITLE_PADDING_DP = 16
 private const val SUBTITLE_PADDING_DP = 32
@@ -35,6 +36,7 @@ private const val ENTER_ANIM_DURATION_MS = 400
 fun ResultScreen(
     winnerName: String = "",
     isBlocked: Boolean = false,
+    newAchievements: List<AchievementType> = emptyList(),
     onPlayAgain: () -> Unit = {},
     onMenu: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -57,6 +59,9 @@ fun ResultScreen(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 ResultTitle(isBlocked = isBlocked)
                 ResultSubtitle(isBlocked = isBlocked, winnerName = winnerName)
+                if (newAchievements.isNotEmpty()) {
+                    NewAchievementsBanner(achievements = newAchievements)
+                }
             }
         }
         Button(
@@ -73,6 +78,26 @@ fun ResultScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Main Menu")
+        }
+    }
+}
+
+@Composable
+private fun NewAchievementsBanner(achievements: List<AchievementType>) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(top = TITLE_PADDING_DP.dp)
+    ) {
+        Text(
+            text = "Achievement Unlocked!",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
+        achievements.forEach { type ->
+            Text(
+                text = "${type.badge} ${type.title}",
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }

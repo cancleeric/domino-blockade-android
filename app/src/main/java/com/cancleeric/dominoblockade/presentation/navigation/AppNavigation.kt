@@ -5,16 +5,21 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.cancleeric.dominoblockade.presentation.achievements.AchievementsScreen
 import com.cancleeric.dominoblockade.presentation.game.GameScreen
 import com.cancleeric.dominoblockade.presentation.leaderboard.LeaderboardScreen
 import com.cancleeric.dominoblockade.presentation.menu.MenuScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultScreen
+import com.cancleeric.dominoblockade.presentation.result.ResultViewModel
 
 private const val DEFAULT_PLAYER_COUNT = 2
 
@@ -28,6 +33,7 @@ sealed class Screen(val route: String) {
             "result/${winnerName.ifEmpty { "_" }}/$isBlocked"
     }
     object Leaderboard : Screen("leaderboard")
+    object Achievements : Screen("achievements")
 }
 
 @Composable
@@ -49,6 +55,9 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 },
                 onLeaderboard = {
                     navController.navigate(Screen.Leaderboard.route)
+                },
+                onAchievements = {
+                    navController.navigate(Screen.Achievements.route)
                 }
             )
         }
@@ -81,6 +90,8 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             val winnerName = backStackEntry.arguments?.getString("winnerName")
                 ?.let { if (it == "_") "" else it }.orEmpty()
             val isBlocked = backStackEntry.arguments?.getBoolean("isBlocked") ?: false
+            val resultViewModel: ResultViewModel = hiltViewModel()
+            val newAchievements by resultViewModel.newAchievements.collectAsStateWithLifecycle()
             val navigateToMenu = {
                 navController.navigate(Screen.Menu.route) {
                     popUpTo(Screen.Menu.route) { inclusive = true }
@@ -89,6 +100,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             ResultScreen(
                 winnerName = winnerName,
                 isBlocked = isBlocked,
+                newAchievements = newAchievements,
                 onPlayAgain = navigateToMenu,
                 onMenu = navigateToMenu
             )
@@ -96,6 +108,11 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         composable(Screen.Leaderboard.route) {
             LeaderboardScreen(
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.Achievements.route) {
+            AchievementsScreen(
+                onBack = { navController.popBackStack() }
             )
         }
     }
