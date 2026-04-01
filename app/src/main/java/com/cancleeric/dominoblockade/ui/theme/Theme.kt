@@ -1,8 +1,10 @@
 package com.cancleeric.dominoblockade.ui.theme
 
 import android.app.Activity
+import android.content.Context
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -101,6 +103,26 @@ val LocalBoardBackground = staticCompositionLocalOf { ClassicBoard }
 val LocalDominoStyle = staticCompositionLocalOf { DominoStyle.DOTS }
 
 @Suppress("CyclomaticComplexMethod")
+private fun resolveColorSchemeAndBoard(
+    appTheme: AppTheme,
+    darkTheme: Boolean,
+    dynamicColor: Boolean,
+    highContrast: Boolean,
+    context: Context
+): Pair<ColorScheme, Color> = when {
+    highContrast -> HighContrastColorScheme to HcBackground
+    appTheme == AppTheme.CLASSIC -> ClassicColorScheme to ClassicBoard
+    appTheme == AppTheme.DARK -> DarkAppColorScheme to DarkBoard
+    appTheme == AppTheme.WOOD -> WoodColorScheme to WoodBoard
+    appTheme == AppTheme.NEON -> NeonColorScheme to NeonBoard
+    dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        val scheme = if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        scheme to scheme.background
+    }
+    darkTheme -> DarkColorScheme to DarkColorScheme.background
+    else -> LightColorScheme to LightColorScheme.background
+}
+
 @Composable
 fun DominoBlockadeTheme(
     appTheme: AppTheme = AppTheme.CLASSIC,
@@ -110,20 +132,10 @@ fun DominoBlockadeTheme(
     highContrast: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val (colorScheme, boardBackground) = when {
-        highContrast -> HighContrastColorScheme to HcBackground
-        appTheme == AppTheme.CLASSIC -> ClassicColorScheme to ClassicBoard
-        appTheme == AppTheme.DARK -> DarkAppColorScheme to DarkBoard
-        appTheme == AppTheme.WOOD -> WoodColorScheme to WoodBoard
-        appTheme == AppTheme.NEON -> NeonColorScheme to NeonBoard
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            val scheme = if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-            scheme to scheme.background
-        }
-        darkTheme -> DarkColorScheme to DarkColorScheme.background
-        else -> LightColorScheme to LightColorScheme.background
-    }
+    val context = LocalContext.current
+    val (colorScheme, boardBackground) = resolveColorSchemeAndBoard(
+        appTheme, darkTheme, dynamicColor, highContrast, context
+    )
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
