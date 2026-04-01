@@ -68,17 +68,19 @@ fun LobbyScreen(
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
-        if (uiState.error != null) {
+        val errorMessage = uiState.error
+        if (errorMessage != null) {
             Text(
-                text = uiState.error,
+                text = errorMessage,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall
             )
         }
+        val createdRoomId = uiState.createdRoomId
         if (uiState.isLoading) {
             CircularProgressIndicator()
-        } else if (uiState.createdRoomId != null) {
-            WaitingSection(roomId = uiState.createdRoomId, status = uiState.roomStatus)
+        } else if (createdRoomId != null) {
+            WaitingSection(roomId = createdRoomId, status = uiState.roomStatus)
         } else {
             LobbyActions(
                 roomCode = uiState.roomCode,
