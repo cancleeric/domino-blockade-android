@@ -4,7 +4,7 @@ HSPLcom/cancleeric/dominoblockade/startup/AppTimingInitializer;->create(Landroid
 HSPLcom/cancleeric/dominoblockade/startup/AppTimingInitializer;->dependencies()Ljava/util/List;
 HSPLcom/cancleeric/dominoblockade/startup/AppStartupStats;->setStartElapsedRealtime(J)V
 HSPLcom/cancleeric/dominoblockade/presentation/navigation/AppNavigation;->invoke(Landroidx/compose/runtime/Composer;I)V
-HSPLcom/cancleeric/dominoblockade/presentation/menu/MenuScreenKt;->MenuScreen(Landroid/content/Context;Landroid/content/Context;Landrodix/compose/runtime/Composer;I)V
+HSPLcom/cancleeric/dominoblockade/presentation/menu/MenuScreenKt;->MenuScreen(Landroid/content/Context;Landroid/content/Context;Landroidx/compose/runtime/Composer;I)V
 HSPLcom/cancleeric/dominoblockade/ui/theme/ThemeKt;->DominoBlockadeTheme(ZZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 Lcom/cancleeric/dominoblockade/MainActivity;
 Lcom/cancleeric/dominoblockade/DominoBlockadeApplication;

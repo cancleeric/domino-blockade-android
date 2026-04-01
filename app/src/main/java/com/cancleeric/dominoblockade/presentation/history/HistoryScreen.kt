@@ -27,9 +27,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cancleeric.dominoblockade.data.local.entity.GameRecordEntity
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+
+private val dateFormatter: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault())
 
 private const val CARD_PADDING_DP = 8
 private const val SCREEN_PADDING_DP = 16
@@ -92,8 +95,7 @@ private fun EmptyHistoryContent(modifier: Modifier = Modifier) {
 @Composable
 private fun GameRecordCard(record: GameRecordEntity) {
     val date = remember(record.timestamp) {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-        dateFormat.format(Date(record.timestamp))
+        dateFormatter.format(Instant.ofEpochMilli(record.timestamp))
     }
 
     Card(
