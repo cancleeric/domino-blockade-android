@@ -15,6 +15,7 @@ import com.cancleeric.dominoblockade.presentation.game.GameScreen
 import com.cancleeric.dominoblockade.presentation.leaderboard.LeaderboardScreen
 import com.cancleeric.dominoblockade.presentation.menu.MenuScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultScreen
+import com.cancleeric.dominoblockade.presentation.theme.ThemeSelectionScreen
 
 private const val DEFAULT_PLAYER_COUNT = 2
 
@@ -28,6 +29,7 @@ sealed class Screen(val route: String) {
             "result/${winnerName.ifEmpty { "_" }}/$isBlocked"
     }
     object Leaderboard : Screen("leaderboard")
+    object ThemeSelection : Screen("theme")
 }
 
 @Composable
@@ -49,6 +51,9 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 },
                 onLeaderboard = {
                     navController.navigate(Screen.Leaderboard.route)
+                },
+                onThemeSettings = {
+                    navController.navigate(Screen.ThemeSelection.route)
                 }
             )
         }
@@ -95,6 +100,11 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         }
         composable(Screen.Leaderboard.route) {
             LeaderboardScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.ThemeSelection.route) {
+            ThemeSelectionScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

@@ -8,6 +8,7 @@ import androidx.room.Room
 import com.cancleeric.dominoblockade.data.local.AppDatabase
 import com.cancleeric.dominoblockade.data.local.dao.GameRecordDao
 import com.cancleeric.dominoblockade.data.local.dao.PlayerStatsDao
+import com.cancleeric.dominoblockade.data.local.dao.ThemeDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,6 +34,9 @@ object DatabaseModule {
 
     @Provides
     fun providePlayerStatsDao(db: AppDatabase): PlayerStatsDao = db.playerStatsDao()
+
+    @Provides
+    fun provideThemeDao(db: AppDatabase): ThemeDao = db.themeDao()
 
     @Provides
     @Singleton
