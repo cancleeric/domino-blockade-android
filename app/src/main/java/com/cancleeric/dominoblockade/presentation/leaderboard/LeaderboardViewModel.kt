@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cancleeric.dominoblockade.data.remote.auth.AuthService
 import com.cancleeric.dominoblockade.data.remote.auth.User
-import com.cancleeric.dominoblockade.data.remote.firestore.LeaderboardEntry
-import com.cancleeric.dominoblockade.data.remote.firestore.LeaderboardRepository
+import com.cancleeric.dominoblockade.domain.model.LeaderboardEntry
+import com.cancleeric.dominoblockade.domain.repository.LeaderboardRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

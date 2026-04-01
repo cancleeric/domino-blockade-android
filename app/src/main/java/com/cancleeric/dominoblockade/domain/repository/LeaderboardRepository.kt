@@ -1,5 +1,6 @@
-package com.cancleeric.dominoblockade.data.remote.firestore
+package com.cancleeric.dominoblockade.domain.repository
 
+import com.cancleeric.dominoblockade.domain.model.LeaderboardEntry
 import kotlinx.coroutines.flow.Flow
 
 interface LeaderboardRepository {

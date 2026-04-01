@@ -42,9 +42,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.cancleeric.dominoblockade.data.remote.firestore.LeaderboardEntry
-import com.cancleeric.dominoblockade.data.remote.firestore.LeaderboardEntry.Companion.PLATFORM_ANDROID
-import com.cancleeric.dominoblockade.data.remote.firestore.LeaderboardEntry.Companion.PLATFORM_IOS
+import com.cancleeric.dominoblockade.domain.model.LeaderboardEntry
+import com.cancleeric.dominoblockade.domain.model.LeaderboardEntry.Companion.PLATFORM_ANDROID
+import com.cancleeric.dominoblockade.domain.model.LeaderboardEntry.Companion.PLATFORM_IOS
 
 private const val RANK_GOLD = 1
 private const val RANK_SILVER = 2

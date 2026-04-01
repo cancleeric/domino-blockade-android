@@ -3,7 +3,7 @@ package com.cancleeric.dominoblockade.di
 import com.cancleeric.dominoblockade.data.remote.auth.AuthService
 import com.cancleeric.dominoblockade.data.remote.auth.FirebaseAuthService
 import com.cancleeric.dominoblockade.data.remote.firestore.FirestoreLeaderboardRepository
-import com.cancleeric.dominoblockade.data.remote.firestore.LeaderboardRepository
+import com.cancleeric.dominoblockade.domain.repository.LeaderboardRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

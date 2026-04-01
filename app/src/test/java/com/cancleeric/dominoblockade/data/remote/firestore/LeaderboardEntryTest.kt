@@ -1,5 +1,6 @@
 package com.cancleeric.dominoblockade.data.remote.firestore
 
+import com.cancleeric.dominoblockade.domain.model.LeaderboardEntry
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

@@ -13,6 +13,7 @@ hilt = "2.51.1"
 hiltNavigationCompose = "1.2.0"
 navigationCompose = "2.7.7"
 room = "2.6.1"
+datastore = "1.1.1"
 coroutines = "1.8.1"
 detekt = "1.23.6"
 firebaseBom = "33.1.0"
@@ -42,6 +43,7 @@ navigation-compose = { group = "androidx.navigation", name = "navigation-compose
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
