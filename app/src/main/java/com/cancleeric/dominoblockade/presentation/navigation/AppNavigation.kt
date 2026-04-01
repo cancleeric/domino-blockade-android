@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.cancleeric.dominoblockade.presentation.game.GameScreen
 import com.cancleeric.dominoblockade.presentation.leaderboard.LeaderboardScreen
+import com.cancleeric.dominoblockade.presentation.localmultiplayer.LocalMultiplayerScreen
 import com.cancleeric.dominoblockade.presentation.menu.MenuScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultScreen
 
@@ -29,6 +30,7 @@ sealed class Screen(val route: String) {
             "result/${winnerName.ifEmpty { "_" }}/$isBlocked"
     }
     object Leaderboard : Screen("leaderboard")
+    object LocalMultiplayer : Screen("localMultiplayer")
 }
 
 @Composable
@@ -55,6 +57,9 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
                 },
                 onLeaderboard = {
                     navController.navigate(Screen.Leaderboard.route)
+                },
+                onLocalMultiplayer = {
+                    navController.navigate(Screen.LocalMultiplayer.route)
                 }
             )
         }
@@ -101,6 +106,16 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
         }
         composable(Screen.Leaderboard.route) {
             LeaderboardScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.LocalMultiplayer.route) {
+            LocalMultiplayerScreen(
+                onGameOver = { winnerName, isBlocked ->
+                    navController.navigate(Screen.Result.createRoute(winnerName, isBlocked)) {
+                        popUpTo(Screen.LocalMultiplayer.route) { inclusive = true }
+                    }
+                },
                 onNavigateBack = { navController.popBackStack() }
             )
         }

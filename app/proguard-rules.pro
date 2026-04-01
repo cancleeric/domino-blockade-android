@@ -5,17 +5,49 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep source file names and line numbers for crash reports
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# ---- Kotlin ----------------------------------------------------------------
+-keepclassmembers class **$WhenMappings {
+    <fields>;
+}
+-keep class kotlin.Metadata { *; }
+-dontwarn kotlin.**
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# ---- Hilt / Dagger ---------------------------------------------------------
+-keep class dagger.hilt.** { *; }
+-keep @dagger.hilt.android.HiltAndroidApp class * { *; }
+-keep @dagger.hilt.android.AndroidEntryPoint class * { *; }
+-keep @dagger.hilt.android.lifecycle.HiltViewModel class * { *; }
+-keepclassmembers class * {
+    @javax.inject.Inject <init>(...);
+    @javax.inject.Inject <fields>;
+}
+
+# ---- Room ------------------------------------------------------------------
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class *
+-keep @androidx.room.Dao interface *
+
+# ---- Firebase / Firestore --------------------------------------------------
+-dontwarn com.google.firebase.**
+-dontwarn com.google.android.gms.**
+
+# ---- DataStore / Protobuf --------------------------------------------------
+-keep class androidx.datastore.** { *; }
+-dontwarn androidx.datastore.**
+
+# ---- Coroutines ------------------------------------------------------------
+-keepclassmembernames class kotlinx.** {
+    volatile <fields>;
+}
+-dontwarn kotlinx.coroutines.**
+
+# ---- Jetpack Compose -------------------------------------------------------
+-dontwarn androidx.compose.**
+
+# ---- App domain models -----------------------------------------------------
+-keep class com.cancleeric.dominoblockade.domain.model.** { *; }
+-keep class com.cancleeric.dominoblockade.data.local.entity.** { *; }
