@@ -7,6 +7,7 @@ import com.cancleeric.dominoblockade.domain.model.GameState
 import com.cancleeric.dominoblockade.domain.model.OnlineRoomStatus
 import com.cancleeric.dominoblockade.domain.repository.OnlineGameRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,10 +24,13 @@ class OnlineGameViewModel @Inject constructor(
 
     private var roomId: String = ""
     private var localPlayerIndex: Int = 0
+    private var observeJob: Job? = null
 
     fun setup(roomId: String, localPlayerIndex: Int) {
+        if (this.roomId == roomId) return
         this.roomId = roomId
         this.localPlayerIndex = localPlayerIndex
+        observeJob?.cancel()
         observeRoom()
     }
 
@@ -63,7 +67,7 @@ class OnlineGameViewModel @Inject constructor(
     }
 
     private fun observeRoom() {
-        viewModelScope.launch {
+        observeJob = viewModelScope.launch {
             onlineGameRepository.observeRoom(roomId).collect { room ->
                 if (room.status == OnlineRoomStatus.FINISHED) {
                     _uiState.value = _uiState.value.copy(roomFinished = true)

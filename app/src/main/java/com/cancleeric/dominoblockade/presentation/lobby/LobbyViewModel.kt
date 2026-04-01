@@ -2,6 +2,7 @@ package com.cancleeric.dominoblockade.presentation.lobby
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cancleeric.dominoblockade.domain.model.OnlineRoom
 import com.cancleeric.dominoblockade.domain.model.OnlineRoomStatus
 import com.cancleeric.dominoblockade.domain.repository.OnlineGameRepository
 import com.cancleeric.dominoblockade.domain.usecase.StartGameUseCase
@@ -26,6 +27,7 @@ class LobbyViewModel @Inject constructor(
     val uiState: StateFlow<LobbyUiState> = _uiState.asStateFlow()
 
     private val localId = UUID.randomUUID().toString()
+    private var gameInitialized = false
 
     fun setPlayerName(name: String) {
         _uiState.value = _uiState.value.copy(playerName = name, error = null)
@@ -90,16 +92,17 @@ class LobbyViewModel @Inject constructor(
         }
     }
 
-    private fun handleRoomUpdate(
-        room: com.cancleeric.dominoblockade.domain.model.OnlineRoom,
-        roomId: String,
-        localPlayerIndex: Int
-    ) {
+    private fun handleRoomUpdate(room: OnlineRoom, roomId: String, localPlayerIndex: Int) {
+        val isPlaying = room.status == OnlineRoomStatus.PLAYING
+        val canNavigate = isPlaying && room.gameState != null && _uiState.value.navigateToGame == null
+        val shouldInit = isPlaying && room.gameState == null
+            && localPlayerIndex == HOST_PLAYER_INDEX && !gameInitialized
         when {
-            room.status == OnlineRoomStatus.PLAYING && room.gameState == null && localPlayerIndex == HOST_PLAYER_INDEX -> {
+            shouldInit -> {
+                gameInitialized = true
                 initializeGameAsHost(room, roomId)
             }
-            room.status == OnlineRoomStatus.PLAYING && room.gameState != null -> {
+            canNavigate -> {
                 _uiState.value = _uiState.value.copy(
                     navigateToGame = NavigateToOnlineGame(roomId, localPlayerIndex)
                 )
@@ -107,14 +110,10 @@ class LobbyViewModel @Inject constructor(
         }
     }
 
-    private fun initializeGameAsHost(
-        room: com.cancleeric.dominoblockade.domain.model.OnlineRoom,
-        roomId: String
-    ) {
+    private fun initializeGameAsHost(room: OnlineRoom, roomId: String) {
         val guestName = room.guestName ?: return
-        val hostName = room.hostName
         viewModelScope.launch {
-            val gameState = startGameUseCase(listOf(hostName, guestName))
+            val gameState = startGameUseCase(listOf(room.hostName, guestName))
             runCatching { onlineGameRepository.updateGameState(roomId, gameState) }
         }
     }

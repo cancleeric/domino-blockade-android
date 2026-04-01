@@ -70,7 +70,7 @@ fun LobbyScreen(
         )
         if (uiState.error != null) {
             Text(
-                text = uiState.error ?: "",
+                text = uiState.error,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall
             )
@@ -78,7 +78,7 @@ fun LobbyScreen(
         if (uiState.isLoading) {
             CircularProgressIndicator()
         } else if (uiState.createdRoomId != null) {
-            WaitingSection(roomId = uiState.createdRoomId ?: "", status = uiState.roomStatus)
+            WaitingSection(roomId = uiState.createdRoomId, status = uiState.roomStatus)
         } else {
             LobbyActions(
                 roomCode = uiState.roomCode,
