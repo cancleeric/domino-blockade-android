@@ -58,8 +58,8 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { repository.setDefaultAiDifficulty(difficulty) }
     }
 
-    fun setLanguage(lang: String) {
-        viewModelScope.launch { repository.setLanguage(lang) }
+    fun setLanguage(language: String) {
+        viewModelScope.launch { repository.setLanguage(language) }
     }
 
     fun setDarkModeEnabled(enabled: Boolean) {
