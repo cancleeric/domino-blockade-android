@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -88,10 +89,8 @@ private fun EmptyStatsContent(modifier: Modifier = Modifier) {
 
 @Composable
 private fun PlayerStatsCard(stats: PlayerStatsEntity) {
-    val winRate = if (stats.totalGames > 0) {
-        (stats.wins * 100) / stats.totalGames
-    } else {
-        0
+    val winRate = remember(stats) {
+        if (stats.totalGames > 0) (stats.wins * 100) / stats.totalGames else 0
     }
 
     Card(modifier = Modifier.fillMaxWidth()) {

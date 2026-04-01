@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -62,11 +63,13 @@ fun GameBoard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 board.forEach { domino ->
-                    DominoTile(
-                        left = domino.left,
-                        right = domino.right,
-                        isVertical = false
-                    )
+                    key(domino) {
+                        DominoTile(
+                            left = domino.left,
+                            right = domino.right,
+                            isVertical = false
+                        )
+                    }
                 }
             }
         }

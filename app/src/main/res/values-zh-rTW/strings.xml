@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">骨牌封鎖</string>
+
+    <!-- Menu screen -->
+    <string name="menu_title">骨牌封鎖</string>
+    <string name="menu_number_of_players">選擇玩家人數</string>
+    <string name="menu_start_game">開始遊戲</string>
+    <string name="menu_leaderboard">排行榜</string>
+
+    <!-- Game screen -->
+    <string name="game_place_first_tile">請放置第一張骨牌</string>
+    <string name="game_boneyard">牌庫：%1$d</string>
+    <string name="game_hand">手牌（%1$d 張）</string>
+    <string name="game_starting">遊戲啟動中…</string>
+
+    <!-- History screen -->
+    <string name="history_no_games">尚無遊戲紀錄</string>
+    <string name="history_score">分數：%1$d</string>
+
+    <!-- Stats screen -->
+    <string name="stats_no_stats">尚無統計資料</string>
+
+    <!-- Leaderboard screen -->
+    <string name="leaderboard_no_scores">目前無紀錄，成為第一名吧！</string>
+    <string name="leaderboard_your_rank">您的排名：第 %1$d 名</string>
+    <string name="leaderboard_wins">勝場：%1$d</string>
+</resources>
