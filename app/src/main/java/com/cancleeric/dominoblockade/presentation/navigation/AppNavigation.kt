@@ -13,7 +13,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.cancleeric.dominoblockade.presentation.game.GameScreen
 import com.cancleeric.dominoblockade.presentation.leaderboard.LeaderboardScreen
+import com.cancleeric.dominoblockade.presentation.lobby.LobbyScreen
 import com.cancleeric.dominoblockade.presentation.menu.MenuScreen
+import com.cancleeric.dominoblockade.presentation.onlinegame.OnlineGameScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultScreen
 
 private const val DEFAULT_PLAYER_COUNT = 2
@@ -28,6 +30,10 @@ sealed class Screen(val route: String) {
             "result/${winnerName.ifEmpty { "_" }}/$isBlocked"
     }
     object Leaderboard : Screen("leaderboard")
+    object Lobby : Screen("lobby")
+    object OnlineGame : Screen("onlineGame/{roomId}/{playerIndex}") {
+        fun createRoute(roomId: String, playerIndex: Int) = "onlineGame/$roomId/$playerIndex"
+    }
 }
 
 @Composable
@@ -47,9 +53,8 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 onStartGame = { playerCount ->
                     navController.navigate(Screen.Game.createRoute(playerCount))
                 },
-                onLeaderboard = {
-                    navController.navigate(Screen.Leaderboard.route)
-                }
+                onLeaderboard = { navController.navigate(Screen.Leaderboard.route) },
+                onOnlineMultiplayer = { navController.navigate(Screen.Lobby.route) }
             )
         }
         composable(
@@ -94,8 +99,40 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             )
         }
         composable(Screen.Leaderboard.route) {
-            LeaderboardScreen(
+            LeaderboardScreen(onNavigateBack = { navController.popBackStack() })
+        }
+        composable(Screen.Lobby.route) {
+            LobbyScreen(
+                onNavigateToGame = { roomId, playerIndex ->
+                    navController.navigate(Screen.OnlineGame.createRoute(roomId, playerIndex)) {
+                        popUpTo(Screen.Lobby.route) { inclusive = true }
+                    }
+                },
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = Screen.OnlineGame.route,
+            arguments = listOf(
+                navArgument("roomId") { type = NavType.StringType },
+                navArgument("playerIndex") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val roomId = backStackEntry.arguments?.getString("roomId").orEmpty()
+            val playerIndex = backStackEntry.arguments?.getInt("playerIndex") ?: 0
+            OnlineGameScreen(
+                roomId = roomId,
+                localPlayerIndex = playerIndex,
+                onGameOver = { winnerName, isBlocked ->
+                    navController.navigate(Screen.Result.createRoute(winnerName, isBlocked)) {
+                        popUpTo(Screen.OnlineGame.route) { inclusive = true }
+                    }
+                },
+                onOpponentLeft = {
+                    navController.navigate(Screen.Menu.route) {
+                        popUpTo(Screen.Menu.route) { inclusive = true }
+                    }
+                }
             )
         }
     }
