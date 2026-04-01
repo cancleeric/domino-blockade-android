@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -90,8 +91,10 @@ private fun EmptyHistoryContent(modifier: Modifier = Modifier) {
 
 @Composable
 private fun GameRecordCard(record: GameRecordEntity) {
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-    val date = dateFormat.format(Date(record.timestamp))
+    val date = remember(record.timestamp) {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+        dateFormat.format(Date(record.timestamp))
+    }
 
     Card(
         modifier = Modifier.fillMaxWidth()
