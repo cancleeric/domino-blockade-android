@@ -12,10 +12,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.cancleeric.dominoblockade.presentation.game.GameScreen
-import com.cancleeric.dominoblockade.presentation.history.HistoryScreen
+import com.cancleeric.dominoblockade.presentation.leaderboard.LeaderboardScreen
 import com.cancleeric.dominoblockade.presentation.menu.MenuScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultScreen
-import com.cancleeric.dominoblockade.presentation.stats.StatsScreen
 
 private const val DEFAULT_PLAYER_COUNT = 2
 
@@ -28,8 +27,7 @@ sealed class Screen(val route: String) {
         fun createRoute(winnerName: String, isBlocked: Boolean) =
             "result/${winnerName.ifEmpty { "_" }}/$isBlocked"
     }
-    object History : Screen("history")
-    object Stats : Screen("stats")
+    object Leaderboard : Screen("leaderboard")
 }
 
 @Composable
@@ -49,8 +47,9 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 onStartGame = { playerCount ->
                     navController.navigate(Screen.Game.createRoute(playerCount))
                 },
-                onHistory = { navController.navigate(Screen.History.route) },
-                onStats = { navController.navigate(Screen.Stats.route) }
+                onLeaderboard = {
+                    navController.navigate(Screen.Leaderboard.route)
+                }
             )
         }
         composable(
@@ -94,11 +93,10 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 onMenu = navigateToMenu
             )
         }
-        composable(Screen.History.route) {
-            HistoryScreen(onBack = { navController.popBackStack() })
-        }
-        composable(Screen.Stats.route) {
-            StatsScreen(onBack = { navController.popBackStack() })
+        composable(Screen.Leaderboard.route) {
+            LeaderboardScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
     }
 }
