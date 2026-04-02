@@ -1,5 +1,6 @@
 package com.cancleeric.dominoblockade.presentation.game
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.cancleeric.dominoblockade.domain.model.Domino
+import com.cancleeric.dominoblockade.ui.theme.LocalBoardBackground
 
 private const val BOARD_HEIGHT_DP = 120
 private const val BOARD_PADDING_DP = 8
@@ -33,6 +35,7 @@ fun GameBoard(
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
+    val boardBackground = LocalBoardBackground.current
     LaunchedEffect(board.size) {
         scrollState.animateScrollTo(scrollState.maxValue)
     }
@@ -40,14 +43,15 @@ fun GameBoard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(BOARD_HEIGHT_DP.dp),
+            .height(BOARD_HEIGHT_DP.dp)
+            .background(boardBackground),
         contentAlignment = Alignment.Center
     ) {
         if (board.isEmpty()) {
             Text(
                 text = "Place the first tile",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onBackground
             )
         } else {
             Row(

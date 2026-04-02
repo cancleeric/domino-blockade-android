@@ -21,6 +21,7 @@ import com.cancleeric.dominoblockade.presentation.leaderboard.LeaderboardScreen
 import com.cancleeric.dominoblockade.presentation.localmultiplayer.LocalMultiplayerScreen
 import com.cancleeric.dominoblockade.presentation.menu.MenuScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultScreen
+import com.cancleeric.dominoblockade.presentation.theme.ThemeSelectionScreen
 import com.cancleeric.dominoblockade.presentation.tutorial.TutorialOverlay
 import com.cancleeric.dominoblockade.presentation.tutorial.TutorialViewModel
 
@@ -37,6 +38,7 @@ sealed class Screen(val route: String) {
     }
     object Leaderboard : Screen("leaderboard")
     object LocalMultiplayer : Screen("localMultiplayer")
+    object ThemeSelection : Screen("theme")
 }
 
 @Composable
@@ -64,6 +66,9 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                     },
                     onLocalMultiplayer = {
                         navController.navigate(Screen.LocalMultiplayer.route)
+                    },
+                    onThemeSettings = {
+                        navController.navigate(Screen.ThemeSelection.route)
                     }
                 )
                 TutorialOverlay(
@@ -126,6 +131,11 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                         popUpTo(Screen.LocalMultiplayer.route) { inclusive = true }
                     }
                 },
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.ThemeSelection.route) {
+            ThemeSelectionScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
