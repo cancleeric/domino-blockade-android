@@ -14,6 +14,7 @@ import javax.inject.Singleton
 
 private const val DEFAULT_AI_DIFFICULTY = "medium"
 private const val DEFAULT_PLAYER_COUNT = 2
+private const val DEFAULT_LANGUAGE = "en"
 
 @Singleton
 class GameSettingsRepositoryImpl @Inject constructor(
@@ -26,6 +27,8 @@ class GameSettingsRepositoryImpl @Inject constructor(
         val vibrationEnabled = booleanPreferencesKey("vibration_enabled")
         val defaultAiDifficulty = stringPreferencesKey("default_ai_difficulty")
         val defaultPlayerCount = intPreferencesKey("default_player_count")
+        val language = stringPreferencesKey("language")
+        val darkModeEnabled = booleanPreferencesKey("dark_mode_enabled")
     }
 
     override val soundEnabled: Flow<Boolean> =
@@ -42,6 +45,12 @@ class GameSettingsRepositoryImpl @Inject constructor(
 
     override val defaultPlayerCount: Flow<Int> =
         dataStore.data.map { it[Keys.defaultPlayerCount] ?: DEFAULT_PLAYER_COUNT }
+
+    override val language: Flow<String> =
+        dataStore.data.map { it[Keys.language] ?: DEFAULT_LANGUAGE }
+
+    override val darkModeEnabled: Flow<Boolean> =
+        dataStore.data.map { it[Keys.darkModeEnabled] ?: false }
 
     override suspend fun setSoundEnabled(enabled: Boolean) {
         dataStore.edit { it[Keys.soundEnabled] = enabled }
@@ -61,5 +70,13 @@ class GameSettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setDefaultPlayerCount(count: Int) {
         dataStore.edit { it[Keys.defaultPlayerCount] = count }
+    }
+
+    override suspend fun setLanguage(language: String) {
+        dataStore.edit { it[Keys.language] = language }
+    }
+
+    override suspend fun setDarkModeEnabled(enabled: Boolean) {
+        dataStore.edit { it[Keys.darkModeEnabled] = enabled }
     }
 }

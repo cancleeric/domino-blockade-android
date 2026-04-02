@@ -35,7 +35,8 @@ fun MenuScreen(
     onStartGame: (playerCount: Int) -> Unit,
     onLeaderboard: () -> Unit,
     onLocalMultiplayer: () -> Unit = {},
-    onThemeSettings: () -> Unit,
+    onThemeSettings: () -> Unit = {},
+    onSettings: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var selectedPlayerCount by rememberSaveable { mutableIntStateOf(MIN_PLAYERS) }
@@ -52,6 +53,7 @@ fun MenuScreen(
             onLeaderboard = onLeaderboard,
             onLocalMultiplayer = onLocalMultiplayer,
             onThemeSettings = onThemeSettings,
+            onSettings = onSettings,
             isTablet = isTablet
         )
     }
@@ -65,6 +67,7 @@ private fun MenuContent(
     onLeaderboard: () -> Unit,
     onLocalMultiplayer: () -> Unit,
     onThemeSettings: () -> Unit,
+    onSettings: () -> Unit,
     isTablet: Boolean
 ) {
     val contentModifier = if (isTablet) {
@@ -127,6 +130,15 @@ private fun MenuContent(
                 .padding(top = CHIP_SPACING_DP.dp)
         ) {
             Text(text = "Theme Settings")
+        }
+        Button(
+            onClick = onSettings,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = SECTION_PADDING_DP.dp)
+                .padding(top = CHIP_SPACING_DP.dp)
+        ) {
+            Text(text = "Settings")
         }
     }
 }
