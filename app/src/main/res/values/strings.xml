@@ -1,3 +1,27 @@
 <resources>
     <string name="app_name">Domino Blockade</string>
+
+    <!-- Menu screen -->
+    <string name="menu_title">Domino Blockade</string>
+    <string name="menu_number_of_players">Number of Players</string>
+    <string name="menu_start_game">Start Game</string>
+    <string name="menu_leaderboard">Leaderboard</string>
+
+    <!-- Game screen -->
+    <string name="game_place_first_tile">Place the first tile</string>
+    <string name="game_boneyard">Boneyard: %1$d</string>
+    <string name="game_hand">Hand (%1$d tiles)</string>
+    <string name="game_starting">Starting game…</string>
+
+    <!-- History screen -->
+    <string name="history_no_games">No games played yet</string>
+    <string name="history_score">Score: %1$d</string>
+
+    <!-- Stats screen -->
+    <string name="stats_no_stats">No statistics yet</string>
+
+    <!-- Leaderboard screen -->
+    <string name="leaderboard_no_scores">No scores yet. Be the first!</string>
+    <string name="leaderboard_your_rank">Your rank: #%1$d</string>
+    <string name="leaderboard_wins">Wins: %1$d</string>
 </resources>

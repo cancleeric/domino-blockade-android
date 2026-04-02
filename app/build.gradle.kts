@@ -46,7 +46,8 @@ android {
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -67,6 +68,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
@@ -104,6 +106,12 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     // DataStore
     implementation(libs.androidx.datastore.preferences)
+
+    // App Startup
+    implementation(libs.androidx.startup.runtime)
+
+    // Baseline Profiles
+    implementation(libs.androidx.profileinstaller)
 
     // Testing
     testImplementation(libs.junit)
