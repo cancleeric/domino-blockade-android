@@ -38,6 +38,7 @@ fun MenuScreen(
     onThemeSettings: () -> Unit = {},
     onSettings: () -> Unit = {},
     onAchievements: () -> Unit = {},
+    onOnlineMultiplayer: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var selectedPlayerCount by rememberSaveable { mutableIntStateOf(MIN_PLAYERS) }
@@ -56,6 +57,7 @@ fun MenuScreen(
             onThemeSettings = onThemeSettings,
             onSettings = onSettings,
             onAchievements = onAchievements,
+            onOnlineMultiplayer = onOnlineMultiplayer,
             isTablet = isTablet
         )
     }
@@ -71,6 +73,7 @@ private fun MenuContent(
     onThemeSettings: () -> Unit,
     onSettings: () -> Unit,
     onAchievements: () -> Unit,
+    onOnlineMultiplayer: () -> Unit,
     isTablet: Boolean
 ) {
     val contentModifier = if (isTablet) {
@@ -151,6 +154,15 @@ private fun MenuContent(
                 .padding(top = CHIP_SPACING_DP.dp)
         ) {
             Text(text = "Achievements")
+        }
+        Button(
+            onClick = onOnlineMultiplayer,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = SECTION_PADDING_DP.dp)
+                .padding(top = CHIP_SPACING_DP.dp)
+        ) {
+            Text(text = "Online Multiplayer")
         }
     }
 }
