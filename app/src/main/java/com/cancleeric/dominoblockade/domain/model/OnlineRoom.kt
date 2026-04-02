@@ -22,3 +22,4 @@ data class OnlineRoom(
     val status: OnlineRoomStatus = OnlineRoomStatus.WAITING,
     val gameState: GameState? = null
 )
+
