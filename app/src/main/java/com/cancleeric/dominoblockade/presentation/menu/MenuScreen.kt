@@ -36,7 +36,8 @@ fun MenuScreen(
     onLeaderboard: () -> Unit,
     onLocalMultiplayer: () -> Unit = {},
     onThemeSettings: () -> Unit = {},
-    onOnlineMultiplayer: () -> Unit,
+    onSettings: () -> Unit = {},
+    onOnlineMultiplayer: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var selectedPlayerCount by rememberSaveable { mutableIntStateOf(MIN_PLAYERS) }
@@ -53,6 +54,7 @@ fun MenuScreen(
             onLeaderboard = onLeaderboard,
             onLocalMultiplayer = onLocalMultiplayer,
             onThemeSettings = onThemeSettings,
+            onSettings = onSettings,
             onOnlineMultiplayer = onOnlineMultiplayer,
             isTablet = isTablet
         )
@@ -67,6 +69,7 @@ private fun MenuContent(
     onLeaderboard: () -> Unit,
     onLocalMultiplayer: () -> Unit,
     onThemeSettings: () -> Unit,
+    onSettings: () -> Unit,
     onOnlineMultiplayer: () -> Unit,
     isTablet: Boolean
 ) {
@@ -130,6 +133,15 @@ private fun MenuContent(
                 .padding(top = CHIP_SPACING_DP.dp)
         ) {
             Text(text = "Theme Settings")
+        }
+        Button(
+            onClick = onSettings,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = SECTION_PADDING_DP.dp)
+                .padding(top = CHIP_SPACING_DP.dp)
+        ) {
+            Text(text = "Settings")
         }
         Button(
             onClick = onOnlineMultiplayer,

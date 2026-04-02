@@ -24,4 +24,10 @@
     <string name="leaderboard_no_scores">No scores yet. Be the first!</string>
     <string name="leaderboard_your_rank">Your rank: #%1$d</string>
     <string name="leaderboard_wins">Wins: %1$d</string>
+
+    <!-- Widget -->
+    <string name="widget_description">Quick Start widget for Domino Blockade</string>
+    <string name="widget_quick_start">Quick Start</string>
+    <string name="widget_status_ready">Ready to play!</string>
+    <string name="widget_title">Domino Blockade</string>
 </resources>

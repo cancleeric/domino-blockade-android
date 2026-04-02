@@ -18,9 +18,11 @@ import com.cancleeric.dominoblockade.presentation.localmultiplayer.LocalMultipla
 import com.cancleeric.dominoblockade.presentation.menu.MenuScreen
 import com.cancleeric.dominoblockade.presentation.onlinegame.OnlineGameScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultScreen
+import com.cancleeric.dominoblockade.presentation.settings.SettingsScreen
 import com.cancleeric.dominoblockade.presentation.theme.ThemeSelectionScreen
 
 private const val DEFAULT_PLAYER_COUNT = 2
+private const val NO_QUICK_START = -1
 
 sealed class Screen(val route: String) {
     object Menu : Screen("menu")
@@ -34,6 +36,7 @@ sealed class Screen(val route: String) {
     object Leaderboard : Screen("leaderboard")
     object LocalMultiplayer : Screen("localMultiplayer")
     object ThemeSelection : Screen("theme")
+    object Settings : Screen("settings")
     object Lobby : Screen("lobby")
     object OnlineGame : Screen("onlineGame/{roomId}/{playerIndex}") {
         fun createRoute(roomId: String, playerIndex: Int) = "onlineGame/$roomId/$playerIndex"
@@ -41,11 +44,16 @@ sealed class Screen(val route: String) {
 }
 
 @Composable
-fun AppNavigation(modifier: Modifier = Modifier) {
+fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO_QUICK_START) {
     val navController = rememberNavController()
+    val startDestination = if (quickStartPlayerCount > 0) {
+        Screen.Game.createRoute(quickStartPlayerCount)
+    } else {
+        Screen.Menu.route
+    }
     NavHost(
         navController = navController,
-        startDestination = Screen.Menu.route,
+        startDestination = startDestination,
         modifier = modifier,
         enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
         exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut() },
@@ -65,6 +73,9 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 },
                 onThemeSettings = {
                     navController.navigate(Screen.ThemeSelection.route)
+                },
+                onSettings = {
+                    navController.navigate(Screen.Settings.route)
                 },
                 onOnlineMultiplayer = { navController.navigate(Screen.Lobby.route) }
             )
@@ -128,6 +139,11 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         composable(Screen.ThemeSelection.route) {
             ThemeSelectionScreen(
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.Settings.route) {
+            SettingsScreen(
+                onBack = { navController.popBackStack() }
             )
         }
         composable(Screen.Lobby.route) {
