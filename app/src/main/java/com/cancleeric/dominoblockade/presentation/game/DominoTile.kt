@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -28,6 +29,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.cancleeric.dominoblockade.domain.model.DominoStyle
+import com.cancleeric.dominoblockade.ui.theme.LocalDominoStyle
 
 private const val SELECTED_SCALE = 1.08f
 private const val NORMAL_SCALE = 1f
@@ -105,6 +108,7 @@ fun DominoTile(
     }
     val dotColor = MaterialTheme.colorScheme.onSurface
     val shape = RoundedCornerShape(CORNER_RADIUS_DP.dp)
+    val dominoStyle = LocalDominoStyle.current
 
     val tileModifier = modifier
         .scale(scale)
@@ -120,18 +124,18 @@ fun DominoTile(
             modifier = tileModifier,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            PipFace(pips = left, dotColor = dotColor)
+            PipFace(pips = left, dotColor = dotColor, style = dominoStyle)
             TileDivider(isVertical = true, color = MaterialTheme.colorScheme.outline)
-            PipFace(pips = right, dotColor = dotColor)
+            PipFace(pips = right, dotColor = dotColor, style = dominoStyle)
         }
     } else {
         Row(
             modifier = tileModifier,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            PipFace(pips = left, dotColor = dotColor)
+            PipFace(pips = left, dotColor = dotColor, style = dominoStyle)
             TileDivider(isVertical = false, color = MaterialTheme.colorScheme.outline)
-            PipFace(pips = right, dotColor = dotColor)
+            PipFace(pips = right, dotColor = dotColor, style = dominoStyle)
         }
     }
 }
@@ -147,7 +151,16 @@ private fun TileDivider(isVertical: Boolean, color: Color) {
 }
 
 @Composable
-private fun PipFace(pips: Int, dotColor: Color) {
+private fun PipFace(pips: Int, dotColor: Color, style: DominoStyle) {
+    if (style == DominoStyle.NUMBERS) {
+        NumberFace(pips = pips, dotColor = dotColor)
+    } else {
+        DotFace(pips = pips, dotColor = dotColor)
+    }
+}
+
+@Composable
+private fun DotFace(pips: Int, dotColor: Color) {
     val safeIndex = pips.coerceIn(0, dotPatterns.size - 1)
     val positions = dotPatterns[safeIndex]
     val dotRadiusDp = DOT_RADIUS_DP.dp
@@ -165,6 +178,20 @@ private fun PipFace(pips: Int, dotColor: Color) {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun NumberFace(pips: Int, dotColor: Color) {
+    Box(
+        modifier = Modifier.size(HALF_SIZE_DP.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = pips.toString(),
+            style = MaterialTheme.typography.titleMedium,
+            color = dotColor
+        )
     }
 }
 
