@@ -14,9 +14,11 @@ import androidx.navigation.navArgument
 import com.cancleeric.dominoblockade.presentation.game.GameScreen
 import com.cancleeric.dominoblockade.presentation.leaderboard.LeaderboardScreen
 import com.cancleeric.dominoblockade.presentation.lobby.LobbyScreen
+import com.cancleeric.dominoblockade.presentation.localmultiplayer.LocalMultiplayerScreen
 import com.cancleeric.dominoblockade.presentation.menu.MenuScreen
 import com.cancleeric.dominoblockade.presentation.onlinegame.OnlineGameScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultScreen
+import com.cancleeric.dominoblockade.presentation.theme.ThemeSelectionScreen
 
 private const val DEFAULT_PLAYER_COUNT = 2
 
@@ -30,6 +32,8 @@ sealed class Screen(val route: String) {
             "result/${winnerName.ifEmpty { "_" }}/$isBlocked"
     }
     object Leaderboard : Screen("leaderboard")
+    object LocalMultiplayer : Screen("localMultiplayer")
+    object ThemeSelection : Screen("theme")
     object Lobby : Screen("lobby")
     object OnlineGame : Screen("onlineGame/{roomId}/{playerIndex}") {
         fun createRoute(roomId: String, playerIndex: Int) = "onlineGame/$roomId/$playerIndex"
@@ -53,7 +57,15 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 onStartGame = { playerCount ->
                     navController.navigate(Screen.Game.createRoute(playerCount))
                 },
-                onLeaderboard = { navController.navigate(Screen.Leaderboard.route) },
+                onLeaderboard = {
+                    navController.navigate(Screen.Leaderboard.route)
+                },
+                onLocalMultiplayer = {
+                    navController.navigate(Screen.LocalMultiplayer.route)
+                },
+                onThemeSettings = {
+                    navController.navigate(Screen.ThemeSelection.route)
+                },
                 onOnlineMultiplayer = { navController.navigate(Screen.Lobby.route) }
             )
         }
@@ -99,7 +111,24 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             )
         }
         composable(Screen.Leaderboard.route) {
-            LeaderboardScreen(onNavigateBack = { navController.popBackStack() })
+            LeaderboardScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.LocalMultiplayer.route) {
+            LocalMultiplayerScreen(
+                onGameOver = { winnerName, isBlocked ->
+                    navController.navigate(Screen.Result.createRoute(winnerName, isBlocked)) {
+                        popUpTo(Screen.LocalMultiplayer.route) { inclusive = true }
+                    }
+                },
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.ThemeSelection.route) {
+            ThemeSelectionScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
         composable(Screen.Lobby.route) {
             LobbyScreen(
