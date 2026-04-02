@@ -35,6 +35,7 @@ fun MenuScreen(
     onStartGame: (playerCount: Int) -> Unit,
     onLeaderboard: () -> Unit,
     onLocalMultiplayer: () -> Unit = {},
+    onThemeSettings: () -> Unit = {},
     onSettings: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -51,6 +52,7 @@ fun MenuScreen(
             onStartGame = onStartGame,
             onLeaderboard = onLeaderboard,
             onLocalMultiplayer = onLocalMultiplayer,
+            onThemeSettings = onThemeSettings,
             onSettings = onSettings,
             isTablet = isTablet
         )
@@ -64,6 +66,7 @@ private fun MenuContent(
     onStartGame: (playerCount: Int) -> Unit,
     onLeaderboard: () -> Unit,
     onLocalMultiplayer: () -> Unit,
+    onThemeSettings: () -> Unit,
     onSettings: () -> Unit,
     isTablet: Boolean
 ) {
@@ -118,6 +121,15 @@ private fun MenuContent(
                 .padding(top = CHIP_SPACING_DP.dp)
         ) {
             Text(text = stringResource(R.string.menu_leaderboard))
+        }
+        Button(
+            onClick = onThemeSettings,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = SECTION_PADDING_DP.dp)
+                .padding(top = CHIP_SPACING_DP.dp)
+        ) {
+            Text(text = "Theme Settings")
         }
         Button(
             onClick = onSettings,
