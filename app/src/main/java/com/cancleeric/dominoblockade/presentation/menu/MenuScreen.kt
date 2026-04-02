@@ -35,7 +35,7 @@ fun MenuScreen(
     onStartGame: (playerCount: Int) -> Unit,
     onLeaderboard: () -> Unit,
     onLocalMultiplayer: () -> Unit = {},
-    onThemeSettings: () -> Unit = {},
+    onThemeSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var selectedPlayerCount by rememberSaveable { mutableIntStateOf(MIN_PLAYERS) }
