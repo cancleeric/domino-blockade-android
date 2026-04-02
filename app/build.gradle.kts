@@ -91,6 +91,9 @@ dependencies {
     // Baseline Profiles
     implementation(libs.androidx.profileinstaller)
 
+    // Glance App Widget
+    implementation(libs.glance.appwidget)
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

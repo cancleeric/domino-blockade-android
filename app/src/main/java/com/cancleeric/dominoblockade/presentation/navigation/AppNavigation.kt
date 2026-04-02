@@ -19,6 +19,7 @@ import com.cancleeric.dominoblockade.presentation.result.ResultScreen
 import com.cancleeric.dominoblockade.presentation.theme.ThemeSelectionScreen
 
 private const val DEFAULT_PLAYER_COUNT = 2
+private const val NO_QUICK_START = -1
 
 sealed class Screen(val route: String) {
     object Menu : Screen("menu")
@@ -35,11 +36,16 @@ sealed class Screen(val route: String) {
 }
 
 @Composable
-fun AppNavigation(modifier: Modifier = Modifier) {
+fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO_QUICK_START) {
     val navController = rememberNavController()
+    val startDestination = if (quickStartPlayerCount > 0) {
+        Screen.Game.createRoute(quickStartPlayerCount)
+    } else {
+        Screen.Menu.route
+    }
     NavHost(
         navController = navController,
-        startDestination = Screen.Menu.route,
+        startDestination = startDestination,
         modifier = modifier,
         enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
         exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut() },

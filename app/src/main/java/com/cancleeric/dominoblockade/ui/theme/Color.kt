@@ -31,6 +31,11 @@ val HcTileDot = Color(0xFF000000)
 val HcText = Color(0xFFFFFFFF)
 val HcError = Color(0xFFFF6B6B)
 
+// Widget color palette
+val WidgetBackground = Color(0xFF1B2838)
+val WidgetTextSecondary = Color(0xFFB0BEC5)
+val WidgetButtonGreen = Color(0xFF4CAF50)
+
 // Classic theme (ivory tiles, green felt board)
 val ClassicTile = Color(0xFFFFFDE7)
 val ClassicBoard = Color(0xFF388E3C)
