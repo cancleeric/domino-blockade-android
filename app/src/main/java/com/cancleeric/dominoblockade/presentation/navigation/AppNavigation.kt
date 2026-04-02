@@ -16,6 +16,7 @@ import com.cancleeric.dominoblockade.presentation.leaderboard.LeaderboardScreen
 import com.cancleeric.dominoblockade.presentation.localmultiplayer.LocalMultiplayerScreen
 import com.cancleeric.dominoblockade.presentation.menu.MenuScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultScreen
+import com.cancleeric.dominoblockade.presentation.settings.SettingsScreen
 import com.cancleeric.dominoblockade.presentation.theme.ThemeSelectionScreen
 
 private const val DEFAULT_PLAYER_COUNT = 2
@@ -33,6 +34,7 @@ sealed class Screen(val route: String) {
     object Leaderboard : Screen("leaderboard")
     object LocalMultiplayer : Screen("localMultiplayer")
     object ThemeSelection : Screen("theme")
+    object Settings : Screen("settings")
 }
 
 @Composable
@@ -65,6 +67,9 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
                 },
                 onThemeSettings = {
                     navController.navigate(Screen.ThemeSelection.route)
+                },
+                onSettings = {
+                    navController.navigate(Screen.Settings.route)
                 }
             )
         }
@@ -127,6 +132,11 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
         composable(Screen.ThemeSelection.route) {
             ThemeSelectionScreen(
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.Settings.route) {
+            SettingsScreen(
+                onBack = { navController.popBackStack() }
             )
         }
     }
