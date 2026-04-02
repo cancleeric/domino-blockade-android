@@ -5,12 +5,18 @@ import com.cancleeric.dominoblockade.domain.model.OnlineRoom
 import com.cancleeric.dominoblockade.domain.model.OnlineRoomStatus
 import com.cancleeric.dominoblockade.domain.repository.OnlineGameRepository
 import com.cancleeric.dominoblockade.domain.usecase.StartGameUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Before
 import org.junit.Test
 
 class LobbyViewModelTest {
@@ -27,7 +33,18 @@ class LobbyViewModelTest {
         override suspend fun leaveRoom(roomId: String) = Unit
     }
 
-    private val viewModel = LobbyViewModel(fakeRepository, StartGameUseCase())
+    private lateinit var viewModel: LobbyViewModel
+
+    @Before
+    fun setUp() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+        viewModel = LobbyViewModel(fakeRepository, StartGameUseCase())
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
 
     @Test
     fun `initial state has empty playerName and roomCode`() {
