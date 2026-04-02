@@ -1,6 +1,7 @@
 package com.cancleeric.dominoblockade.di
 
 import com.cancleeric.dominoblockade.data.preferences.GameSettingsRepositoryImpl
+import com.cancleeric.dominoblockade.data.preferences.TutorialRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.AchievementRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.GameRecordRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.GameRepositoryImpl
@@ -12,6 +13,7 @@ import com.cancleeric.dominoblockade.domain.repository.GameRepository
 import com.cancleeric.dominoblockade.domain.repository.GameSettingsRepository
 import com.cancleeric.dominoblockade.domain.repository.PlayerStatsRepository
 import com.cancleeric.dominoblockade.domain.repository.ThemeRepository
+import com.cancleeric.dominoblockade.domain.repository.TutorialRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -36,6 +38,10 @@ abstract class AppModule {
     @Binds
     @Singleton
     abstract fun bindGameSettingsRepository(impl: GameSettingsRepositoryImpl): GameSettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTutorialRepository(impl: TutorialRepositoryImpl): TutorialRepository
 
     @Binds
     @Singleton

@@ -4,7 +4,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,6 +26,8 @@ import com.cancleeric.dominoblockade.presentation.result.ResultScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultViewModel
 import com.cancleeric.dominoblockade.presentation.settings.SettingsScreen
 import com.cancleeric.dominoblockade.presentation.theme.ThemeSelectionScreen
+import com.cancleeric.dominoblockade.presentation.tutorial.TutorialOverlay
+import com.cancleeric.dominoblockade.presentation.tutorial.TutorialViewModel
 
 private const val DEFAULT_PLAYER_COUNT = 2
 private const val NO_QUICK_START = -1
@@ -61,26 +66,35 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
         popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut() }
     ) {
         composable(Screen.Menu.route) {
-            MenuScreen(
-                onStartGame = { playerCount ->
-                    navController.navigate(Screen.Game.createRoute(playerCount))
-                },
-                onLeaderboard = {
-                    navController.navigate(Screen.Leaderboard.route)
-                },
-                onLocalMultiplayer = {
-                    navController.navigate(Screen.LocalMultiplayer.route)
-                },
-                onThemeSettings = {
-                    navController.navigate(Screen.ThemeSelection.route)
-                },
-                onSettings = {
-                    navController.navigate(Screen.Settings.route)
-                },
-                onAchievements = {
-                    navController.navigate(Screen.Achievements.route)
-                }
-            )
+            val tutorialViewModel: TutorialViewModel = hiltViewModel()
+            val tutorialState by tutorialViewModel.uiState.collectAsState()
+            Box(modifier = Modifier.fillMaxSize()) {
+                MenuScreen(
+                    onStartGame = { playerCount ->
+                        navController.navigate(Screen.Game.createRoute(playerCount))
+                    },
+                    onLeaderboard = {
+                        navController.navigate(Screen.Leaderboard.route)
+                    },
+                    onLocalMultiplayer = {
+                        navController.navigate(Screen.LocalMultiplayer.route)
+                    },
+                    onThemeSettings = {
+                        navController.navigate(Screen.ThemeSelection.route)
+                    },
+                    onSettings = {
+                        navController.navigate(Screen.Settings.route)
+                    },
+                    onAchievements = {
+                        navController.navigate(Screen.Achievements.route)
+                    }
+                )
+                TutorialOverlay(
+                    uiState = tutorialState,
+                    onNext = tutorialViewModel::nextStep,
+                    onSkip = tutorialViewModel::completeTutorial
+                )
+            }
         }
         composable(
             route = Screen.Game.route,
