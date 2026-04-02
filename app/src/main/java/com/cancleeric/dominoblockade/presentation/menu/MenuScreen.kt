@@ -35,7 +35,8 @@ fun MenuScreen(
     onStartGame: (playerCount: Int) -> Unit,
     onLeaderboard: () -> Unit,
     onLocalMultiplayer: () -> Unit = {},
-    onAchievements: () -> Unit,
+    onThemeSettings: () -> Unit = {},
+    onAchievements: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var selectedPlayerCount by rememberSaveable { mutableIntStateOf(MIN_PLAYERS) }
@@ -51,6 +52,7 @@ fun MenuScreen(
             onStartGame = onStartGame,
             onLeaderboard = onLeaderboard,
             onLocalMultiplayer = onLocalMultiplayer,
+            onThemeSettings = onThemeSettings,
             onAchievements = onAchievements,
             isTablet = isTablet
         )
@@ -64,6 +66,7 @@ private fun MenuContent(
     onStartGame: (playerCount: Int) -> Unit,
     onLeaderboard: () -> Unit,
     onLocalMultiplayer: () -> Unit,
+    onThemeSettings: () -> Unit,
     onAchievements: () -> Unit,
     isTablet: Boolean
 ) {
@@ -118,6 +121,15 @@ private fun MenuContent(
                 .padding(top = CHIP_SPACING_DP.dp)
         ) {
             Text(text = stringResource(R.string.menu_leaderboard))
+        }
+        Button(
+            onClick = onThemeSettings,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = SECTION_PADDING_DP.dp)
+                .padding(top = CHIP_SPACING_DP.dp)
+        ) {
+            Text(text = "Theme Settings")
         }
         Button(
             onClick = onAchievements,
