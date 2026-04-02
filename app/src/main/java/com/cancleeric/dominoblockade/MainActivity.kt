@@ -15,6 +15,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cancleeric.dominoblockade.presentation.navigation.AppNavigation
 import com.cancleeric.dominoblockade.presentation.theme.ThemeViewModel
 import com.cancleeric.dominoblockade.ui.theme.DominoBlockadeTheme
+import com.cancleeric.dominoblockade.widget.QuickStartWidget.Companion.EXTRA_PLAYER_COUNT
+import com.cancleeric.dominoblockade.widget.QuickStartWidget.Companion.EXTRA_QUICK_START
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -26,12 +28,20 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val quickStartPlayerCount = if (intent.getBooleanExtra(EXTRA_QUICK_START, false)) {
+            intent.getIntExtra(EXTRA_PLAYER_COUNT, -1)
+        } else {
+            -1
+        }
         setContent {
             val appTheme by themeViewModel.appTheme.collectAsStateWithLifecycle()
             val dominoStyle by themeViewModel.dominoStyle.collectAsStateWithLifecycle()
             DominoBlockadeTheme(appTheme = appTheme, dominoStyle = dominoStyle) {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AppNavigation(modifier = Modifier.padding(innerPadding))
+                    AppNavigation(
+                        modifier = Modifier.padding(innerPadding),
+                        quickStartPlayerCount = quickStartPlayerCount
+                    )
                 }
             }
         }

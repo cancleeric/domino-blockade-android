@@ -70,4 +70,3 @@ object DatabaseModule {
     fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
         context.dataStore
 }
-

@@ -45,4 +45,3 @@ abstract class AppModule {
     @Singleton
     abstract fun bindAchievementRepository(impl: AchievementRepositoryImpl): AchievementRepository
 }
-

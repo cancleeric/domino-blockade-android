@@ -22,4 +22,3 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun themeDao(): ThemeDao
     abstract fun achievementDao(): AchievementDao
 }
-
