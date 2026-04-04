@@ -3,6 +3,7 @@ package com.cancleeric.dominoblockade.presentation.result
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cancleeric.dominoblockade.data.analytics.AnalyticsTracker
 import com.cancleeric.dominoblockade.data.local.entity.PlayerStatsEntity
 import com.cancleeric.dominoblockade.domain.model.AchievementType
 import com.cancleeric.dominoblockade.domain.model.GameResult
@@ -23,7 +24,8 @@ class ResultViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val playerStatsRepository: PlayerStatsRepository,
     private val checkAchievementsUseCase: CheckAchievementsUseCase,
-    private val notificationHelper: AchievementNotificationHelper
+    private val notificationHelper: AchievementNotificationHelper,
+    private val analyticsTracker: AnalyticsTracker
 ) : ViewModel() {
 
     private val _newAchievements = MutableStateFlow<List<AchievementType>>(emptyList())
@@ -36,7 +38,10 @@ class ResultViewModel @Inject constructor(
         viewModelScope.launch {
             val result = buildGameResult(winnerName, isBlocked)
             val unlocked = checkAchievementsUseCase(result)
-            unlocked.forEach { notificationHelper.showAchievementUnlocked(it) }
+            unlocked.forEach { achievement ->
+                notificationHelper.showAchievementUnlocked(achievement)
+                analyticsTracker.logAchievementUnlocked(achievement.name, achievement.title)
+            }
             _newAchievements.value = unlocked
         }
     }

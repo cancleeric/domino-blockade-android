@@ -2,6 +2,7 @@ package com.cancleeric.dominoblockade.presentation.tutorial
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cancleeric.dominoblockade.data.analytics.AnalyticsTracker
 import com.cancleeric.dominoblockade.domain.repository.TutorialRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,8 @@ data class TutorialUiState(
 
 @HiltViewModel
 class TutorialViewModel @Inject constructor(
-    private val tutorialRepository: TutorialRepository
+    private val tutorialRepository: TutorialRepository,
+    private val analyticsTracker: AnalyticsTracker
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TutorialUiState())
@@ -39,6 +41,7 @@ class TutorialViewModel @Inject constructor(
         if (state.currentStep < state.totalSteps - 1) {
             _uiState.value = state.copy(currentStep = state.currentStep + 1)
         } else {
+            analyticsTracker.logTutorialCompleted()
             completeTutorial()
         }
     }

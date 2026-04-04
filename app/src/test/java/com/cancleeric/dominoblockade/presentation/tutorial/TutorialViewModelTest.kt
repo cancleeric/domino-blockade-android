@@ -1,5 +1,6 @@
 package com.cancleeric.dominoblockade.presentation.tutorial
 
+import com.cancleeric.dominoblockade.data.analytics.AnalyticsTracker
 import com.cancleeric.dominoblockade.domain.repository.TutorialRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +17,16 @@ import org.junit.Test
 
 private const val EXPECTED_TOTAL_STEPS = 5
 
+private val noOpTracker = object : AnalyticsTracker {
+    override fun logGameStart(playerCount: Int, mode: String, difficulty: String) = Unit
+    override fun logGameEnd(result: String, durationSeconds: Long, mode: String, turnCount: Int) = Unit
+    override fun logBlockadeTriggered(turnNumber: Int, remainingPipTotal: Int) = Unit
+    override fun logAchievementUnlocked(achievementId: String, achievementName: String) = Unit
+    override fun logDominoPlaced(pipLeft: Int, pipRight: Int, boardEnd: String) = Unit
+    override fun logOnlineMatchFound(waitTimeSeconds: Long) = Unit
+    override fun logTutorialCompleted() = Unit
+}
+
 class TutorialViewModelTest {
 
     private lateinit var viewModel: TutorialViewModel
@@ -31,7 +42,7 @@ class TutorialViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
-        viewModel = TutorialViewModel(fakeRepository)
+        viewModel = TutorialViewModel(fakeRepository, noOpTracker)
     }
 
     @After

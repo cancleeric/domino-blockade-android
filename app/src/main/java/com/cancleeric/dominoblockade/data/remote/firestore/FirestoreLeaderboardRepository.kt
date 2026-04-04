@@ -1,5 +1,6 @@
 package com.cancleeric.dominoblockade.data.remote.firestore
 
+import com.cancleeric.dominoblockade.data.crashlytics.CrashlyticsHelper
 import com.cancleeric.dominoblockade.domain.model.LeaderboardEntry
 import com.cancleeric.dominoblockade.domain.repository.LeaderboardRepository
 import com.google.firebase.firestore.FirebaseFirestore
@@ -24,7 +25,8 @@ private const val FIELD_LAST_UPDATED = "lastUpdated"
 
 @Singleton
 class FirestoreLeaderboardRepository @Inject constructor(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val crashlyticsHelper: CrashlyticsHelper
 ) : LeaderboardRepository {
 
     private val collectionRef
@@ -39,6 +41,7 @@ class FirestoreLeaderboardRepository @Inject constructor(
             .limit(limit.toLong())
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
+                    crashlyticsHelper.logException(error)
                     close(error)
                     return@addSnapshotListener
                 }
@@ -58,17 +61,27 @@ class FirestoreLeaderboardRepository @Inject constructor(
             FIELD_PLATFORM to entry.platform,
             FIELD_LAST_UPDATED to entry.lastUpdated
         )
-        collectionRef.document(entry.userId).set(data).await()
+        try {
+            collectionRef.document(entry.userId).set(data).await()
+        } catch (e: Exception) {
+            crashlyticsHelper.logException(e)
+            throw e
+        }
     }
 
     override fun getPlayerRank(userId: String): Flow<Int?> = flow {
-        val snapshot = collectionRef
-            .orderBy(FIELD_HIGH_SCORE, Query.Direction.DESCENDING)
-            .limit(RANK_QUERY_LIMIT)
-            .get()
-            .await()
-        val index = snapshot.documents.indexOfFirst { it.id == userId }
-        emit(if (index >= 0) index + 1 else null)
+        try {
+            val snapshot = collectionRef
+                .orderBy(FIELD_HIGH_SCORE, Query.Direction.DESCENDING)
+                .limit(RANK_QUERY_LIMIT)
+                .get()
+                .await()
+            val index = snapshot.documents.indexOfFirst { it.id == userId }
+            emit(if (index >= 0) index + 1 else null)
+        } catch (e: Exception) {
+            crashlyticsHelper.logException(e)
+            throw e
+        }
     }
 
     private fun com.google.firebase.firestore.DocumentSnapshot.toFirestoreLeaderboardEntry(): LeaderboardEntry {

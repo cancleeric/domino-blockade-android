@@ -2,6 +2,7 @@ package com.cancleeric.dominoblockade.presentation.lobby
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cancleeric.dominoblockade.data.analytics.AnalyticsTracker
 import com.cancleeric.dominoblockade.domain.model.OnlineRoom
 import com.cancleeric.dominoblockade.domain.model.OnlineRoomStatus
 import com.cancleeric.dominoblockade.domain.repository.OnlineGameRepository
@@ -16,11 +17,13 @@ import javax.inject.Inject
 
 private const val GUEST_PLAYER_INDEX = 1
 private const val HOST_PLAYER_INDEX = 0
+private const val MS_PER_SECOND = 1000L
 
 @HiltViewModel
 class LobbyViewModel @Inject constructor(
     private val onlineGameRepository: OnlineGameRepository,
-    private val startGameUseCase: StartGameUseCase
+    private val startGameUseCase: StartGameUseCase,
+    private val analyticsTracker: AnalyticsTracker
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LobbyUiState())
@@ -28,6 +31,7 @@ class LobbyViewModel @Inject constructor(
 
     private val localId = UUID.randomUUID().toString()
     private var gameInitialized = false
+    private var matchmakingStartTime = 0L
 
     fun setPlayerName(name: String) {
         _uiState.value = _uiState.value.copy(playerName = name, error = null)
@@ -44,6 +48,7 @@ class LobbyViewModel @Inject constructor(
             return
         }
         _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+        matchmakingStartTime = System.currentTimeMillis()
         viewModelScope.launch {
             val result = runCatching { onlineGameRepository.createRoom(localId, name) }
             val roomId = result.getOrNull()
@@ -64,6 +69,7 @@ class LobbyViewModel @Inject constructor(
             return
         }
         _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+        matchmakingStartTime = System.currentTimeMillis()
         viewModelScope.launch {
             val result = runCatching { onlineGameRepository.joinRoom(code, localId, name) }
             if (result.isFailure) {
@@ -103,6 +109,8 @@ class LobbyViewModel @Inject constructor(
                 initializeGameAsHost(room, roomId)
             }
             canNavigate -> {
+                val waitSeconds = (System.currentTimeMillis() - matchmakingStartTime) / MS_PER_SECOND
+                analyticsTracker.logOnlineMatchFound(waitSeconds)
                 _uiState.value = _uiState.value.copy(
                     navigateToGame = NavigateToOnlineGame(roomId, localPlayerIndex)
                 )
@@ -118,3 +126,4 @@ class LobbyViewModel @Inject constructor(
         }
     }
 }
+

@@ -1,5 +1,6 @@
 package com.cancleeric.dominoblockade.data.remote.realtime
 
+import com.cancleeric.dominoblockade.data.crashlytics.CrashlyticsHelper
 import com.cancleeric.dominoblockade.domain.model.GameState
 import com.cancleeric.dominoblockade.domain.model.OnlineRoom
 import com.cancleeric.dominoblockade.domain.model.OnlineRoomStatus
@@ -25,7 +26,8 @@ private const val ROOM_CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 @Singleton
 class FirebaseRealtimeGameRepository @Inject constructor(
-    private val database: FirebaseDatabase
+    private val database: FirebaseDatabase,
+    private val crashlyticsHelper: CrashlyticsHelper
 ) : OnlineGameRepository {
 
     private val roomsRef get() = database.getReference(PATH_ROOMS)
@@ -37,7 +39,12 @@ class FirebaseRealtimeGameRepository @Inject constructor(
             "hostName" to hostName,
             KEY_STATUS to OnlineRoomStatus.WAITING.name
         )
-        roomsRef.child(roomCode).setValue(data).await()
+        try {
+            roomsRef.child(roomCode).setValue(data).await()
+        } catch (e: Exception) {
+            crashlyticsHelper.logException(e)
+            throw e
+        }
         return roomCode
     }
 
@@ -47,7 +54,12 @@ class FirebaseRealtimeGameRepository @Inject constructor(
             KEY_GUEST_NAME to guestName,
             KEY_STATUS to OnlineRoomStatus.PLAYING.name
         )
-        roomsRef.child(roomId).updateChildren(updates).await()
+        try {
+            roomsRef.child(roomId).updateChildren(updates).await()
+        } catch (e: Exception) {
+            crashlyticsHelper.logException(e)
+            throw e
+        }
         return true
     }
 
@@ -60,7 +72,9 @@ class FirebaseRealtimeGameRepository @Inject constructor(
             }
 
             override fun onCancelled(error: DatabaseError) {
-                close(error.toException())
+                val exception = error.toException()
+                crashlyticsHelper.logException(exception)
+                close(exception)
             }
         }
         ref.addValueEventListener(listener)
@@ -69,11 +83,21 @@ class FirebaseRealtimeGameRepository @Inject constructor(
 
     override suspend fun updateGameState(roomId: String, gameState: GameState) {
         val data = gameStateToMap(gameState)
-        roomsRef.child(roomId).child(KEY_GAME_STATE).setValue(data).await()
+        try {
+            roomsRef.child(roomId).child(KEY_GAME_STATE).setValue(data).await()
+        } catch (e: Exception) {
+            crashlyticsHelper.logException(e)
+            throw e
+        }
     }
 
     override suspend fun leaveRoom(roomId: String) {
-        roomsRef.child(roomId).child(KEY_STATUS).setValue(OnlineRoomStatus.FINISHED.name).await()
+        try {
+            roomsRef.child(roomId).child(KEY_STATUS).setValue(OnlineRoomStatus.FINISHED.name).await()
+        } catch (e: Exception) {
+            crashlyticsHelper.logException(e)
+            throw e
+        }
     }
 
     private fun generateRoomCode(): String =

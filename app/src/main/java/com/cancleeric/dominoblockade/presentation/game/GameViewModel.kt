@@ -1,6 +1,7 @@
 package com.cancleeric.dominoblockade.presentation.game
 
 import androidx.lifecycle.ViewModel
+import com.cancleeric.dominoblockade.data.analytics.AnalyticsTracker
 import com.cancleeric.dominoblockade.domain.model.Domino
 import com.cancleeric.dominoblockade.domain.model.GameState
 import com.cancleeric.dominoblockade.domain.usecase.StartGameUseCase
@@ -9,6 +10,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
+
+private const val GAME_MODE_SOLO = "solo"
+private const val DIFFICULTY_NA = "n_a"
+private const val RESULT_WIN = "win"
+private const val RESULT_DRAW = "draw"
+private const val BOARD_END_RIGHT = "right"
+private const val BOARD_END_LEFT = "left"
 
 data class GameUiState(
     val gameState: GameState? = null,
@@ -20,14 +28,21 @@ data class GameUiState(
 
 @HiltViewModel
 class GameViewModel @Inject constructor(
-    private val startGameUseCase: StartGameUseCase
+    private val startGameUseCase: StartGameUseCase,
+    private val analyticsTracker: AnalyticsTracker
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GameUiState())
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
 
+    private var gameStartTime = 0L
+    private var turnCount = 0
+
     fun startGame(playerCount: Int) {
         val names = (1..playerCount).map { "Player $it" }
+        gameStartTime = System.currentTimeMillis()
+        turnCount = 0
+        analyticsTracker.logGameStart(playerCount, GAME_MODE_SOLO, DIFFICULTY_NA)
         _uiState.value = GameUiState(gameState = startGameUseCase(names))
     }
 
@@ -61,8 +76,17 @@ class GameViewModel @Inject constructor(
     private fun applyPlacement(state: GameState, domino: Domino) {
         val newState = computePlacement(state, domino)
         if (newState != null) {
+            val boardEnd = if (state.board.isEmpty() || newState.rightEnd != state.rightEnd) {
+                BOARD_END_RIGHT
+            } else {
+                BOARD_END_LEFT
+            }
+            analyticsTracker.logDominoPlaced(domino.left, domino.right, boardEnd)
             val updatedPlayer = newState.players[state.currentPlayerIndex]
             if (updatedPlayer.hand.isEmpty()) {
+                turnCount++
+                val duration = (System.currentTimeMillis() - gameStartTime) / 1000
+                analyticsTracker.logGameEnd(RESULT_WIN, duration, GAME_MODE_SOLO, turnCount)
                 _uiState.value = _uiState.value.copy(
                     gameState = newState, selectedDomino = null,
                     isGameOver = true, winnerName = updatedPlayer.name
@@ -77,6 +101,13 @@ class GameViewModel @Inject constructor(
         val nextIndex = (state.currentPlayerIndex + 1) % state.players.size
         val nextState = state.copy(currentPlayerIndex = nextIndex)
         val blocked = checkBlocked(nextState)
+        turnCount++
+        if (blocked) {
+            val remainingPips = nextState.players.sumOf { p -> p.hand.sumOf { it.left + it.right } }
+            analyticsTracker.logBlockadeTriggered(turnCount, remainingPips)
+            val duration = (System.currentTimeMillis() - gameStartTime) / 1000
+            analyticsTracker.logGameEnd(RESULT_DRAW, duration, GAME_MODE_SOLO, turnCount)
+        }
         _uiState.value = _uiState.value.copy(
             gameState = nextState, selectedDomino = null,
             isBlocked = blocked, isGameOver = blocked

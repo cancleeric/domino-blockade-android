@@ -1,5 +1,6 @@
 package com.cancleeric.dominoblockade.presentation.localmultiplayer
 
+import com.cancleeric.dominoblockade.data.analytics.AnalyticsTracker
 import com.cancleeric.dominoblockade.domain.usecase.StartGameUseCase
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -8,9 +9,19 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+private val noOpTracker = object : AnalyticsTracker {
+    override fun logGameStart(playerCount: Int, mode: String, difficulty: String) = Unit
+    override fun logGameEnd(result: String, durationSeconds: Long, mode: String, turnCount: Int) = Unit
+    override fun logBlockadeTriggered(turnNumber: Int, remainingPipTotal: Int) = Unit
+    override fun logAchievementUnlocked(achievementId: String, achievementName: String) = Unit
+    override fun logDominoPlaced(pipLeft: Int, pipRight: Int, boardEnd: String) = Unit
+    override fun logOnlineMatchFound(waitTimeSeconds: Long) = Unit
+    override fun logTutorialCompleted() = Unit
+}
+
 class LocalMultiplayerViewModelTest {
 
-    private val viewModel = LocalMultiplayerViewModel(StartGameUseCase())
+    private val viewModel = LocalMultiplayerViewModel(StartGameUseCase(), noOpTracker)
 
     @Test
     fun `initial state has default player count and no game`() {

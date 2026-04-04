@@ -1,5 +1,6 @@
 package com.cancleeric.dominoblockade.presentation.lobby
 
+import com.cancleeric.dominoblockade.data.analytics.AnalyticsTracker
 import com.cancleeric.dominoblockade.domain.model.GameState
 import com.cancleeric.dominoblockade.domain.model.OnlineRoom
 import com.cancleeric.dominoblockade.domain.model.OnlineRoomStatus
@@ -18,6 +19,16 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+
+private val noOpTracker = object : AnalyticsTracker {
+    override fun logGameStart(playerCount: Int, mode: String, difficulty: String) = Unit
+    override fun logGameEnd(result: String, durationSeconds: Long, mode: String, turnCount: Int) = Unit
+    override fun logBlockadeTriggered(turnNumber: Int, remainingPipTotal: Int) = Unit
+    override fun logAchievementUnlocked(achievementId: String, achievementName: String) = Unit
+    override fun logDominoPlaced(pipLeft: Int, pipRight: Int, boardEnd: String) = Unit
+    override fun logOnlineMatchFound(waitTimeSeconds: Long) = Unit
+    override fun logTutorialCompleted() = Unit
+}
 
 class LobbyViewModelTest {
 
@@ -38,7 +49,7 @@ class LobbyViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
-        viewModel = LobbyViewModel(fakeRepository, StartGameUseCase())
+        viewModel = LobbyViewModel(fakeRepository, StartGameUseCase(), noOpTracker)
     }
 
     @After
