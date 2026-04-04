@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,6 +20,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -33,12 +35,16 @@ import com.cancleeric.dominoblockade.domain.model.Domino
 import com.cancleeric.dominoblockade.domain.model.GameState
 import com.cancleeric.dominoblockade.presentation.audio.SoundManager
 import com.cancleeric.dominoblockade.presentation.haptic.HapticFeedbackManager
+import com.cancleeric.dominoblockade.ui.theme.LocalWindowSizeClass
+import com.cancleeric.dominoblockade.ui.theme.widthIsMediumOrExpanded
 
 private const val DEFAULT_PLAYER_COUNT = 2
 private const val SCREEN_PADDING_DP = 16
 private const val SECTION_SPACING_DP = 8
 private const val FLASH_ALPHA = 0.35f
 private const val FLASH_DURATION_MS = 500
+private const val BOARD_PANE_WEIGHT = 3f
+private const val CONTROLS_PANE_WEIGHT = 2f
 
 /**
  * Stateful game screen backed by [GameViewModel].
@@ -99,6 +105,9 @@ fun GameScreen(
 /**
  * Stateless game content composable — can be tested without Hilt.
  *
+ * On medium/expanded widths the board occupies a left pane and player controls a right pane.
+ * On compact widths the original single-column layout is used.
+ *
  * When [uiState] indicates a blocked game, a red flash overlay is shown.
  */
 @Composable
@@ -110,6 +119,7 @@ fun GameContent(
     modifier: Modifier = Modifier
 ) {
     val gameState = uiState.gameState
+    val isWide = LocalWindowSizeClass.current.widthIsMediumOrExpanded
     val infiniteTransition = rememberInfiniteTransition(label = "blockedFlash")
     val flashAlpha by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -127,37 +137,108 @@ fun GameContent(
     )
 
     Box(modifier = modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(SCREEN_PADDING_DP.dp),
-            verticalArrangement = Arrangement.spacedBy(SECTION_SPACING_DP.dp)
-        ) {
-            if (gameState != null) {
-                GameHeader(gameState = gameState, playerNameColor = headerColor)
-                HorizontalDivider()
-                GameBoard(
-                    board = gameState.board,
-                    modifier = Modifier.weight(1f)
-                )
-                HorizontalDivider()
-                PlayerSection(
+        if (gameState != null) {
+            if (isWide) {
+                GameContentWide(
                     uiState = uiState,
                     gameState = gameState,
+                    headerColor = headerColor,
                     onSelectDomino = onSelectDomino,
                     onPlaceDomino = onPlaceDomino,
                     onDrawDomino = onDrawDomino
                 )
             } else {
-                LoadingContent()
+                GameContentCompact(
+                    uiState = uiState,
+                    gameState = gameState,
+                    headerColor = headerColor,
+                    onSelectDomino = onSelectDomino,
+                    onPlaceDomino = onPlaceDomino,
+                    onDrawDomino = onDrawDomino
+                )
             }
+        } else {
+            LoadingContent()
         }
         if (uiState.isBlocked) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Red.copy(alpha = flashAlpha))
+            )
+        }
+    }
+}
+
+@Composable
+private fun GameContentCompact(
+    uiState: GameUiState,
+    gameState: GameState,
+    headerColor: Color,
+    onSelectDomino: (Domino) -> Unit,
+    onPlaceDomino: () -> Unit,
+    onDrawDomino: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(SCREEN_PADDING_DP.dp),
+        verticalArrangement = Arrangement.spacedBy(SECTION_SPACING_DP.dp)
+    ) {
+        GameHeader(gameState = gameState, playerNameColor = headerColor)
+        HorizontalDivider()
+        GameBoard(
+            board = gameState.board,
+            modifier = Modifier.weight(1f)
+        )
+        HorizontalDivider()
+        PlayerSection(
+            uiState = uiState,
+            gameState = gameState,
+            onSelectDomino = onSelectDomino,
+            onPlaceDomino = onPlaceDomino,
+            onDrawDomino = onDrawDomino
+        )
+    }
+}
+
+@Composable
+private fun GameContentWide(
+    uiState: GameUiState,
+    gameState: GameState,
+    headerColor: Color,
+    onSelectDomino: (Domino) -> Unit,
+    onPlaceDomino: () -> Unit,
+    onDrawDomino: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        GameBoard(
+            board = gameState.board,
+            modifier = Modifier
+                .weight(BOARD_PANE_WEIGHT)
+                .fillMaxHeight()
+        )
+        VerticalDivider()
+        Column(
+            modifier = Modifier
+                .weight(CONTROLS_PANE_WEIGHT)
+                .fillMaxHeight()
+                .padding(SCREEN_PADDING_DP.dp),
+            verticalArrangement = Arrangement.spacedBy(SECTION_SPACING_DP.dp)
+        ) {
+            GameHeader(gameState = gameState, playerNameColor = headerColor)
+            HorizontalDivider()
+            PlayerSection(
+                uiState = uiState,
+                gameState = gameState,
+                onSelectDomino = onSelectDomino,
+                onPlaceDomino = onPlaceDomino,
+                onDrawDomino = onDrawDomino
             )
         }
     }
