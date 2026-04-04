@@ -119,7 +119,7 @@ fun GameContent(
     modifier: Modifier = Modifier
 ) {
     val gameState = uiState.gameState
-    val isWide = LocalWindowSizeClass.current.widthIsMediumOrExpanded
+    val isMediumOrExpanded = LocalWindowSizeClass.current.widthIsMediumOrExpanded
     val infiniteTransition = rememberInfiniteTransition(label = "blockedFlash")
     val flashAlpha by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -138,7 +138,7 @@ fun GameContent(
 
     Box(modifier = modifier.fillMaxSize()) {
         if (gameState != null) {
-            if (isWide) {
+            if (isMediumOrExpanded) {
                 GameContentWide(
                     uiState = uiState,
                     gameState = gameState,

@@ -43,7 +43,7 @@ fun MenuScreen(
     modifier: Modifier = Modifier
 ) {
     var selectedPlayerCount by rememberSaveable { mutableIntStateOf(MIN_PLAYERS) }
-    val isWide = LocalWindowSizeClass.current.widthIsMediumOrExpanded
+    val isMediumOrExpanded = LocalWindowSizeClass.current.widthIsMediumOrExpanded
 
     MenuContent(
         selectedPlayerCount = selectedPlayerCount,
@@ -55,7 +55,7 @@ fun MenuScreen(
         onSettings = onSettings,
         onAchievements = onAchievements,
         onOnlineMultiplayer = onOnlineMultiplayer,
-        isWide = isWide,
+        isMediumOrExpanded = isMediumOrExpanded,
         modifier = modifier.fillMaxSize()
     )
 }
@@ -71,10 +71,10 @@ private fun MenuContent(
     onSettings: () -> Unit,
     onAchievements: () -> Unit,
     onOnlineMultiplayer: () -> Unit,
-    isWide: Boolean,
+    isMediumOrExpanded: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val contentModifier = if (isWide) {
+    val contentModifier = if (isMediumOrExpanded) {
         Modifier.widthIn(max = MENU_MAX_WIDTH_DP.dp)
     } else {
         Modifier.fillMaxWidth()

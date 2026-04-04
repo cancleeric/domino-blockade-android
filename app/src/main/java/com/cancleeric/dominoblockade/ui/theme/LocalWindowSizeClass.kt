@@ -8,7 +8,7 @@ import androidx.compose.runtime.compositionLocalOf
  * Composition local that provides the current [WindowSizeClass].
  * Defaults to `null`, which is treated as [WindowWidthSizeClass.Compact].
  *
- * Provide this in [MainActivity] via [androidx.compose.runtime.CompositionLocalProvider].
+ * Provide this in MainActivity via [androidx.compose.runtime.CompositionLocalProvider].
  */
 val LocalWindowSizeClass = compositionLocalOf<WindowSizeClass?> { null }
 

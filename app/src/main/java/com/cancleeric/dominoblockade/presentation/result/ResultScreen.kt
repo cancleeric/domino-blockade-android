@@ -46,9 +46,9 @@ fun ResultScreen(
 ) {
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { visible = true }
-    val isWide = LocalWindowSizeClass.current.widthIsMediumOrExpanded
+    val isMediumOrExpanded = LocalWindowSizeClass.current.widthIsMediumOrExpanded
 
-    if (isWide) {
+    if (isMediumOrExpanded) {
         ResultContentWide(
             visible = visible,
             isBlocked = isBlocked,
