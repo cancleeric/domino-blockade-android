@@ -1,13 +1,19 @@
 package com.cancleeric.dominoblockade.presentation.game
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.cancleeric.dominoblockade.data.local.MoveHistorySerializer
+import com.cancleeric.dominoblockade.data.local.entity.GameRecordEntity
 import com.cancleeric.dominoblockade.domain.model.Domino
+import com.cancleeric.dominoblockade.domain.model.GameMove
 import com.cancleeric.dominoblockade.domain.model.GameState
+import com.cancleeric.dominoblockade.domain.repository.GameRecordRepository
 import com.cancleeric.dominoblockade.domain.usecase.StartGameUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class GameUiState(
@@ -20,15 +26,24 @@ data class GameUiState(
 
 @HiltViewModel
 class GameViewModel @Inject constructor(
-    private val startGameUseCase: StartGameUseCase
+    private val startGameUseCase: StartGameUseCase,
+    private val gameRecordRepository: GameRecordRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GameUiState())
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
 
+    private val _moves = mutableListOf<GameMove>()
+    private var _initialHandsJson = ""
+    private var _gameStartTime = 0L
+
     fun startGame(playerCount: Int) {
         val names = (1..playerCount).map { "Player $it" }
-        _uiState.value = GameUiState(gameState = startGameUseCase(names))
+        val gameState = startGameUseCase(names)
+        _moves.clear()
+        _initialHandsJson = MoveHistorySerializer.serializePlayers(gameState.players)
+        _gameStartTime = System.currentTimeMillis()
+        _uiState.value = GameUiState(gameState = gameState)
     }
 
     fun selectDomino(domino: Domino) {
@@ -61,8 +76,38 @@ class GameViewModel @Inject constructor(
     private fun applyPlacement(state: GameState, domino: Domino) {
         val newState = computePlacement(state, domino)
         if (newState != null) {
+            val boardEnd = when {
+                state.board.isEmpty() -> "INITIAL"
+                newState.rightEnd != state.rightEnd -> "RIGHT"
+                else -> "LEFT"
+            }
+            _moves.add(
+                GameMove(
+                    playerId = state.currentPlayer.id,
+                    playerName = state.currentPlayer.name,
+                    dominoLeft = domino.left,
+                    dominoRight = domino.right,
+                    boardEnd = boardEnd,
+                    timestamp = System.currentTimeMillis()
+                )
+            )
             val updatedPlayer = newState.players[state.currentPlayerIndex]
             if (updatedPlayer.hand.isEmpty()) {
+                val winnerScore = newState.players
+                    .filterIndexed { idx, _ -> idx != state.currentPlayerIndex }
+                    .sumOf { p -> p.hand.sumOf { it.total } }
+                val record = GameRecordEntity(
+                    playerCount = newState.players.size,
+                    winnerName = updatedPlayer.name,
+                    winnerScore = winnerScore,
+                    gameMode = "local",
+                    aiDifficulty = null,
+                    isBlocked = false,
+                    durationSeconds = ((System.currentTimeMillis() - _gameStartTime) / 1000).toInt(),
+                    moveHistory = MoveHistorySerializer.serializeMoves(_moves.toList()),
+                    initialHandsJson = _initialHandsJson
+                )
+                viewModelScope.launch { gameRecordRepository.insert(record) }
                 _uiState.value = _uiState.value.copy(
                     gameState = newState, selectedDomino = null,
                     isGameOver = true, winnerName = updatedPlayer.name
@@ -77,6 +122,20 @@ class GameViewModel @Inject constructor(
         val nextIndex = (state.currentPlayerIndex + 1) % state.players.size
         val nextState = state.copy(currentPlayerIndex = nextIndex)
         val blocked = checkBlocked(nextState)
+        if (blocked) {
+            val record = GameRecordEntity(
+                playerCount = nextState.players.size,
+                winnerName = "",
+                winnerScore = 0,
+                gameMode = "local",
+                aiDifficulty = null,
+                isBlocked = true,
+                durationSeconds = ((System.currentTimeMillis() - _gameStartTime) / 1000).toInt(),
+                moveHistory = MoveHistorySerializer.serializeMoves(_moves.toList()),
+                initialHandsJson = _initialHandsJson
+            )
+            viewModelScope.launch { gameRecordRepository.insert(record) }
+        }
         _uiState.value = _uiState.value.copy(
             gameState = nextState, selectedDomino = null,
             isBlocked = blocked, isGameOver = blocked

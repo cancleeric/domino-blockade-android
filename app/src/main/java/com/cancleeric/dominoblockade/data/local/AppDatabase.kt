@@ -13,7 +13,7 @@ import com.cancleeric.dominoblockade.data.local.entity.ThemeEntity
 
 @Database(
     entities = [GameRecordEntity::class, PlayerStatsEntity::class, ThemeEntity::class, AchievementEntity::class],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

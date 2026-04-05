@@ -19,11 +19,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.cancleeric.dominoblockade.presentation.achievements.AchievementsScreen
 import com.cancleeric.dominoblockade.presentation.game.GameScreen
+import com.cancleeric.dominoblockade.presentation.history.HistoryScreen
 import com.cancleeric.dominoblockade.presentation.leaderboard.LeaderboardScreen
 import com.cancleeric.dominoblockade.presentation.lobby.LobbyScreen
 import com.cancleeric.dominoblockade.presentation.localmultiplayer.LocalMultiplayerScreen
 import com.cancleeric.dominoblockade.presentation.menu.MenuScreen
 import com.cancleeric.dominoblockade.presentation.onlinegame.OnlineGameScreen
+import com.cancleeric.dominoblockade.presentation.replay.ReplayScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultViewModel
 import com.cancleeric.dominoblockade.presentation.settings.SettingsScreen
@@ -49,6 +51,10 @@ sealed class Screen(val route: String) {
     object Settings : Screen("settings")
     object Achievements : Screen("achievements")
     object Lobby : Screen("lobby")
+    object History : Screen("history")
+    object Replay : Screen("replay/{recordId}") {
+        fun createRoute(recordId: Long) = "replay/$recordId"
+    }
     object OnlineGame : Screen("onlineGame/{roomId}/{playerIndex}") {
         fun createRoute(roomId: String, playerIndex: Int) = "onlineGame/$roomId/$playerIndex"
     }
@@ -94,7 +100,8 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
                     onAchievements = {
                         navController.navigate(Screen.Achievements.route)
                     },
-                    onOnlineMultiplayer = { navController.navigate(Screen.Lobby.route) }
+                    onOnlineMultiplayer = { navController.navigate(Screen.Lobby.route) },
+                    onHistory = { navController.navigate(Screen.History.route) }
                 )
                 TutorialOverlay(
                     uiState = tutorialState,
@@ -186,6 +193,22 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
                 },
                 onNavigateBack = { navController.popBackStack() }
             )
+        }
+        composable(Screen.History.route) {
+            HistoryScreen(
+                onBack = { navController.popBackStack() },
+                onReplay = { recordId ->
+                    navController.navigate(Screen.Replay.createRoute(recordId))
+                }
+            )
+        }
+        composable(
+            route = Screen.Replay.route,
+            arguments = listOf(
+                navArgument("recordId") { type = NavType.LongType }
+            )
+        ) {
+            ReplayScreen(onBack = { navController.popBackStack() })
         }
         composable(
             route = Screen.OnlineGame.route,

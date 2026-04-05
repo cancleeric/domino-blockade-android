@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -41,6 +42,7 @@ private const val SCREEN_PADDING_DP = 16
 @Composable
 fun HistoryScreen(
     onBack: () -> Unit,
+    onReplay: (Long) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: HistoryViewModel = hiltViewModel()
 ) {
@@ -70,7 +72,7 @@ fun HistoryScreen(
                 verticalArrangement = Arrangement.spacedBy(CARD_PADDING_DP.dp)
             ) {
                 items(records) { record ->
-                    GameRecordCard(record = record)
+                    GameRecordCard(record = record, onReplay = onReplay)
                 }
             }
         }
@@ -93,10 +95,11 @@ private fun EmptyHistoryContent(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun GameRecordCard(record: GameRecordEntity) {
+private fun GameRecordCard(record: GameRecordEntity, onReplay: (Long) -> Unit) {
     val date = remember(record.timestamp) {
         dateFormatter.format(Instant.ofEpochMilli(record.timestamp))
     }
+    val hasReplay = record.moveHistory != null && record.moveHistory.isNotEmpty()
 
     Card(
         modifier = Modifier.fillMaxWidth()
@@ -107,10 +110,22 @@ private fun GameRecordCard(record: GameRecordEntity) {
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = date, style = MaterialTheme.typography.labelMedium)
-                Text(text = record.gameMode, style = MaterialTheme.typography.labelMedium)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = record.gameMode, style = MaterialTheme.typography.labelMedium)
+                    if (hasReplay) {
+                        IconButton(onClick = { onReplay(record.id) }) {
+                            Icon(
+                                imageVector = Icons.Filled.PlayArrow,
+                                contentDescription = "Replay game",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
             }
             Text(
                 text = if (record.isBlocked) "Blocked" else "Winner: ${record.winnerName}",

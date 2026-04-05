@@ -7,4 +7,5 @@ interface GameRecordRepository {
     suspend fun insert(record: GameRecordEntity)
     fun getAll(): Flow<List<GameRecordEntity>>
     fun getRecent(limit: Int): Flow<List<GameRecordEntity>>
+    fun getById(id: Long): Flow<GameRecordEntity?>
 }

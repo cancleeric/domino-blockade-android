@@ -16,4 +16,7 @@ interface GameRecordDao {
 
     @Query("SELECT * FROM game_records ORDER BY timestamp DESC LIMIT :limit")
     fun getRecent(limit: Int): Flow<List<GameRecordEntity>>
+
+    @Query("SELECT * FROM game_records WHERE id = :id")
+    fun getById(id: Long): Flow<GameRecordEntity?>
 }

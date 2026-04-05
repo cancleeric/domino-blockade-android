@@ -40,6 +40,7 @@ fun MenuScreen(
     onSettings: () -> Unit = {},
     onAchievements: () -> Unit = {},
     onOnlineMultiplayer: () -> Unit = {},
+    onHistory: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var selectedPlayerCount by rememberSaveable { mutableIntStateOf(MIN_PLAYERS) }
@@ -55,6 +56,7 @@ fun MenuScreen(
         onSettings = onSettings,
         onAchievements = onAchievements,
         onOnlineMultiplayer = onOnlineMultiplayer,
+        onHistory = onHistory,
         isMediumOrExpanded = isMediumOrExpanded,
         modifier = modifier.fillMaxSize()
     )
@@ -71,6 +73,7 @@ private fun MenuContent(
     onSettings: () -> Unit,
     onAchievements: () -> Unit,
     onOnlineMultiplayer: () -> Unit,
+    onHistory: () -> Unit,
     isMediumOrExpanded: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -165,6 +168,15 @@ private fun MenuContent(
                     .padding(top = CHIP_SPACING_DP.dp)
             ) {
                 Text(text = "Online Multiplayer")
+            }
+            Button(
+                onClick = onHistory,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = SECTION_PADDING_DP.dp)
+                    .padding(top = CHIP_SPACING_DP.dp)
+            ) {
+                Text(text = "Game History")
             }
         }
     }

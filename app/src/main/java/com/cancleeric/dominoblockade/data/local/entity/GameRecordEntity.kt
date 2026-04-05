@@ -17,5 +17,9 @@ data class GameRecordEntity(
     val aiDifficulty: String?,
     val isBlocked: Boolean,
     val durationSeconds: Int,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    /** JSON array of [com.cancleeric.dominoblockade.domain.model.GameMove] objects. Null for legacy records. */
+    val moveHistory: String? = null,
+    /** JSON array of initial player hands at game start. Null for legacy records. */
+    val initialHandsJson: String? = null
 )

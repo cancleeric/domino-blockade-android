@@ -17,4 +17,6 @@ class GameRecordRepositoryImpl @Inject constructor(
     override fun getAll(): Flow<List<GameRecordEntity>> = dao.getAll()
 
     override fun getRecent(limit: Int): Flow<List<GameRecordEntity>> = dao.getRecent(limit)
+
+    override fun getById(id: Long): Flow<GameRecordEntity?> = dao.getById(id)
 }
