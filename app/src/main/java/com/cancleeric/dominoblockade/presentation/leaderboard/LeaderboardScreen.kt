@@ -50,6 +50,7 @@ private const val RANK_GOLD = 1
 private const val RANK_SILVER = 2
 private const val RANK_BRONZE = 3
 private const val RANK_BADGE_SIZE_DP = 32
+private const val AVATAR_SIZE_DP = 40
 private const val CARD_PADDING_DP = 12
 private const val SPACER_LARGE_DP = 12
 private const val SPACER_SMALL_DP = 4
@@ -60,6 +61,7 @@ private const val BADGE_VERTICAL_PADDING_DP = 2
 private const val ITEM_SPACING_DP = 8
 private const val RANK_LABEL_PADDING_DP = 8
 private const val ALPHA_BADGE_BACKGROUND = 0.2f
+private const val AVATAR_INITIALS_MAX = 2
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -182,6 +184,32 @@ private fun LeaderboardList(uiState: LeaderboardUiState) {
 }
 
 @Composable
+private fun PlayerAvatar(displayName: String, modifier: Modifier = Modifier) {
+    val initials = displayName
+        .split(" ")
+        .filter { it.isNotEmpty() }
+        .take(AVATAR_INITIALS_MAX)
+        .joinToString("") { word -> word.firstOrNull()?.uppercaseChar()?.toString() ?: "" }
+        .ifEmpty { "?" }
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .size(AVATAR_SIZE_DP.dp)
+            .background(
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                shape = CircleShape
+            )
+    ) {
+        Text(
+            text = initials,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
 private fun LeaderboardEntryCard(
     rank: Int,
     entry: LeaderboardEntry,
@@ -203,6 +231,8 @@ private fun LeaderboardEntryCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             RankBadge(rank = rank)
+            Spacer(modifier = Modifier.width(SPACER_LARGE_DP.dp))
+            PlayerAvatar(displayName = entry.displayName.ifEmpty { "?" })
             Spacer(modifier = Modifier.width(SPACER_LARGE_DP.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
