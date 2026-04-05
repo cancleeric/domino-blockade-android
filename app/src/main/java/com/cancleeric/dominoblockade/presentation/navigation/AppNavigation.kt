@@ -24,6 +24,7 @@ import com.cancleeric.dominoblockade.presentation.lobby.LobbyScreen
 import com.cancleeric.dominoblockade.presentation.localmultiplayer.LocalMultiplayerScreen
 import com.cancleeric.dominoblockade.presentation.menu.MenuScreen
 import com.cancleeric.dominoblockade.presentation.onlinegame.OnlineGameScreen
+import com.cancleeric.dominoblockade.presentation.profile.PlayerProfileScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultViewModel
 import com.cancleeric.dominoblockade.presentation.settings.SettingsScreen
@@ -48,6 +49,7 @@ sealed class Screen(val route: String) {
     object ThemeSelection : Screen("theme")
     object Settings : Screen("settings")
     object Achievements : Screen("achievements")
+    object PlayerProfile : Screen("playerProfile")
     object Lobby : Screen("lobby")
     object OnlineGame : Screen("onlineGame/{roomId}/{playerIndex}") {
         fun createRoute(roomId: String, playerIndex: Int) = "onlineGame/$roomId/$playerIndex"
@@ -93,6 +95,9 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
                     },
                     onAchievements = {
                         navController.navigate(Screen.Achievements.route)
+                    },
+                    onProfile = {
+                        navController.navigate(Screen.PlayerProfile.route)
                     },
                     onOnlineMultiplayer = { navController.navigate(Screen.Lobby.route) }
                 )
@@ -174,6 +179,11 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
         }
         composable(Screen.Achievements.route) {
             AchievementsScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.PlayerProfile.route) {
+            PlayerProfileScreen(
                 onBack = { navController.popBackStack() }
             )
         }

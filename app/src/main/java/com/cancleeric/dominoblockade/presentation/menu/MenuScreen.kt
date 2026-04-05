@@ -39,6 +39,7 @@ fun MenuScreen(
     onThemeSettings: () -> Unit = {},
     onSettings: () -> Unit = {},
     onAchievements: () -> Unit = {},
+    onProfile: () -> Unit = {},
     onOnlineMultiplayer: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -54,6 +55,7 @@ fun MenuScreen(
         onThemeSettings = onThemeSettings,
         onSettings = onSettings,
         onAchievements = onAchievements,
+        onProfile = onProfile,
         onOnlineMultiplayer = onOnlineMultiplayer,
         isMediumOrExpanded = isMediumOrExpanded,
         modifier = modifier.fillMaxSize()
@@ -70,6 +72,7 @@ private fun MenuContent(
     onThemeSettings: () -> Unit,
     onSettings: () -> Unit,
     onAchievements: () -> Unit,
+    onProfile: () -> Unit,
     onOnlineMultiplayer: () -> Unit,
     isMediumOrExpanded: Boolean,
     modifier: Modifier = Modifier
@@ -156,6 +159,15 @@ private fun MenuContent(
                     .padding(top = CHIP_SPACING_DP.dp)
             ) {
                 Text(text = "Achievements")
+            }
+            Button(
+                onClick = onProfile,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = SECTION_PADDING_DP.dp)
+                    .padding(top = CHIP_SPACING_DP.dp)
+            ) {
+                Text(text = "Profile")
             }
             Button(
                 onClick = onOnlineMultiplayer,
