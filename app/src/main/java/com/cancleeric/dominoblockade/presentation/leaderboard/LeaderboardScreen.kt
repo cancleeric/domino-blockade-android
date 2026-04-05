@@ -189,7 +189,7 @@ private fun PlayerAvatar(displayName: String, modifier: Modifier = Modifier) {
         .split(" ")
         .filter { it.isNotEmpty() }
         .take(AVATAR_INITIALS_MAX)
-        .joinToString("") { it.first().uppercaseChar().toString() }
+        .joinToString("") { word -> word.firstOrNull()?.uppercaseChar()?.toString() ?: "" }
         .ifEmpty { "?" }
     Box(
         contentAlignment = Alignment.Center,
