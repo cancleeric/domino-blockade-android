@@ -1,7 +1,6 @@
 package com.cancleeric.dominoblockade.presentation.menu
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,13 +21,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.cancleeric.dominoblockade.R
+import com.cancleeric.dominoblockade.ui.theme.LocalWindowSizeClass
+import com.cancleeric.dominoblockade.ui.theme.widthIsMediumOrExpanded
 
 private const val MIN_PLAYERS = 2
 private const val MAX_PLAYERS = 4
 private const val TITLE_PADDING_DP = 32
 private const val SECTION_PADDING_DP = 16
 private const val CHIP_SPACING_DP = 8
-private const val TABLET_BREAKPOINT_DP = 600
+private const val MENU_MAX_WIDTH_DP = 480
 
 @Composable
 fun MenuScreen(
@@ -42,25 +43,21 @@ fun MenuScreen(
     modifier: Modifier = Modifier
 ) {
     var selectedPlayerCount by rememberSaveable { mutableIntStateOf(MIN_PLAYERS) }
+    val isMediumOrExpanded = LocalWindowSizeClass.current.widthIsMediumOrExpanded
 
-    BoxWithConstraints(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        val isTablet = maxWidth >= TABLET_BREAKPOINT_DP.dp
-        MenuContent(
-            selectedPlayerCount = selectedPlayerCount,
-            onCountSelected = { selectedPlayerCount = it },
-            onStartGame = onStartGame,
-            onLeaderboard = onLeaderboard,
-            onLocalMultiplayer = onLocalMultiplayer,
-            onThemeSettings = onThemeSettings,
-            onSettings = onSettings,
-            onAchievements = onAchievements,
-            onOnlineMultiplayer = onOnlineMultiplayer,
-            isTablet = isTablet
-        )
-    }
+    MenuContent(
+        selectedPlayerCount = selectedPlayerCount,
+        onCountSelected = { selectedPlayerCount = it },
+        onStartGame = onStartGame,
+        onLeaderboard = onLeaderboard,
+        onLocalMultiplayer = onLocalMultiplayer,
+        onThemeSettings = onThemeSettings,
+        onSettings = onSettings,
+        onAchievements = onAchievements,
+        onOnlineMultiplayer = onOnlineMultiplayer,
+        isMediumOrExpanded = isMediumOrExpanded,
+        modifier = modifier.fillMaxSize()
+    )
 }
 
 @Composable
@@ -74,95 +71,101 @@ private fun MenuContent(
     onSettings: () -> Unit,
     onAchievements: () -> Unit,
     onOnlineMultiplayer: () -> Unit,
-    isTablet: Boolean
+    isMediumOrExpanded: Boolean,
+    modifier: Modifier = Modifier
 ) {
-    val contentModifier = if (isTablet) {
-        Modifier.widthIn(max = TABLET_BREAKPOINT_DP.dp)
+    val contentModifier = if (isMediumOrExpanded) {
+        Modifier.widthIn(max = MENU_MAX_WIDTH_DP.dp)
     } else {
         Modifier.fillMaxWidth()
     }
 
     Column(
-        modifier = contentModifier,
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = stringResource(R.string.menu_title),
-            style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.padding(bottom = TITLE_PADDING_DP.dp)
-        )
-        Text(
-            text = stringResource(R.string.menu_number_of_players),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = CHIP_SPACING_DP.dp)
-        )
-        PlayerCountSelector(
-            selectedCount = selectedPlayerCount,
-            onCountSelected = onCountSelected
-        )
-        Button(
-            onClick = { onStartGame(selectedPlayerCount) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = SECTION_PADDING_DP.dp)
-                .padding(top = TITLE_PADDING_DP.dp)
+        Column(
+            modifier = contentModifier,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = stringResource(R.string.menu_start_game))
-        }
-        Button(
-            onClick = onLocalMultiplayer,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = SECTION_PADDING_DP.dp)
-                .padding(top = CHIP_SPACING_DP.dp)
-        ) {
-            Text(text = "Local Multiplayer")
-        }
-        Button(
-            onClick = onLeaderboard,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = SECTION_PADDING_DP.dp)
-                .padding(top = CHIP_SPACING_DP.dp)
-        ) {
-            Text(text = stringResource(R.string.menu_leaderboard))
-        }
-        Button(
-            onClick = onThemeSettings,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = SECTION_PADDING_DP.dp)
-                .padding(top = CHIP_SPACING_DP.dp)
-        ) {
-            Text(text = "Theme Settings")
-        }
-        Button(
-            onClick = onSettings,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = SECTION_PADDING_DP.dp)
-                .padding(top = CHIP_SPACING_DP.dp)
-        ) {
-            Text(text = "Settings")
-        }
-        Button(
-            onClick = onAchievements,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = SECTION_PADDING_DP.dp)
-                .padding(top = CHIP_SPACING_DP.dp)
-        ) {
-            Text(text = "Achievements")
-        }
-        Button(
-            onClick = onOnlineMultiplayer,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = SECTION_PADDING_DP.dp)
-                .padding(top = CHIP_SPACING_DP.dp)
-        ) {
-            Text(text = "Online Multiplayer")
+            Text(
+                text = stringResource(R.string.menu_title),
+                style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier.padding(bottom = TITLE_PADDING_DP.dp)
+            )
+            Text(
+                text = stringResource(R.string.menu_number_of_players),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = CHIP_SPACING_DP.dp)
+            )
+            PlayerCountSelector(
+                selectedCount = selectedPlayerCount,
+                onCountSelected = onCountSelected
+            )
+            Button(
+                onClick = { onStartGame(selectedPlayerCount) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = SECTION_PADDING_DP.dp)
+                    .padding(top = TITLE_PADDING_DP.dp)
+            ) {
+                Text(text = stringResource(R.string.menu_start_game))
+            }
+            Button(
+                onClick = onLocalMultiplayer,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = SECTION_PADDING_DP.dp)
+                    .padding(top = CHIP_SPACING_DP.dp)
+            ) {
+                Text(text = "Local Multiplayer")
+            }
+            Button(
+                onClick = onLeaderboard,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = SECTION_PADDING_DP.dp)
+                    .padding(top = CHIP_SPACING_DP.dp)
+            ) {
+                Text(text = stringResource(R.string.menu_leaderboard))
+            }
+            Button(
+                onClick = onThemeSettings,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = SECTION_PADDING_DP.dp)
+                    .padding(top = CHIP_SPACING_DP.dp)
+            ) {
+                Text(text = "Theme Settings")
+            }
+            Button(
+                onClick = onSettings,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = SECTION_PADDING_DP.dp)
+                    .padding(top = CHIP_SPACING_DP.dp)
+            ) {
+                Text(text = "Settings")
+            }
+            Button(
+                onClick = onAchievements,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = SECTION_PADDING_DP.dp)
+                    .padding(top = CHIP_SPACING_DP.dp)
+            ) {
+                Text(text = "Achievements")
+            }
+            Button(
+                onClick = onOnlineMultiplayer,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = SECTION_PADDING_DP.dp)
+                    .padding(top = CHIP_SPACING_DP.dp)
+            ) {
+                Text(text = "Online Multiplayer")
+            }
         }
     }
 }
