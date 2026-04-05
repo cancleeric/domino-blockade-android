@@ -7,10 +7,10 @@ import com.cancleeric.dominoblockade.domain.model.PlayerProfile
 import com.cancleeric.dominoblockade.domain.repository.PlayerProfileRepository
 import com.cancleeric.dominoblockade.domain.repository.PlayerStatsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,14 +24,9 @@ class PlayerProfileViewModel @Inject constructor(
     val profile: StateFlow<PlayerProfile> = profileRepository.getProfile()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), PlayerProfile())
 
-    private val _stats = MutableStateFlow<PlayerStatsEntity?>(null)
-    val stats: StateFlow<PlayerStatsEntity?> = _stats.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            profile.collect { p -> _stats.value = statsRepository.getByName(p.playerName) }
-        }
-    }
+    val stats: StateFlow<PlayerStatsEntity?> = profileRepository.getProfile()
+        .flatMapLatest { p -> flow { emit(statsRepository.getByName(p.playerName)) } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
 
     fun saveName(name: String) {
         viewModelScope.launch {
