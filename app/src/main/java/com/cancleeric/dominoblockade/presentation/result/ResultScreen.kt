@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.cancleeric.dominoblockade.domain.model.AchievementType
+import com.cancleeric.dominoblockade.ui.theme.LocalWindowSizeClass
+import com.cancleeric.dominoblockade.ui.theme.widthIsMediumOrExpanded
 
 private const val TITLE_PADDING_DP = 16
 private const val SUBTITLE_PADDING_DP = 32
@@ -43,7 +46,41 @@ fun ResultScreen(
 ) {
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { visible = true }
+    val isMediumOrExpanded = LocalWindowSizeClass.current.widthIsMediumOrExpanded
 
+    if (isMediumOrExpanded) {
+        ResultContentWide(
+            visible = visible,
+            isBlocked = isBlocked,
+            winnerName = winnerName,
+            newAchievements = newAchievements,
+            onPlayAgain = onPlayAgain,
+            onMenu = onMenu,
+            modifier = modifier
+        )
+    } else {
+        ResultContentCompact(
+            visible = visible,
+            isBlocked = isBlocked,
+            winnerName = winnerName,
+            newAchievements = newAchievements,
+            onPlayAgain = onPlayAgain,
+            onMenu = onMenu,
+            modifier = modifier
+        )
+    }
+}
+
+@Composable
+private fun ResultContentCompact(
+    visible: Boolean,
+    isBlocked: Boolean,
+    winnerName: String,
+    newAchievements: List<AchievementType>,
+    onPlayAgain: () -> Unit,
+    onMenu: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -64,12 +101,67 @@ fun ResultScreen(
                 }
             }
         }
+        ResultActionButtons(
+            onPlayAgain = onPlayAgain,
+            onMenu = onMenu,
+            modifier = Modifier.padding(top = SUBTITLE_PADDING_DP.dp)
+        )
+    }
+}
+
+@Composable
+private fun ResultContentWide(
+    visible: Boolean,
+    isBlocked: Boolean,
+    winnerName: String,
+    newAchievements: List<AchievementType>,
+    onPlayAgain: () -> Unit,
+    onMenu: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(SCREEN_PADDING_DP.dp),
+        horizontalArrangement = Arrangement.spacedBy(SUBTITLE_PADDING_DP.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AnimatedVisibility(
+            visible = visible,
+            enter = scaleIn(animationSpec = tween(ENTER_ANIM_DURATION_MS, ENTER_ANIM_DELAY_MS)) +
+                fadeIn(animationSpec = tween(ENTER_ANIM_DURATION_MS, ENTER_ANIM_DELAY_MS)),
+            modifier = Modifier.weight(1f)
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                ResultTitle(isBlocked = isBlocked)
+                ResultSubtitle(isBlocked = isBlocked, winnerName = winnerName)
+                if (newAchievements.isNotEmpty()) {
+                    NewAchievementsBanner(achievements = newAchievements)
+                }
+            }
+        }
+        ResultActionButtons(
+            onPlayAgain = onPlayAgain,
+            onMenu = onMenu,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun ResultActionButtons(
+    onPlayAgain: () -> Unit,
+    onMenu: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(BUTTON_PADDING_DP.dp)
+    ) {
         Button(
             onClick = onPlayAgain,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = SUBTITLE_PADDING_DP.dp)
-                .padding(bottom = BUTTON_PADDING_DP.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text("Play Again")
         }
