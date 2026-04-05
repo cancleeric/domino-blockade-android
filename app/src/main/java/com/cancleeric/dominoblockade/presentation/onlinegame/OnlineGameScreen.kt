@@ -144,7 +144,7 @@ private fun OpponentDisconnectedBanner(opponentName: String, gracePeriodSeconds:
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            text = "$opponentName disconnected \u2014 waiting $gracePeriodSeconds s for reconnection\u2026",
+            text = "$opponentName disconnected \u2014 waiting $gracePeriodSeconds seconds for reconnection\u2026",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onErrorContainer,
             modifier = Modifier.padding(SECTION_SPACING_DP.dp)
