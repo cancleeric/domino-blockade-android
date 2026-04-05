@@ -13,6 +13,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -99,6 +100,12 @@ fun OnlineGameContent(
             verticalArrangement = Arrangement.spacedBy(SECTION_SPACING_DP.dp)
         ) {
             OnlineGameHeader(uiState = uiState, onLeave = onLeave)
+            if (uiState.opponentDisconnected) {
+                OpponentDisconnectedBanner(
+                    opponentName = uiState.opponentName,
+                    gracePeriodSeconds = uiState.gracePeriodSeconds
+                )
+            }
             HorizontalDivider()
             GameBoard(board = gameState.board, modifier = Modifier.weight(1f))
             HorizontalDivider()
@@ -127,6 +134,21 @@ private fun OnlineGameHeader(uiState: OnlineGameUiState, onLeave: () -> Unit) {
         OutlinedButton(onClick = onLeave) {
             Text("Leave")
         }
+    }
+}
+
+@Composable
+private fun OpponentDisconnectedBanner(opponentName: String, gracePeriodSeconds: Int) {
+    Surface(
+        color = MaterialTheme.colorScheme.errorContainer,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = "$opponentName disconnected \u2014 waiting $gracePeriodSeconds s for reconnection\u2026",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onErrorContainer,
+            modifier = Modifier.padding(SECTION_SPACING_DP.dp)
+        )
     }
 }
 

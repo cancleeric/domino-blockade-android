@@ -14,5 +14,9 @@ data class OnlineGameUiState(
     val opponentName: String = "",
     val opponentTileCount: Int = 0,
     val isLoading: Boolean = true,
-    val roomFinished: Boolean = false
+    val roomFinished: Boolean = false,
+    /** True when the opponent has disconnected and the grace period countdown is active. */
+    val opponentDisconnected: Boolean = false,
+    /** Remaining seconds of the reconnection grace period (0 when not counting down). */
+    val gracePeriodSeconds: Int = 0
 )

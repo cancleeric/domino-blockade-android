@@ -6,6 +6,7 @@ import com.cancleeric.dominoblockade.domain.model.OnlineRoomStatus
 import com.cancleeric.dominoblockade.domain.repository.OnlineGameRepository
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.DataSnapshot
 import kotlinx.coroutines.channels.awaitClose
@@ -74,6 +75,19 @@ class FirebaseRealtimeGameRepository @Inject constructor(
 
     override suspend fun leaveRoom(roomId: String) {
         roomsRef.child(roomId).child(KEY_STATUS).setValue(OnlineRoomStatus.FINISHED.name).await()
+    }
+
+    override suspend fun registerDisconnectHandler(roomId: String, isHost: Boolean) {
+        val key = if (isHost) KEY_HOST_DISCONNECTED_AT else KEY_GUEST_DISCONNECTED_AT
+        roomsRef.child(roomId).child(key)
+            .onDisconnect()
+            .setValue(ServerValue.TIMESTAMP)
+            .await()
+    }
+
+    override suspend fun markPlayerConnected(roomId: String, isHost: Boolean) {
+        val key = if (isHost) KEY_HOST_DISCONNECTED_AT else KEY_GUEST_DISCONNECTED_AT
+        roomsRef.child(roomId).child(key).setValue(null).await()
     }
 
     private fun generateRoomCode(): String =

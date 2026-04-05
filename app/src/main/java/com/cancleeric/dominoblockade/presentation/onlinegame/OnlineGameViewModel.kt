@@ -8,11 +8,15 @@ import com.cancleeric.dominoblockade.domain.model.OnlineRoomStatus
 import com.cancleeric.dominoblockade.domain.repository.OnlineGameRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val GRACE_PERIOD_SECONDS = 60
+private const val ONE_SECOND_MS = 1_000L
 
 @HiltViewModel
 class OnlineGameViewModel @Inject constructor(
@@ -25,13 +29,22 @@ class OnlineGameViewModel @Inject constructor(
     private var roomId: String = ""
     private var localPlayerIndex: Int = 0
     private var observeJob: Job? = null
+    private var gracePeriodJob: Job? = null
 
     fun setup(roomId: String, localPlayerIndex: Int) {
-        if (this.roomId == roomId) return
+        val isNewRoom = this.roomId != roomId
         this.roomId = roomId
         this.localPlayerIndex = localPlayerIndex
-        observeJob?.cancel()
-        observeRoom()
+        viewModelScope.launch {
+            runCatching {
+                onlineGameRepository.markPlayerConnected(roomId, localPlayerIndex == 0)
+                onlineGameRepository.registerDisconnectHandler(roomId, localPlayerIndex == 0)
+            }
+        }
+        if (isNewRoom) {
+            observeJob?.cancel()
+            observeRoom()
+        }
     }
 
     fun selectDomino(domino: Domino) {
@@ -70,12 +83,19 @@ class OnlineGameViewModel @Inject constructor(
         observeJob = viewModelScope.launch {
             onlineGameRepository.observeRoom(roomId).collect { room ->
                 if (room.status == OnlineRoomStatus.FINISHED) {
+                    gracePeriodJob?.cancel()
                     _uiState.value = _uiState.value.copy(roomFinished = true)
                     return@collect
                 }
                 val gameState = room.gameState ?: return@collect
                 val opponentIndex = 1 - localPlayerIndex
                 val opponent = gameState.players.getOrNull(opponentIndex)
+                val opponentDisconnectedAt = if (localPlayerIndex == 0) {
+                    room.guestDisconnectedAt
+                } else {
+                    room.hostDisconnectedAt
+                }
+                handleOpponentConnection(opponentDisconnectedAt)
                 _uiState.value = _uiState.value.copy(
                     gameState = gameState,
                     isMyTurn = gameState.currentPlayerIndex == localPlayerIndex,
@@ -86,6 +106,40 @@ class OnlineGameViewModel @Inject constructor(
                     opponentTileCount = opponent?.hand?.size ?: 0,
                     isLoading = false
                 )
+            }
+        }
+    }
+
+    private fun handleOpponentConnection(opponentDisconnectedAt: Long?) {
+        if (opponentDisconnectedAt != null) {
+            if (!_uiState.value.opponentDisconnected) {
+                startGracePeriodCountdown()
+            }
+        } else {
+            if (_uiState.value.opponentDisconnected) {
+                gracePeriodJob?.cancel()
+                _uiState.value = _uiState.value.copy(
+                    opponentDisconnected = false,
+                    gracePeriodSeconds = 0
+                )
+            }
+        }
+    }
+
+    private fun startGracePeriodCountdown() {
+        gracePeriodJob?.cancel()
+        _uiState.value = _uiState.value.copy(
+            opponentDisconnected = true,
+            gracePeriodSeconds = GRACE_PERIOD_SECONDS
+        )
+        gracePeriodJob = viewModelScope.launch {
+            for (remaining in (GRACE_PERIOD_SECONDS - 1) downTo 0) {
+                delay(ONE_SECOND_MS)
+                _uiState.value = _uiState.value.copy(gracePeriodSeconds = remaining)
+                if (remaining == 0) {
+                    runCatching { onlineGameRepository.leaveRoom(roomId) }
+                    _uiState.value = _uiState.value.copy(roomFinished = true)
+                }
             }
         }
     }

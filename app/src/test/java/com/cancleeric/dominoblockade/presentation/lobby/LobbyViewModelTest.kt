@@ -31,6 +31,8 @@ class LobbyViewModelTest {
         override fun observeRoom(roomId: String): Flow<OnlineRoom> = roomFlow
         override suspend fun updateGameState(roomId: String, gameState: GameState) = Unit
         override suspend fun leaveRoom(roomId: String) = Unit
+        override suspend fun registerDisconnectHandler(roomId: String, isHost: Boolean) = Unit
+        override suspend fun markPlayerConnected(roomId: String, isHost: Boolean) = Unit
     }
 
     private lateinit var viewModel: LobbyViewModel
