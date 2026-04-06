@@ -10,6 +10,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.cancleeric.dominoblockade.data.local.AppDatabase
 import com.cancleeric.dominoblockade.data.local.dao.AchievementDao
 import com.cancleeric.dominoblockade.data.local.dao.GameRecordDao
+import com.cancleeric.dominoblockade.data.local.dao.PlayerProfileDao
 import com.cancleeric.dominoblockade.data.local.dao.PlayerStatsDao
 import com.cancleeric.dominoblockade.data.local.dao.ThemeDao
 import dagger.Module
@@ -41,6 +42,16 @@ private val MIGRATION_3_4 = object : Migration(3, 4) {
     }
 }
 
+private val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `player_profiles` " +
+                "(`id` INTEGER NOT NULL DEFAULT 1, `playerName` TEXT NOT NULL DEFAULT 'Player', " +
+                "`avatarEmoji` TEXT NOT NULL DEFAULT '🎮', PRIMARY KEY(`id`))"
+        )
+    }
+}
+
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
@@ -49,7 +60,7 @@ object DatabaseModule {
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, "domino_blockade.db")
-            .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
+            .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
             .fallbackToDestructiveMigration()
             .build()
 
@@ -64,6 +75,9 @@ object DatabaseModule {
 
     @Provides
     fun provideAchievementDao(db: AppDatabase): AchievementDao = db.achievementDao()
+
+    @Provides
+    fun providePlayerProfileDao(db: AppDatabase): PlayerProfileDao = db.playerProfileDao()
 
     @Provides
     @Singleton
