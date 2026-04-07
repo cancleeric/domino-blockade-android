@@ -51,8 +51,9 @@ sealed class Screen(val route: String) {
     object Achievements : Screen("achievements")
     object PlayerProfile : Screen("playerProfile")
     object Lobby : Screen("lobby")
-    object OnlineGame : Screen("onlineGame/{roomId}/{playerIndex}") {
-        fun createRoute(roomId: String, playerIndex: Int) = "onlineGame/$roomId/$playerIndex"
+    object OnlineGame : Screen("onlineGame/{roomId}/{playerIndex}/{playerId}") {
+        fun createRoute(roomId: String, playerIndex: Int, playerId: String) =
+            "onlineGame/$roomId/$playerIndex/$playerId"
     }
 }
 
@@ -189,8 +190,8 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
         }
         composable(Screen.Lobby.route) {
             LobbyScreen(
-                onNavigateToGame = { roomId, playerIndex ->
-                    navController.navigate(Screen.OnlineGame.createRoute(roomId, playerIndex)) {
+                onNavigateToGame = { roomId, playerIndex, playerId ->
+                    navController.navigate(Screen.OnlineGame.createRoute(roomId, playerIndex, playerId)) {
                         popUpTo(Screen.Lobby.route) { inclusive = true }
                     }
                 },
@@ -201,14 +202,17 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
             route = Screen.OnlineGame.route,
             arguments = listOf(
                 navArgument("roomId") { type = NavType.StringType },
-                navArgument("playerIndex") { type = NavType.IntType }
+                navArgument("playerIndex") { type = NavType.IntType },
+                navArgument("playerId") { type = NavType.StringType; defaultValue = "" }
             )
         ) { backStackEntry ->
             val roomId = backStackEntry.arguments?.getString("roomId").orEmpty()
             val playerIndex = backStackEntry.arguments?.getInt("playerIndex") ?: 0
+            val playerId = backStackEntry.arguments?.getString("playerId").orEmpty()
             OnlineGameScreen(
                 roomId = roomId,
                 localPlayerIndex = playerIndex,
+                localPlayerId = playerId,
                 onGameOver = { winnerName, isBlocked ->
                     navController.navigate(Screen.Result.createRoute(winnerName, isBlocked)) {
                         popUpTo(Screen.OnlineGame.route) { inclusive = true }

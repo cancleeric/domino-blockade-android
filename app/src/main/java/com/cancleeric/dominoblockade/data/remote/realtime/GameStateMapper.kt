@@ -27,6 +27,7 @@ private const val KEY_GUEST_ID = "guestId"
 private const val KEY_GUEST_NAME = "guestName"
 private const val KEY_STATUS = "status"
 private const val KEY_GAME_STATE = "gameState"
+private const val KEY_DISCONNECTED_PLAYER_ID = "disconnectedPlayerId"
 
 internal fun dominoToMap(domino: Domino): Map<String, Int> =
     mapOf(KEY_LEFT to domino.left, KEY_RIGHT to domino.right)
@@ -113,6 +114,7 @@ internal fun snapshotToOnlineRoom(snapshot: DataSnapshot): OnlineRoom? {
     } else {
         null
     }
+    val disconnectedPlayerId = snapshot.child(KEY_DISCONNECTED_PLAYER_ID).getValue(String::class.java)
     return OnlineRoom(
         roomId = snapshot.key ?: "",
         hostId = hostId,
@@ -120,6 +122,7 @@ internal fun snapshotToOnlineRoom(snapshot: DataSnapshot): OnlineRoom? {
         guestId = guestId,
         guestName = guestName,
         status = status,
-        gameState = gameState
+        gameState = gameState,
+        disconnectedPlayerId = disconnectedPlayerId
     )
 }

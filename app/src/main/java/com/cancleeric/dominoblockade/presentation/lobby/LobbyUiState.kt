@@ -4,7 +4,8 @@ import com.cancleeric.dominoblockade.domain.model.OnlineRoomStatus
 
 data class NavigateToOnlineGame(
     val roomId: String,
-    val localPlayerIndex: Int
+    val localPlayerIndex: Int,
+    val localPlayerId: String
 )
 
 data class LobbyUiState(

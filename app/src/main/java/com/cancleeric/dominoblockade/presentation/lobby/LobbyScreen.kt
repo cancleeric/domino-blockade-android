@@ -30,12 +30,13 @@ private const val TITLE_SPACING_DP = 24
 /**
  * Lobby screen for creating or joining an online multiplayer room.
  *
- * @param onNavigateToGame Called once both players are ready with the roomId and localPlayerIndex.
+ * @param onNavigateToGame Called once both players are ready with the roomId, localPlayerIndex,
+ *   and localPlayerId.
  * @param onNavigateBack Called when the user presses the back button.
  */
 @Composable
 fun LobbyScreen(
-    onNavigateToGame: (roomId: String, localPlayerIndex: Int) -> Unit,
+    onNavigateToGame: (roomId: String, localPlayerIndex: Int, localPlayerId: String) -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LobbyViewModel = hiltViewModel()
@@ -45,7 +46,7 @@ fun LobbyScreen(
     LaunchedEffect(uiState.navigateToGame) {
         uiState.navigateToGame?.let { nav ->
             viewModel.resetNavigation()
-            onNavigateToGame(nav.roomId, nav.localPlayerIndex)
+            onNavigateToGame(nav.roomId, nav.localPlayerIndex, nav.localPlayerId)
         }
     }
 
