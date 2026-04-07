@@ -1,5 +1,6 @@
 package com.cancleeric.dominoblockade.di
 
+import com.cancleeric.dominoblockade.data.analytics.AnalyticsHelper
 import com.cancleeric.dominoblockade.data.preferences.GameSettingsRepositoryImpl
 import com.cancleeric.dominoblockade.data.preferences.TutorialRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.AchievementRepositoryImpl
@@ -8,6 +9,7 @@ import com.cancleeric.dominoblockade.data.repository.GameRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.PlayerProfileRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.PlayerStatsRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.ThemeRepositoryImpl
+import com.cancleeric.dominoblockade.domain.analytics.AnalyticsTracker
 import com.cancleeric.dominoblockade.domain.repository.AchievementRepository
 import com.cancleeric.dominoblockade.domain.repository.GameRecordRepository
 import com.cancleeric.dominoblockade.domain.repository.GameRepository
@@ -25,6 +27,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class AppModule {
+    @Binds
+    @Singleton
+    abstract fun bindAnalyticsTracker(impl: AnalyticsHelper): AnalyticsTracker
+
     @Binds
     @Singleton
     abstract fun bindGameRepository(impl: GameRepositoryImpl): GameRepository

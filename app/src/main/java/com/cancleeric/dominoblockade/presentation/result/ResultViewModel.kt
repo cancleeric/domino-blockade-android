@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cancleeric.dominoblockade.data.local.entity.PlayerStatsEntity
+import com.cancleeric.dominoblockade.domain.analytics.AnalyticsTracker
 import com.cancleeric.dominoblockade.domain.model.AchievementType
 import com.cancleeric.dominoblockade.domain.model.GameResult
 import com.cancleeric.dominoblockade.domain.repository.PlayerStatsRepository
@@ -23,7 +24,8 @@ class ResultViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val playerStatsRepository: PlayerStatsRepository,
     private val checkAchievementsUseCase: CheckAchievementsUseCase,
-    private val notificationHelper: AchievementNotificationHelper
+    private val notificationHelper: AchievementNotificationHelper,
+    private val analyticsTracker: AnalyticsTracker
 ) : ViewModel() {
 
     private val _newAchievements = MutableStateFlow<List<AchievementType>>(emptyList())
@@ -35,6 +37,12 @@ class ResultViewModel @Inject constructor(
         val isBlocked = savedStateHandle.get<Boolean>("isBlocked") ?: false
         viewModelScope.launch {
             val result = buildGameResult(winnerName, isBlocked)
+            analyticsTracker.logGameEnd(
+                winner = winnerName,
+                isBlocked = isBlocked,
+                durationSeconds = 0L,
+                winRate = if (result.totalGames > 0) result.totalWins.toFloat() / result.totalGames else 0f
+            )
             val unlocked = checkAchievementsUseCase(result)
             unlocked.forEach { notificationHelper.showAchievementUnlocked(it) }
             _newAchievements.value = unlocked

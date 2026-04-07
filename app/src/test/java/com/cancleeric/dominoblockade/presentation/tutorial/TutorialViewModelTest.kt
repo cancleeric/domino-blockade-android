@@ -1,5 +1,6 @@
 package com.cancleeric.dominoblockade.presentation.tutorial
 
+import com.cancleeric.dominoblockade.domain.analytics.AnalyticsTracker
 import com.cancleeric.dominoblockade.domain.repository.TutorialRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -28,10 +29,20 @@ class TutorialViewModelTest {
         }
     }
 
+    private val fakeAnalyticsTracker = object : AnalyticsTracker {
+        val events = mutableListOf<String>()
+        override fun logTutorialStarted() { events.add("tutorial_started") }
+        override fun logTutorialStepCompleted(step: Int) { events.add("step_$step") }
+        override fun logTutorialCompleted() { events.add("tutorial_completed") }
+        override fun logGameStart(playerCount: Int, aiDifficulty: String?) {}
+        override fun logGameEnd(winner: String, isBlocked: Boolean, durationSeconds: Long, winRate: Float) {}
+        override fun logGameBlocked() {}
+    }
+
     @Before
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
-        viewModel = TutorialViewModel(fakeRepository)
+        viewModel = TutorialViewModel(fakeRepository, fakeAnalyticsTracker)
     }
 
     @After
@@ -48,7 +59,7 @@ class TutorialViewModelTest {
     @Test
     fun `initial state hides tutorial when already completed`() {
         completedFlow.value = true
-        val completedViewModel = TutorialViewModel(fakeRepository)
+        val completedViewModel = TutorialViewModel(fakeRepository, fakeAnalyticsTracker)
         assertFalse(completedViewModel.uiState.value.isVisible)
     }
 
@@ -74,5 +85,22 @@ class TutorialViewModelTest {
     @Test
     fun `totalSteps matches expected count`() {
         assertEquals(EXPECTED_TOTAL_STEPS, viewModel.uiState.value.totalSteps)
+    }
+
+    @Test
+    fun `tutorial started event logged when tutorial becomes visible`() {
+        assertTrue(fakeAnalyticsTracker.events.contains("tutorial_started"))
+    }
+
+    @Test
+    fun `completeTutorial logs tutorial completed event`() {
+        viewModel.completeTutorial()
+        assertTrue(fakeAnalyticsTracker.events.contains("tutorial_completed"))
+    }
+
+    @Test
+    fun `nextStep logs step completed event`() {
+        viewModel.nextStep()
+        assertTrue(fakeAnalyticsTracker.events.contains("step_1"))
     }
 }
