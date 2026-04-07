@@ -21,3 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "DominoBlockade"
 include(":app")
+include(":core")
+include(":domain")
