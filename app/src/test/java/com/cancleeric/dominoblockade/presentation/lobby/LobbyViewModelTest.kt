@@ -31,6 +31,7 @@ class LobbyViewModelTest {
         override fun observeRoom(roomId: String): Flow<OnlineRoom> = roomFlow
         override suspend fun updateGameState(roomId: String, gameState: GameState) = Unit
         override suspend fun leaveRoom(roomId: String) = Unit
+        override suspend fun registerPresence(roomId: String, playerId: String) = Unit
     }
 
     private lateinit var viewModel: LobbyViewModel

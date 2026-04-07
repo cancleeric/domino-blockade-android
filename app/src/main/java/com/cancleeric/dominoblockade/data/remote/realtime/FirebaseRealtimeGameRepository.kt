@@ -20,6 +20,7 @@ private const val KEY_GUEST_ID = "guestId"
 private const val KEY_GUEST_NAME = "guestName"
 private const val KEY_STATUS = "status"
 private const val KEY_GAME_STATE = "gameState"
+private const val KEY_DISCONNECTED_PLAYER_ID = "disconnectedPlayerId"
 private const val ROOM_CODE_LENGTH = 6
 private const val ROOM_CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
@@ -74,6 +75,12 @@ class FirebaseRealtimeGameRepository @Inject constructor(
 
     override suspend fun leaveRoom(roomId: String) {
         roomsRef.child(roomId).child(KEY_STATUS).setValue(OnlineRoomStatus.FINISHED.name).await()
+    }
+
+    override suspend fun registerPresence(roomId: String, playerId: String) {
+        val ref = roomsRef.child(roomId).child(KEY_DISCONNECTED_PLAYER_ID)
+        ref.setValue(null).await()
+        ref.onDisconnect().setValue(playerId).await()
     }
 
     private fun generateRoomCode(): String =

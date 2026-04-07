@@ -27,4 +27,11 @@ interface OnlineGameRepository {
 
     /** Marks the room as finished when a player leaves. */
     suspend fun leaveRoom(roomId: String)
+
+    /**
+     * Registers a Firebase onDisconnect handler so that [playerId] is written to
+     * `disconnectedPlayerId` automatically if the player's connection drops. Also clears any
+     * stale disconnect flag left from a previous session.
+     */
+    suspend fun registerPresence(roomId: String, playerId: String)
 }

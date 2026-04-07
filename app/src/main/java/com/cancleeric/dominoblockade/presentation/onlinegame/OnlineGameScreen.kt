@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -35,6 +36,7 @@ private const val SECTION_SPACING_DP = 8
  *
  * @param roomId The room code shared between players.
  * @param localPlayerIndex 0 for host, 1 for guest.
+ * @param localPlayerId The local player's unique ID used for presence tracking.
  * @param onGameOver Callback invoked when the game ends.
  */
 @Composable
@@ -44,12 +46,13 @@ fun OnlineGameScreen(
     onGameOver: (winnerName: String, isBlocked: Boolean) -> Unit,
     onOpponentLeft: () -> Unit,
     modifier: Modifier = Modifier,
+    localPlayerId: String = "",
     viewModel: OnlineGameViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(roomId, localPlayerIndex) {
-        viewModel.setup(roomId, localPlayerIndex)
+        viewModel.setup(roomId, localPlayerIndex, localPlayerId)
     }
 
     LaunchedEffect(uiState.isGameOver) {
@@ -112,7 +115,32 @@ fun OnlineGameContent(
                 onDrawDomino = onDrawDomino
             )
         }
+
+        if (uiState.reconnectionCountdown != null) {
+            ReconnectionDialog(
+                opponentName = uiState.disconnectedOpponentName.orEmpty(),
+                countdown = uiState.reconnectionCountdown
+            )
+        }
     }
+}
+
+@Composable
+private fun ReconnectionDialog(opponentName: String, countdown: Int) {
+    AlertDialog(
+        onDismissRequest = {},
+        title = { Text("Opponent Disconnected") },
+        text = {
+            Text(
+                text = if (opponentName.isNotEmpty()) {
+                    "$opponentName disconnected — waiting $countdown seconds for reconnect\u2026"
+                } else {
+                    "Opponent disconnected — waiting $countdown seconds for reconnect\u2026"
+                }
+            )
+        },
+        confirmButton = {}
+    )
 }
 
 @Composable

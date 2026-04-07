@@ -14,5 +14,7 @@ data class OnlineGameUiState(
     val opponentName: String = "",
     val opponentTileCount: Int = 0,
     val isLoading: Boolean = true,
-    val roomFinished: Boolean = false
+    val roomFinished: Boolean = false,
+    val reconnectionCountdown: Int? = null,
+    val disconnectedOpponentName: String? = null
 )

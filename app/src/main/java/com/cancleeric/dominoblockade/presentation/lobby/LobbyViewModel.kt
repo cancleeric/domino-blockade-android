@@ -104,7 +104,7 @@ class LobbyViewModel @Inject constructor(
             }
             canNavigate -> {
                 _uiState.value = _uiState.value.copy(
-                    navigateToGame = NavigateToOnlineGame(roomId, localPlayerIndex)
+                    navigateToGame = NavigateToOnlineGame(roomId, localPlayerIndex, localId)
                 )
             }
         }

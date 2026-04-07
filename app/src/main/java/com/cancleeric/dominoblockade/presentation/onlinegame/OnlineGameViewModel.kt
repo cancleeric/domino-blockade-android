@@ -4,19 +4,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cancleeric.dominoblockade.domain.model.Domino
 import com.cancleeric.dominoblockade.domain.model.GameState
+import com.cancleeric.dominoblockade.domain.model.OnlineRoom
 import com.cancleeric.dominoblockade.domain.model.OnlineRoomStatus
 import com.cancleeric.dominoblockade.domain.repository.OnlineGameRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 @HiltViewModel
 class OnlineGameViewModel @Inject constructor(
-    private val onlineGameRepository: OnlineGameRepository
+    private val onlineGameRepository: OnlineGameRepository,
+    @Named("reconnectTimeout") private val reconnectTimeoutSeconds: Int
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OnlineGameUiState())
@@ -24,14 +28,22 @@ class OnlineGameViewModel @Inject constructor(
 
     private var roomId: String = ""
     private var localPlayerIndex: Int = 0
+    private var localPlayerId: String = ""
     private var observeJob: Job? = null
+    private var countdownJob: Job? = null
 
-    fun setup(roomId: String, localPlayerIndex: Int) {
+    fun setup(roomId: String, localPlayerIndex: Int, localPlayerId: String = "") {
         if (this.roomId == roomId) return
         this.roomId = roomId
         this.localPlayerIndex = localPlayerIndex
+        this.localPlayerId = localPlayerId
         observeJob?.cancel()
         observeRoom()
+        if (localPlayerId.isNotEmpty()) {
+            viewModelScope.launch {
+                runCatching { onlineGameRepository.registerPresence(roomId, localPlayerId) }
+            }
+        }
     }
 
     fun selectDomino(domino: Domino) {
@@ -76,6 +88,7 @@ class OnlineGameViewModel @Inject constructor(
                 val gameState = room.gameState ?: return@collect
                 val opponentIndex = 1 - localPlayerIndex
                 val opponent = gameState.players.getOrNull(opponentIndex)
+                handleDisconnectState(room, opponent?.id.orEmpty(), opponent?.name.orEmpty())
                 _uiState.value = _uiState.value.copy(
                     gameState = gameState,
                     isMyTurn = gameState.currentPlayerIndex == localPlayerIndex,
@@ -87,6 +100,41 @@ class OnlineGameViewModel @Inject constructor(
                     isLoading = false
                 )
             }
+        }
+    }
+
+    private fun handleDisconnectState(room: OnlineRoom, opponentId: String, opponentName: String) {
+        val isOpponentDisconnected = room.disconnectedPlayerId != null &&
+            room.disconnectedPlayerId == opponentId
+        if (isOpponentDisconnected) {
+            if (countdownJob?.isActive != true) {
+                countdownJob = viewModelScope.launch {
+                    var remaining = reconnectTimeoutSeconds
+                    _uiState.value = _uiState.value.copy(
+                        reconnectionCountdown = remaining,
+                        disconnectedOpponentName = opponentName
+                    )
+                    while (remaining > 0) {
+                        delay(1_000L)
+                        remaining--
+                        if (remaining > 0) {
+                            _uiState.value = _uiState.value.copy(reconnectionCountdown = remaining)
+                        }
+                    }
+                    _uiState.value = _uiState.value.copy(
+                        roomFinished = true,
+                        reconnectionCountdown = null
+                    )
+                    runCatching { onlineGameRepository.leaveRoom(roomId) }
+                }
+            }
+        } else if (countdownJob?.isActive == true) {
+            countdownJob?.cancel()
+            countdownJob = null
+            _uiState.value = _uiState.value.copy(
+                reconnectionCountdown = null,
+                disconnectedOpponentName = null
+            )
         }
     }
 
