@@ -80,7 +80,7 @@ class FirebaseRealtimeGameRepository @Inject constructor(
     override suspend fun registerPresence(roomId: String, playerId: String) {
         val ref = roomsRef.child(roomId).child(KEY_DISCONNECTED_PLAYER_ID)
         ref.setValue(null).await()
-        ref.onDisconnect().setValue(playerId)
+        ref.onDisconnect().setValue(playerId).await()
     }
 
     private fun generateRoomCode(): String =

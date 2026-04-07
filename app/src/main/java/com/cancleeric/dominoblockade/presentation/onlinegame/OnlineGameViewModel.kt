@@ -117,7 +117,9 @@ class OnlineGameViewModel @Inject constructor(
                     while (remaining > 0) {
                         delay(1_000L)
                         remaining--
-                        _uiState.value = _uiState.value.copy(reconnectionCountdown = remaining)
+                        if (remaining > 0) {
+                            _uiState.value = _uiState.value.copy(reconnectionCountdown = remaining)
+                        }
                     }
                     _uiState.value = _uiState.value.copy(
                         roomFinished = true,

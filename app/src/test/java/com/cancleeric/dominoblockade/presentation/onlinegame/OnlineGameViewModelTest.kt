@@ -26,7 +26,7 @@ private const val ROOM_ID = "ROOM01"
 private const val HOST_ID = "player0"
 private const val GUEST_ID = "player1"
 private const val ONE_SECOND_MS = 1_001L
-private const val FULL_GRACE_PERIOD_MS = 31_000L
+private const val GRACE_PERIOD_PLUS_BUFFER_MS = 31_000L
 
 class OnlineGameViewModelTest {
 
@@ -100,7 +100,7 @@ class OnlineGameViewModelTest {
         roomFlow.emit(buildRoom(disconnectedPlayerId = GUEST_ID))
         testDispatcher.scheduler.runCurrent()
 
-        advanceTimeBy(FULL_GRACE_PERIOD_MS)
+        advanceTimeBy(GRACE_PERIOD_PLUS_BUFFER_MS)
 
         assertTrue(viewModel.uiState.value.roomFinished)
         assertNull(viewModel.uiState.value.reconnectionCountdown)
