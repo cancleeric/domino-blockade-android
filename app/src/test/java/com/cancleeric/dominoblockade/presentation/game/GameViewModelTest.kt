@@ -1,5 +1,6 @@
 package com.cancleeric.dominoblockade.presentation.game
 
+import com.cancleeric.dominoblockade.domain.analytics.AnalyticsTracker
 import com.cancleeric.dominoblockade.domain.usecase.StartGameUseCase
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -9,7 +10,16 @@ import org.junit.Test
 
 class GameViewModelTest {
 
-    private val viewModel = GameViewModel(StartGameUseCase())
+    private val fakeAnalyticsTracker = object : AnalyticsTracker {
+        override fun logTutorialStarted() {}
+        override fun logTutorialStepCompleted(step: Int) {}
+        override fun logTutorialCompleted() {}
+        override fun logGameStart(playerCount: Int, aiDifficulty: String?) {}
+        override fun logGameEnd(winner: String, isBlocked: Boolean, durationSeconds: Long, winRate: Float) {}
+        override fun logGameBlocked() {}
+    }
+
+    private val viewModel = GameViewModel(StartGameUseCase(), fakeAnalyticsTracker)
 
     @Test
     fun `startGame initializes game state with correct player count`() {
