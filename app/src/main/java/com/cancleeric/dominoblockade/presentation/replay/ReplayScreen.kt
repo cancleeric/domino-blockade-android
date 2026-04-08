@@ -219,7 +219,7 @@ private fun ReplayLoadingContent(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Loading replay\u2026",
+            text = "Loading replay...",
             style = MaterialTheme.typography.bodyLarge
         )
     }

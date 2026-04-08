@@ -51,7 +51,7 @@ data class ReplayStep(
                 emptyList()
             } else {
                 s.split(",").map { pair ->
-                    val parts = pair.split("|")
+                    val parts = pair.split('|')
                     Domino(parts[0].toInt(), parts[1].toInt())
                 }
             }
