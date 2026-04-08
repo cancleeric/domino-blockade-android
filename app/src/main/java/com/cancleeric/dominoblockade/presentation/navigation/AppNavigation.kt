@@ -25,6 +25,7 @@ import com.cancleeric.dominoblockade.presentation.localmultiplayer.LocalMultipla
 import com.cancleeric.dominoblockade.presentation.menu.MenuScreen
 import com.cancleeric.dominoblockade.presentation.onlinegame.OnlineGameScreen
 import com.cancleeric.dominoblockade.presentation.profile.PlayerProfileScreen
+import com.cancleeric.dominoblockade.presentation.replay.ReplayScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultViewModel
 import com.cancleeric.dominoblockade.presentation.settings.SettingsScreen
@@ -51,6 +52,7 @@ sealed class Screen(val route: String) {
     object Achievements : Screen("achievements")
     object PlayerProfile : Screen("playerProfile")
     object Lobby : Screen("lobby")
+    object Replay : Screen("replay")
     object OnlineGame : Screen("onlineGame/{roomId}/{playerIndex}/{playerId}") {
         fun createRoute(roomId: String, playerIndex: Int, playerId: String) =
             "onlineGame/$roomId/$playerIndex/$playerId"
@@ -100,7 +102,10 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
                     onProfile = {
                         navController.navigate(Screen.PlayerProfile.route)
                     },
-                    onOnlineMultiplayer = { navController.navigate(Screen.Lobby.route) }
+                    onOnlineMultiplayer = { navController.navigate(Screen.Lobby.route) },
+                    onReplayLastGame = {
+                        navController.navigate(Screen.Replay.route)
+                    }
                 )
                 TutorialOverlay(
                     uiState = tutorialState,
@@ -150,7 +155,8 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
                 isBlocked = isBlocked,
                 newAchievements = newAchievements,
                 onPlayAgain = navigateToMenu,
-                onMenu = navigateToMenu
+                onMenu = navigateToMenu,
+                onViewReplay = { navController.navigate(Screen.Replay.route) }
             )
         }
         composable(Screen.Leaderboard.route) {
@@ -185,6 +191,11 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
         }
         composable(Screen.PlayerProfile.route) {
             PlayerProfileScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.Replay.route) {
+            ReplayScreen(
                 onBack = { navController.popBackStack() }
             )
         }

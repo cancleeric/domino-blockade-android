@@ -42,6 +42,7 @@ fun ResultScreen(
     newAchievements: List<AchievementType> = emptyList(),
     onPlayAgain: () -> Unit = {},
     onMenu: () -> Unit = {},
+    onViewReplay: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var visible by remember { mutableStateOf(false) }
@@ -56,6 +57,7 @@ fun ResultScreen(
             newAchievements = newAchievements,
             onPlayAgain = onPlayAgain,
             onMenu = onMenu,
+            onViewReplay = onViewReplay,
             modifier = modifier
         )
     } else {
@@ -66,6 +68,7 @@ fun ResultScreen(
             newAchievements = newAchievements,
             onPlayAgain = onPlayAgain,
             onMenu = onMenu,
+            onViewReplay = onViewReplay,
             modifier = modifier
         )
     }
@@ -79,6 +82,7 @@ private fun ResultContentCompact(
     newAchievements: List<AchievementType>,
     onPlayAgain: () -> Unit,
     onMenu: () -> Unit,
+    onViewReplay: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -104,6 +108,7 @@ private fun ResultContentCompact(
         ResultActionButtons(
             onPlayAgain = onPlayAgain,
             onMenu = onMenu,
+            onViewReplay = onViewReplay,
             modifier = Modifier.padding(top = SUBTITLE_PADDING_DP.dp)
         )
     }
@@ -117,6 +122,7 @@ private fun ResultContentWide(
     newAchievements: List<AchievementType>,
     onPlayAgain: () -> Unit,
     onMenu: () -> Unit,
+    onViewReplay: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -143,6 +149,7 @@ private fun ResultContentWide(
         ResultActionButtons(
             onPlayAgain = onPlayAgain,
             onMenu = onMenu,
+            onViewReplay = onViewReplay,
             modifier = Modifier.weight(1f)
         )
     }
@@ -152,6 +159,7 @@ private fun ResultContentWide(
 private fun ResultActionButtons(
     onPlayAgain: () -> Unit,
     onMenu: () -> Unit,
+    onViewReplay: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -164,6 +172,12 @@ private fun ResultActionButtons(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Play Again")
+        }
+        OutlinedButton(
+            onClick = onViewReplay,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("View Replay")
         }
         OutlinedButton(
             onClick = onMenu,

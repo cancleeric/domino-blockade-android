@@ -10,6 +10,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.cancleeric.dominoblockade.data.local.AppDatabase
 import com.cancleeric.dominoblockade.data.local.dao.AchievementDao
 import com.cancleeric.dominoblockade.data.local.dao.GameRecordDao
+import com.cancleeric.dominoblockade.data.local.dao.GameReplayDao
 import com.cancleeric.dominoblockade.data.local.dao.PlayerProfileDao
 import com.cancleeric.dominoblockade.data.local.dao.PlayerStatsDao
 import com.cancleeric.dominoblockade.data.local.dao.ThemeDao
@@ -52,6 +53,32 @@ private val MIGRATION_4_5 = object : Migration(4, 5) {
     }
 }
 
+private val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `game_replays` " +
+                "(`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "`playerCount` INTEGER NOT NULL, " +
+                "`winnerName` TEXT NOT NULL, " +
+                "`isBlocked` INTEGER NOT NULL, " +
+                "`timestamp` INTEGER NOT NULL)"
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `game_moves` " +
+                "(`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "`replayId` INTEGER NOT NULL, " +
+                "`moveIndex` INTEGER NOT NULL, " +
+                "`playerIndex` INTEGER NOT NULL, " +
+                "`playerName` TEXT NOT NULL, " +
+                "`moveType` TEXT NOT NULL, " +
+                "`dominoLeft` INTEGER NOT NULL, " +
+                "`dominoRight` INTEGER NOT NULL, " +
+                "`boardState` TEXT NOT NULL, " +
+                "`boneyardSize` INTEGER NOT NULL)"
+        )
+    }
+}
+
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
@@ -60,7 +87,7 @@ object DatabaseModule {
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, "domino_blockade.db")
-            .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+            .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
             .fallbackToDestructiveMigration()
             .build()
 
@@ -78,6 +105,9 @@ object DatabaseModule {
 
     @Provides
     fun providePlayerProfileDao(db: AppDatabase): PlayerProfileDao = db.playerProfileDao()
+
+    @Provides
+    fun provideGameReplayDao(db: AppDatabase): GameReplayDao = db.gameReplayDao()
 
     @Provides
     @Singleton

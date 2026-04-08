@@ -1,7 +1,11 @@
 package com.cancleeric.dominoblockade.presentation.game
 
+import com.cancleeric.dominoblockade.data.local.entity.GameMoveEntity
+import com.cancleeric.dominoblockade.data.local.entity.GameReplayEntity
 import com.cancleeric.dominoblockade.domain.analytics.AnalyticsTracker
+import com.cancleeric.dominoblockade.domain.repository.GameReplayRepository
 import com.cancleeric.dominoblockade.domain.usecase.StartGameUseCase
+import com.cancleeric.dominoblockade.presentation.replay.GameReplayRecorder
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -19,7 +23,16 @@ class GameViewModelTest {
         override fun logGameBlocked() {}
     }
 
-    private val viewModel = GameViewModel(StartGameUseCase(), fakeAnalyticsTracker)
+    private val fakeReplayRepository = object : GameReplayRepository {
+        override suspend fun saveReplay(replay: GameReplayEntity, moves: List<GameMoveEntity>) {}
+        override suspend fun getLatestReplayWithMoves(): Pair<GameReplayEntity, List<GameMoveEntity>>? = null
+    }
+
+    private val viewModel = GameViewModel(
+        StartGameUseCase(),
+        fakeAnalyticsTracker,
+        GameReplayRecorder(fakeReplayRepository)
+    )
 
     @Test
     fun `startGame initializes game state with correct player count`() {

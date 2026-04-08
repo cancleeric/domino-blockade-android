@@ -1,14 +1,18 @@
 package com.cancleeric.dominoblockade.presentation.game
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.cancleeric.dominoblockade.domain.analytics.AnalyticsTracker
 import com.cancleeric.dominoblockade.domain.model.Domino
 import com.cancleeric.dominoblockade.domain.model.GameState
+import com.cancleeric.dominoblockade.domain.model.ReplayStep
 import com.cancleeric.dominoblockade.domain.usecase.StartGameUseCase
+import com.cancleeric.dominoblockade.presentation.replay.GameReplayRecorder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class GameUiState(
@@ -22,7 +26,8 @@ data class GameUiState(
 @HiltViewModel
 class GameViewModel @Inject constructor(
     private val startGameUseCase: StartGameUseCase,
-    private val analyticsTracker: AnalyticsTracker
+    private val analyticsTracker: AnalyticsTracker,
+    private val replayRecorder: GameReplayRecorder
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GameUiState())
@@ -30,7 +35,17 @@ class GameViewModel @Inject constructor(
 
     fun startGame(playerCount: Int) {
         val names = (1..playerCount).map { "Player $it" }
-        _uiState.value = GameUiState(gameState = startGameUseCase(names))
+        val gameState = startGameUseCase(names)
+        replayRecorder.reset()
+        replayRecorder.recordMove(
+            playerIndex = gameState.currentPlayerIndex,
+            playerName = gameState.currentPlayer.name,
+            moveType = ReplayStep.MOVE_DEAL,
+            domino = null,
+            board = gameState.board,
+            boneyardSize = gameState.boneyard.size
+        )
+        _uiState.value = GameUiState(gameState = gameState)
         analyticsTracker.logGameStart(playerCount)
     }
 
@@ -48,22 +63,44 @@ class GameViewModel @Inject constructor(
     fun drawFromBoneyard() {
         val state = _uiState.value.gameState ?: return
         if (state.boneyard.isEmpty()) {
+            replayRecorder.recordMove(
+                playerIndex = state.currentPlayerIndex,
+                playerName = state.currentPlayer.name,
+                moveType = ReplayStep.MOVE_SKIP,
+                domino = null,
+                board = state.board,
+                boneyardSize = 0
+            )
             advanceGame(state)
         } else {
             val tile = state.boneyard.first()
             val updatedPlayer = state.currentPlayer.copy(hand = state.currentPlayer.hand + tile)
             val updatedPlayers = state.players.toMutableList()
             updatedPlayers[state.currentPlayerIndex] = updatedPlayer
-            _uiState.value = _uiState.value.copy(
-                gameState = state.copy(players = updatedPlayers, boneyard = state.boneyard.drop(1)),
-                selectedDomino = null
+            val newState = state.copy(players = updatedPlayers, boneyard = state.boneyard.drop(1))
+            replayRecorder.recordMove(
+                playerIndex = state.currentPlayerIndex,
+                playerName = state.currentPlayer.name,
+                moveType = ReplayStep.MOVE_DRAW,
+                domino = null,
+                board = newState.board,
+                boneyardSize = newState.boneyard.size
             )
+            _uiState.value = _uiState.value.copy(gameState = newState, selectedDomino = null)
         }
     }
 
     private fun applyPlacement(state: GameState, domino: Domino) {
         val newState = computePlacement(state, domino)
         if (newState != null) {
+            replayRecorder.recordMove(
+                playerIndex = state.currentPlayerIndex,
+                playerName = state.currentPlayer.name,
+                moveType = ReplayStep.MOVE_PLACE,
+                domino = domino,
+                board = newState.board,
+                boneyardSize = newState.boneyard.size
+            )
             val updatedPlayer = newState.players[state.currentPlayerIndex]
             if (updatedPlayer.hand.isEmpty()) {
                 analyticsTracker.logGameEnd(
@@ -72,6 +109,9 @@ class GameViewModel @Inject constructor(
                     durationSeconds = 0L,
                     winRate = 0f
                 )
+                viewModelScope.launch {
+                    replayRecorder.saveReplay(state.players.size, updatedPlayer.name, false)
+                }
                 _uiState.value = _uiState.value.copy(
                     gameState = newState, selectedDomino = null,
                     isGameOver = true, winnerName = updatedPlayer.name
@@ -88,6 +128,9 @@ class GameViewModel @Inject constructor(
         val blocked = checkBlocked(nextState)
         if (blocked) {
             analyticsTracker.logGameBlocked()
+            viewModelScope.launch {
+                replayRecorder.saveReplay(state.players.size, "", true)
+            }
         }
         _uiState.value = _uiState.value.copy(
             gameState = nextState, selectedDomino = null,
