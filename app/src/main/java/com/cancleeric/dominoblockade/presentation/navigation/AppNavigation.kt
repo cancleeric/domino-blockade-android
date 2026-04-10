@@ -26,6 +26,8 @@ import com.cancleeric.dominoblockade.presentation.menu.MenuScreen
 import com.cancleeric.dominoblockade.presentation.onlinegame.OnlineGameScreen
 import com.cancleeric.dominoblockade.presentation.profile.PlayerProfileScreen
 import com.cancleeric.dominoblockade.presentation.replay.ReplayScreen
+import com.cancleeric.dominoblockade.presentation.tournament.TournamentBracketScreen
+import com.cancleeric.dominoblockade.presentation.tournament.TournamentSetupScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultViewModel
 import com.cancleeric.dominoblockade.presentation.settings.SettingsScreen
@@ -53,6 +55,8 @@ sealed class Screen(val route: String) {
     object PlayerProfile : Screen("playerProfile")
     object Lobby : Screen("lobby")
     object Replay : Screen("replay")
+    object TournamentSetup : Screen("tournamentSetup")
+    object TournamentBracket : Screen("tournamentBracket")
     object OnlineGame : Screen("onlineGame/{roomId}/{playerIndex}/{playerId}") {
         fun createRoute(roomId: String, playerIndex: Int, playerId: String) =
             "onlineGame/$roomId/$playerIndex/$playerId"
@@ -105,7 +109,8 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
                     onOnlineMultiplayer = { navController.navigate(Screen.Lobby.route) },
                     onReplayLastGame = {
                         navController.navigate(Screen.Replay.route)
-                    }
+                    },
+                    onTournament = { navController.navigate(Screen.TournamentSetup.route) }
                 )
                 TutorialOverlay(
                     uiState = tutorialState,
@@ -196,6 +201,21 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
         }
         composable(Screen.Replay.route) {
             ReplayScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.TournamentSetup.route) {
+            TournamentSetupScreen(
+                onBack = { navController.popBackStack() },
+                onTournamentCreated = {
+                    navController.navigate(Screen.TournamentBracket.route) {
+                        popUpTo(Screen.TournamentSetup.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable(Screen.TournamentBracket.route) {
+            TournamentBracketScreen(
                 onBack = { navController.popBackStack() }
             )
         }
