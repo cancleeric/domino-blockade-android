@@ -1,5 +1,6 @@
 package com.cancleeric.dominoblockade.presentation.navigation
 
+import android.net.Uri
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -7,6 +8,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -31,6 +33,7 @@ import com.cancleeric.dominoblockade.presentation.tournament.TournamentSetupScre
 import com.cancleeric.dominoblockade.presentation.result.ResultScreen
 import com.cancleeric.dominoblockade.presentation.result.ResultViewModel
 import com.cancleeric.dominoblockade.presentation.settings.SettingsScreen
+import com.cancleeric.dominoblockade.presentation.social.SocialScreen
 import com.cancleeric.dominoblockade.presentation.theme.ThemeSelectionScreen
 import com.cancleeric.dominoblockade.presentation.tutorial.TutorialOverlay
 import com.cancleeric.dominoblockade.presentation.tutorial.TutorialViewModel
@@ -53,7 +56,19 @@ sealed class Screen(val route: String) {
     object Settings : Screen("settings")
     object Achievements : Screen("achievements")
     object PlayerProfile : Screen("playerProfile")
-    object Lobby : Screen("lobby")
+    object Social : Screen("social?challengeId={challengeId}&challengeAction={challengeAction}") {
+        fun createRoute(challengeId: String? = null, challengeAction: String? = null): String {
+            val id = Uri.encode(challengeId.orEmpty())
+            val action = Uri.encode(challengeAction.orEmpty())
+            return "social?challengeId=$id&challengeAction=$action"
+        }
+    }
+    object Lobby : Screen("lobby?roomCode={roomCode}") {
+        fun createRoute(roomCode: String? = null): String {
+            val encodedRoomCode = Uri.encode(roomCode.orEmpty())
+            return if (encodedRoomCode.isBlank()) "lobby" else "lobby?roomCode=$encodedRoomCode"
+        }
+    }
     object Replay : Screen("replay")
     object TournamentSetup : Screen("tournamentSetup")
     object TournamentBracket : Screen("tournamentBracket")
@@ -64,7 +79,12 @@ sealed class Screen(val route: String) {
 }
 
 @Composable
-fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO_QUICK_START) {
+fun AppNavigation(
+    modifier: Modifier = Modifier,
+    quickStartPlayerCount: Int = NO_QUICK_START,
+    incomingDeepLink: String? = null,
+    onDeepLinkHandled: () -> Unit = {}
+) {
     val navController = rememberNavController()
     val startDestination = if (quickStartPlayerCount > 0) {
         Screen.Game.createRoute(quickStartPlayerCount)
@@ -80,6 +100,20 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
         popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) + fadeIn() },
         popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut() }
     ) {
+        LaunchedEffect(incomingDeepLink) {
+            val deepLink = incomingDeepLink ?: return@LaunchedEffect
+            val uri = runCatching { Uri.parse(deepLink) }.getOrNull() ?: return@LaunchedEffect
+            if (uri.scheme != "domino-blockade") return@LaunchedEffect
+            when (uri.host) {
+                "challenge" -> {
+                    val action = uri.pathSegments.firstOrNull()
+                    val challengeId = uri.getQueryParameter("challengeId")
+                    navController.navigate(Screen.Social.createRoute(challengeId, action))
+                }
+                "friend" -> navController.navigate(Screen.Social.createRoute())
+            }
+            onDeepLinkHandled()
+        }
         composable(Screen.Menu.route) {
             val tutorialViewModel: TutorialViewModel = hiltViewModel()
             val tutorialState by tutorialViewModel.uiState.collectAsState()
@@ -106,7 +140,8 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
                     onProfile = {
                         navController.navigate(Screen.PlayerProfile.route)
                     },
-                    onOnlineMultiplayer = { navController.navigate(Screen.Lobby.route) },
+                    onOnlineMultiplayer = { navController.navigate(Screen.Lobby.createRoute()) },
+                    onSocial = { navController.navigate(Screen.Social.createRoute()) },
                     onReplayLastGame = {
                         navController.navigate(Screen.Replay.route)
                     },
@@ -219,14 +254,46 @@ fun AppNavigation(modifier: Modifier = Modifier, quickStartPlayerCount: Int = NO
                 onBack = { navController.popBackStack() }
             )
         }
-        composable(Screen.Lobby.route) {
+        composable(
+            route = Screen.Lobby.route,
+            arguments = listOf(
+                navArgument("roomCode") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                }
+            )
+        ) { backStackEntry ->
+            val roomCode = backStackEntry.arguments?.getString("roomCode").orEmpty()
             LobbyScreen(
+                initialRoomCode = roomCode,
                 onNavigateToGame = { roomId, playerIndex, playerId ->
                     navController.navigate(Screen.OnlineGame.createRoute(roomId, playerIndex, playerId)) {
                         popUpTo(Screen.Lobby.route) { inclusive = true }
                     }
                 },
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = Screen.Social.route,
+            arguments = listOf(
+                navArgument("challengeId") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
+                navArgument("challengeAction") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                }
+            )
+        ) { backStackEntry ->
+            SocialScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToLobby = { roomId ->
+                    navController.navigate(Screen.Lobby.createRoute(roomId))
+                },
+                challengeIdFromDeepLink = backStackEntry.arguments?.getString("challengeId").orEmpty(),
+                challengeActionFromDeepLink = backStackEntry.arguments?.getString("challengeAction").orEmpty()
             )
         }
         composable(

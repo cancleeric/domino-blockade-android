@@ -41,6 +41,7 @@ fun MenuScreen(
     onAchievements: () -> Unit = {},
     onProfile: () -> Unit = {},
     onOnlineMultiplayer: () -> Unit = {},
+    onSocial: () -> Unit = {},
     onReplayLastGame: () -> Unit = {},
     onTournament: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -59,6 +60,7 @@ fun MenuScreen(
         onAchievements = onAchievements,
         onProfile = onProfile,
         onOnlineMultiplayer = onOnlineMultiplayer,
+        onSocial = onSocial,
         onReplayLastGame = onReplayLastGame,
         onTournament = onTournament,
         isMediumOrExpanded = isMediumOrExpanded,
@@ -78,6 +80,7 @@ private fun MenuContent(
     onAchievements: () -> Unit,
     onProfile: () -> Unit,
     onOnlineMultiplayer: () -> Unit,
+    onSocial: () -> Unit,
     onReplayLastGame: () -> Unit,
     onTournament: () -> Unit,
     isMediumOrExpanded: Boolean,
@@ -183,6 +186,15 @@ private fun MenuContent(
                     .padding(top = CHIP_SPACING_DP.dp)
             ) {
                 Text(text = "Online Multiplayer")
+            }
+            Button(
+                onClick = onSocial,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = SECTION_PADDING_DP.dp)
+                    .padding(top = CHIP_SPACING_DP.dp)
+            ) {
+                Text(text = "Friends & Challenges")
             }
             Button(
                 onClick = onReplayLastGame,
