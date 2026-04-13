@@ -25,7 +25,9 @@ class AdaptiveAiManager @Inject constructor(
         )
         if (recentGames.isEmpty()) return
 
-        val winRate = recentGames.count { it.playerWon }.toFloat() / recentGames.size
+        val recentGameCount = recentGames.size
+        val winCount = recentGames.count { it.playerWon }
+        val winRate = winCount.toFloat() / recentGameCount
         val currentLevel = repository.getCurrentLevel()
         val adjustedLevel = when {
             winRate > WIN_RATE_INCREASE_THRESHOLD -> (currentLevel + LEVEL_STEP).coerceAtMost(100)

@@ -329,9 +329,10 @@ class GameViewModel @Inject constructor(
         )
         viewModelScope.launch {
             replayRecorder.saveReplay(state.players.size, winnerName, isBlocked)
+            val humanPlayerName = state.players.getOrNull(HUMAN_PLAYER_INDEX)?.name
             adaptiveAiManager.recordGameResult(
                 gameMode = GameMode.QUICK_MATCH,
-                playerWon = !isBlocked && winnerName == HUMAN_PLAYER_NAME
+                playerWon = !isBlocked && winnerName == humanPlayerName
             )
         }
     }

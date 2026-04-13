@@ -63,23 +63,23 @@ class TournamentViewModel @Inject constructor(
 
     fun recordMatchWinner(tournamentId: String, roundIndex: Int, matchIndex: Int, winnerId: String) {
         viewModelScope.launch {
-            val selectedWinnerName = _tournament.value
+            val winnerIsAi = _tournament.value
                 ?.rounds
                 ?.getOrNull(roundIndex)
                 ?.getOrNull(matchIndex)
                 ?.let { match ->
                     when (winnerId) {
-                        match.player1?.playerId -> match.player1?.playerName
-                        match.player2?.playerId -> match.player2?.playerName
+                        match.player1?.playerId -> match.player1?.isAi
+                        match.player2?.playerId -> match.player2?.isAi
                         else -> null
                     }
-                }.orEmpty()
+                }
             runCatching { advanceTournamentUseCase(tournamentId, roundIndex, matchIndex, winnerId) }
                 .onSuccess {
-                    if (selectedWinnerName.isNotBlank()) {
+                    if (winnerIsAi != null) {
                         adaptiveAiManager.recordGameResult(
                             gameMode = GameMode.TOURNAMENT,
-                            playerWon = !selectedWinnerName.startsWith(prefix = "AI", ignoreCase = true)
+                            playerWon = !winnerIsAi
                         )
                     }
                 }

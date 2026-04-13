@@ -28,6 +28,7 @@ private const val FIELD_MATCH_INDEX = "matchIndex"
 private const val FIELD_PLAYER_ID = "playerId"
 private const val FIELD_PLAYER_NAME = "playerName"
 private const val FIELD_SCORE = "score"
+private const val FIELD_IS_AI = "isAi"
 private const val QUERY_LIMIT = 1L
 private const val NEXT_MATCH_DIVISOR = 2
 
@@ -124,7 +125,8 @@ class FirestoreTournamentRepository @Inject constructor(
         return TournamentPlayer(
             playerId = get(FIELD_PLAYER_ID) as? String ?: "",
             playerName = get(FIELD_PLAYER_NAME) as? String ?: "",
-            score = (get(FIELD_SCORE) as? Long)?.toInt() ?: 0
+            score = (get(FIELD_SCORE) as? Long)?.toInt() ?: 0,
+            isAi = get(FIELD_IS_AI) as? Boolean ?: false
         )
     }
 
@@ -147,6 +149,7 @@ class FirestoreTournamentRepository @Inject constructor(
     private fun TournamentPlayer.toMap(): Map<String, Any?> = mapOf(
         FIELD_PLAYER_ID to playerId,
         FIELD_PLAYER_NAME to playerName,
-        FIELD_SCORE to score
+        FIELD_SCORE to score,
+        FIELD_IS_AI to isAi
     )
 }

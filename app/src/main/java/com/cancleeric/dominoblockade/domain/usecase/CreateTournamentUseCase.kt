@@ -15,7 +15,11 @@ class CreateTournamentUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(playerCount: Int, playerNames: List<String>): Tournament {
         val players = playerNames.map { name ->
-            TournamentPlayer(playerId = UUID.randomUUID().toString(), playerName = name)
+            TournamentPlayer(
+                playerId = UUID.randomUUID().toString(),
+                playerName = name,
+                isAi = name.startsWith(prefix = "AI", ignoreCase = true)
+            )
         }
         val rounds = buildRounds(players, playerCount)
         val tournament = Tournament(
