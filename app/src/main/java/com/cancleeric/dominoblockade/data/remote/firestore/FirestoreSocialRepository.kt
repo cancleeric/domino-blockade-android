@@ -68,7 +68,7 @@ class FirestoreSocialRepository @Inject constructor(
 
     override suspend fun ensureUserProfile(username: String) {
         val uid = requireUid()
-        val normalized = username.trim().ifEmpty { "Player-${uid.take(6)}" }
+        val normalized = username.trim().ifEmpty { "Player-${uid.shortId()}" }
         val ref = firestore.collection(COLLECTION_USERS).document(uid)
         val existing = ref.get().await()
         val current = existing.getString(FIELD_USERNAME).orEmpty()
@@ -95,7 +95,7 @@ class FirestoreSocialRepository @Inject constructor(
                             return@addSnapshotListener
                         }
                         val username = snapshot?.getString(FIELD_USERNAME).orEmpty()
-                        trySend(if (username.isBlank()) "Player-${uid.take(6)}" else username)
+                        trySend(if (username.isBlank()) "Player-${uid.shortId()}" else username)
                     }
                 awaitClose { registration.remove() }
             }
@@ -182,7 +182,7 @@ class FirestoreSocialRepository @Inject constructor(
         val fromUid = requireUid()
         if (fromUid == targetUid) return
         val fromDoc = firestore.collection(COLLECTION_USERS).document(fromUid).get().await()
-        val fromUsername = fromDoc.getString(FIELD_USERNAME).orEmpty().ifBlank { "Player-${fromUid.take(6)}" }
+        val fromUsername = fromDoc.getString(FIELD_USERNAME).orEmpty().ifBlank { "Player-${fromUid.shortId()}" }
         val pairKey = pairKey(fromUid, targetUid)
         val existing = firestore.collection(COLLECTION_FRIEND_REQUESTS)
             .whereEqualTo(FIELD_PAIR_KEY, pairKey)
@@ -263,7 +263,7 @@ class FirestoreSocialRepository @Inject constructor(
             .await()
             .getString(FIELD_USERNAME)
             .orEmpty()
-            .ifBlank { "Player-${uid.take(6)}" }
+            .ifBlank { "Player-${uid.shortId()}" }
         val challengeRef = firestore.collection(COLLECTION_CHALLENGES).document()
         val roomId = generateChallengeRoomCode()
         val acceptDeepLink = Uri.Builder()
@@ -412,6 +412,8 @@ class FirestoreSocialRepository @Inject constructor(
     }
 
     private fun pairKey(userA: String, userB: String): String = listOf(userA, userB).sorted().joinToString("_")
+
+    private fun String.shortId(): String = if (length <= 6) this else substring(0, 6)
 
     private fun generateChallengeRoomCode(): String =
         (1..CHALLENGE_ROOM_CODE_LENGTH).map { CHALLENGE_ROOM_CHARS.random() }.joinToString("")

@@ -30,7 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -49,6 +49,8 @@ import com.google.android.gms.mlkit.vision.codescanner.GmsBarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 private const val PADDING_DP = 16
 private const val SPACING_DP = 8
@@ -183,7 +185,11 @@ private fun UsernameSection(
 
 @Composable
 private fun QrSection(qrValue: String, onScan: () -> Unit) {
-    val bitmap = remember(qrValue) { qrValue.takeIf { it.isNotBlank() }?.let(::generateQrBitmap) }
+    val bitmap by produceState<Bitmap?>(initialValue = null, key1 = qrValue) {
+        value = qrValue.takeIf { it.isNotBlank() }?.let { text ->
+            withContext(Dispatchers.Default) { generateQrBitmap(text) }
+        }
+    }
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(PADDING_DP.dp), verticalArrangement = Arrangement.spacedBy(SPACING_DP.dp)) {
             Text(text = "Add Friend with QR", style = MaterialTheme.typography.titleMedium)

@@ -47,7 +47,7 @@ class SocialViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 val uid = socialRepository.ensureSignedIn()
-                socialRepository.ensureUserProfile("Player-${uid.take(6)}")
+                socialRepository.ensureUserProfile("Player-${uid.shortId()}")
             }.onFailure { error ->
                 _uiState.update { it.copy(error = error.message ?: "Unable to authenticate user") }
             }
@@ -182,6 +182,8 @@ class SocialViewModel @Inject constructor(
         _uiState.update { it.copy(navigateToLobbyRoomId = null) }
     }
 }
+
+private fun String.shortId(): String = if (length <= 6) this else substring(0, 6)
 
 private fun parseFriendUidFromQr(rawValue: String): String? {
     val uri = kotlin.runCatching { android.net.Uri.parse(rawValue) }.getOrNull() ?: return null

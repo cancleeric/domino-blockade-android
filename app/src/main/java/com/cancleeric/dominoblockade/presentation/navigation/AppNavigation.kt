@@ -293,8 +293,10 @@ fun AppNavigation(
                 onNavigateToLobby = { roomId ->
                     navController.navigate(Screen.Lobby.createRoute(roomId))
                 },
-                challengeIdFromDeepLink = backStackEntry.arguments?.getString("challengeId").orEmpty(),
-                challengeActionFromDeepLink = backStackEntry.arguments?.getString("challengeAction").orEmpty()
+                challengeIdFromDeepLink = backStackEntry.arguments?.getString("challengeId")
+                    ?.takeIf { it.isNotBlank() },
+                challengeActionFromDeepLink = backStackEntry.arguments?.getString("challengeAction")
+                    ?.takeIf { it.isNotBlank() }
             )
         }
         composable(
