@@ -100,11 +100,15 @@ class SocialViewModel @Inject constructor(
         }
         viewModelScope.launch {
             _uiState.update { it.copy(isSavingUsername = true, error = null) }
-            runCatching { socialRepository.ensureUserProfile(username) }
-                .onFailure { error ->
-                    _uiState.update { it.copy(error = error.message ?: "Failed to save username") }
+            try {
+                socialRepository.ensureUserProfile(username)
+            } catch (error: Exception) {
+                _uiState.update {
+                    it.copy(error = error.message ?: "Failed to save username")
                 }
-            _uiState.update { it.copy(isSavingUsername = false) }
+            } finally {
+                _uiState.update { it.copy(isSavingUsername = false) }
+            }
         }
     }
 

@@ -298,11 +298,14 @@ private fun FriendsSection(
 private fun generateQrBitmap(content: String): Bitmap {
     val matrix = QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, QR_SIZE_PX, QR_SIZE_PX)
     val bitmap = Bitmap.createBitmap(QR_SIZE_PX, QR_SIZE_PX, Bitmap.Config.RGB_565)
-    for (x in 0 until QR_SIZE_PX) {
-        for (y in 0 until QR_SIZE_PX) {
-            bitmap.setPixel(x, y, if (matrix[x, y]) Color.BLACK else Color.WHITE)
+    val pixels = IntArray(QR_SIZE_PX * QR_SIZE_PX)
+    for (y in 0 until QR_SIZE_PX) {
+        val offset = y * QR_SIZE_PX
+        for (x in 0 until QR_SIZE_PX) {
+            pixels[offset + x] = if (matrix[x, y]) Color.BLACK else Color.WHITE
         }
     }
+    bitmap.setPixels(pixels, 0, QR_SIZE_PX, 0, 0, QR_SIZE_PX, QR_SIZE_PX)
     return bitmap
 }
 

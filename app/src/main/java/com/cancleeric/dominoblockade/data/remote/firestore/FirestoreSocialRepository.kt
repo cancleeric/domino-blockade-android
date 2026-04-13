@@ -266,21 +266,8 @@ class FirestoreSocialRepository @Inject constructor(
             .ifBlank { "Player-${uid.shortId()}" }
         val challengeRef = firestore.collection(COLLECTION_CHALLENGES).document()
         val roomId = generateChallengeRoomCode()
-        val acceptDeepLink = Uri.Builder()
-            .scheme("domino-blockade")
-            .authority("challenge")
-            .appendPath("accept")
-            .appendQueryParameter("challengeId", challengeRef.id)
-            .appendQueryParameter("roomId", roomId)
-            .build()
-            .toString()
-        val declineDeepLink = Uri.Builder()
-            .scheme("domino-blockade")
-            .authority("challenge")
-            .appendPath("decline")
-            .appendQueryParameter("challengeId", challengeRef.id)
-            .build()
-            .toString()
+        val acceptDeepLink = challengeDeepLink("accept", challengeRef.id, roomId)
+        val declineDeepLink = challengeDeepLink("decline", challengeRef.id)
         val challengeData = mapOf(
             FIELD_CHALLENGER_UID to uid,
             FIELD_CHALLENGER_NAME to challengerName,
@@ -414,6 +401,18 @@ class FirestoreSocialRepository @Inject constructor(
     private fun pairKey(userA: String, userB: String): String = listOf(userA, userB).sorted().joinToString("_")
 
     private fun String.shortId(): String = if (length <= 6) this else substring(0, 6)
+
+    private fun challengeDeepLink(action: String, challengeId: String, roomId: String? = null): String {
+        val builder = Uri.Builder()
+            .scheme("domino-blockade")
+            .authority("challenge")
+            .appendPath(action)
+            .appendQueryParameter("challengeId", challengeId)
+        if (!roomId.isNullOrBlank()) {
+            builder.appendQueryParameter("roomId", roomId)
+        }
+        return builder.build().toString()
+    }
 
     private fun generateChallengeRoomCode(): String =
         (1..CHALLENGE_ROOM_CODE_LENGTH).map { CHALLENGE_ROOM_CHARS.random() }.joinToString("")
