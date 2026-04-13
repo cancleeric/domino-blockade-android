@@ -1,11 +1,17 @@
 package com.cancleeric.dominoblockade.presentation.game
 
+import com.cancleeric.dominoblockade.data.local.entity.AdaptiveAiGameEntity
 import com.cancleeric.dominoblockade.data.local.entity.GameMoveEntity
 import com.cancleeric.dominoblockade.data.local.entity.GameReplayEntity
 import com.cancleeric.dominoblockade.domain.analytics.AnalyticsTracker
+import com.cancleeric.dominoblockade.domain.model.GameMode
+import com.cancleeric.dominoblockade.domain.repository.AdaptiveAiRepository
 import com.cancleeric.dominoblockade.domain.repository.GameReplayRepository
+import com.cancleeric.dominoblockade.domain.usecase.AdaptiveAiManager
 import com.cancleeric.dominoblockade.domain.usecase.StartGameUseCase
 import com.cancleeric.dominoblockade.presentation.replay.GameReplayRecorder
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -28,10 +34,21 @@ class GameViewModelTest {
         override suspend fun getLatestReplayWithMoves(): Pair<GameReplayEntity, List<GameMoveEntity>>? = null
     }
 
+    private val fakeAdaptiveAiRepository = object : AdaptiveAiRepository {
+        private val _currentLevel = MutableStateFlow(50)
+        override val currentLevel: Flow<Int> = _currentLevel
+        override suspend fun getCurrentLevel(): Int = _currentLevel.value
+        override suspend fun setCurrentLevel(level: Int) { _currentLevel.value = level }
+        override suspend fun insertGameResult(gameMode: GameMode, playerWon: Boolean) = Unit
+        override suspend fun getRecentGames(gameModes: List<GameMode>, limit: Int): List<AdaptiveAiGameEntity> =
+            emptyList()
+    }
+
     private val viewModel = GameViewModel(
         StartGameUseCase(),
         fakeAnalyticsTracker,
-        GameReplayRecorder(fakeReplayRepository)
+        GameReplayRecorder(fakeReplayRepository),
+        AdaptiveAiManager(fakeAdaptiveAiRepository)
     )
 
     @Test
@@ -99,8 +116,8 @@ class GameViewModelTest {
         viewModel.selectDomino(domino)
         viewModel.placeDomino()
         val afterState = viewModel.uiState.value.gameState ?: return
-        assertEquals(1, afterState.board.size)
-        assertEquals(1, afterState.currentPlayerIndex)
+        assertFalse(afterState.board.isEmpty())
+        assertEquals(0, afterState.currentPlayerIndex)
     }
 
     @Test

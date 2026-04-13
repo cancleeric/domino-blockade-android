@@ -3,12 +3,15 @@ package com.cancleeric.dominoblockade.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.cancleeric.dominoblockade.data.local.dao.AchievementDao
+import com.cancleeric.dominoblockade.data.local.dao.AdaptiveAiDao
 import com.cancleeric.dominoblockade.data.local.dao.GameRecordDao
 import com.cancleeric.dominoblockade.data.local.dao.GameReplayDao
 import com.cancleeric.dominoblockade.data.local.dao.PlayerProfileDao
 import com.cancleeric.dominoblockade.data.local.dao.PlayerStatsDao
 import com.cancleeric.dominoblockade.data.local.dao.ThemeDao
 import com.cancleeric.dominoblockade.data.local.entity.AchievementEntity
+import com.cancleeric.dominoblockade.data.local.entity.AdaptiveAiGameEntity
+import com.cancleeric.dominoblockade.data.local.entity.AdaptiveAiStateEntity
 import com.cancleeric.dominoblockade.data.local.entity.GameMoveEntity
 import com.cancleeric.dominoblockade.data.local.entity.GameRecordEntity
 import com.cancleeric.dominoblockade.data.local.entity.GameReplayEntity
@@ -24,9 +27,11 @@ import com.cancleeric.dominoblockade.data.local.entity.ThemeEntity
         AchievementEntity::class,
         PlayerProfileEntity::class,
         GameReplayEntity::class,
-        GameMoveEntity::class
+        GameMoveEntity::class,
+        AdaptiveAiGameEntity::class,
+        AdaptiveAiStateEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -36,4 +41,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun achievementDao(): AchievementDao
     abstract fun playerProfileDao(): PlayerProfileDao
     abstract fun gameReplayDao(): GameReplayDao
+    abstract fun adaptiveAiDao(): AdaptiveAiDao
 }
