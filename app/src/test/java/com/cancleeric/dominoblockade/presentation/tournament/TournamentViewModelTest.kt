@@ -1,7 +1,11 @@
 package com.cancleeric.dominoblockade.presentation.tournament
 
+import com.cancleeric.dominoblockade.data.local.entity.AdaptiveAiGameEntity
+import com.cancleeric.dominoblockade.domain.model.GameMode
 import com.cancleeric.dominoblockade.domain.model.Tournament
+import com.cancleeric.dominoblockade.domain.repository.AdaptiveAiRepository
 import com.cancleeric.dominoblockade.domain.repository.TournamentRepository
+import com.cancleeric.dominoblockade.domain.usecase.AdaptiveAiManager
 import com.cancleeric.dominoblockade.domain.usecase.AdvanceTournamentUseCase
 import com.cancleeric.dominoblockade.domain.usecase.CreateTournamentUseCase
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +42,15 @@ class TournamentViewModelTest {
 
     private lateinit var repository: FakeTournamentRepository
     private lateinit var viewModel: TournamentViewModel
+    private val fakeAdaptiveAiRepository = object : AdaptiveAiRepository {
+        private val _currentLevel = MutableStateFlow(50)
+        override val currentLevel: Flow<Int> = _currentLevel
+        override suspend fun getCurrentLevel(): Int = _currentLevel.value
+        override suspend fun setCurrentLevel(level: Int) { _currentLevel.value = level }
+        override suspend fun insertGameResult(gameMode: GameMode, playerWon: Boolean) = Unit
+        override suspend fun getRecentGames(gameModes: List<GameMode>, limit: Int): List<AdaptiveAiGameEntity> =
+            emptyList()
+    }
 
     @Before
     fun setUp() {
@@ -46,7 +59,8 @@ class TournamentViewModelTest {
         viewModel = TournamentViewModel(
             createTournamentUseCase = CreateTournamentUseCase(repository),
             advanceTournamentUseCase = AdvanceTournamentUseCase(repository),
-            tournamentRepository = repository
+            tournamentRepository = repository,
+            adaptiveAiManager = AdaptiveAiManager(fakeAdaptiveAiRepository)
         )
     }
 

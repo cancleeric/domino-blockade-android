@@ -1,6 +1,10 @@
 package com.cancleeric.dominoblockade.presentation.settings
 
+import com.cancleeric.dominoblockade.data.local.entity.AdaptiveAiGameEntity
+import com.cancleeric.dominoblockade.domain.model.GameMode
+import com.cancleeric.dominoblockade.domain.repository.AdaptiveAiRepository
 import com.cancleeric.dominoblockade.domain.repository.GameSettingsRepository
+import com.cancleeric.dominoblockade.domain.usecase.AdaptiveAiManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -49,6 +53,20 @@ class SettingsViewModelTest {
         override suspend fun setDarkModeEnabled(enabled: Boolean) { _darkModeEnabled.value = enabled }
     }
 
+    private class FakeAdaptiveAiRepository : AdaptiveAiRepository {
+        private val _currentLevel = MutableStateFlow(50)
+        override val currentLevel: Flow<Int> = _currentLevel
+        override suspend fun getCurrentLevel(): Int = _currentLevel.value
+        override suspend fun setCurrentLevel(level: Int) {
+            _currentLevel.value = level
+        }
+
+        override suspend fun insertGameResult(gameMode: GameMode, playerWon: Boolean) = Unit
+
+        override suspend fun getRecentGames(gameModes: List<GameMode>, limit: Int): List<AdaptiveAiGameEntity> =
+            emptyList()
+    }
+
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
@@ -61,20 +79,26 @@ class SettingsViewModelTest {
 
     @Test
     fun `initial uiState has default values`() = runTest(testDispatcher) {
-        val viewModel = SettingsViewModel(FakeGameSettingsRepository())
+        val viewModel = SettingsViewModel(
+            FakeGameSettingsRepository(),
+            AdaptiveAiManager(FakeAdaptiveAiRepository())
+        )
         advanceUntilIdle()
         val state = viewModel.uiState.first()
         assertTrue(state.soundEnabled)
         assertTrue(state.musicEnabled)
         assertTrue(state.vibrationEnabled)
-        assertEquals("medium", state.aiDifficulty)
+        assertEquals(50, state.adaptiveAiLevel)
         assertEquals("en", state.language)
         assertFalse(state.darkModeEnabled)
     }
 
     @Test
     fun `setSoundEnabled updates soundEnabled in state`() = runTest(testDispatcher) {
-        val viewModel = SettingsViewModel(FakeGameSettingsRepository())
+        val viewModel = SettingsViewModel(
+            FakeGameSettingsRepository(),
+            AdaptiveAiManager(FakeAdaptiveAiRepository())
+        )
         advanceUntilIdle()
         viewModel.setSoundEnabled(false)
         advanceUntilIdle()
@@ -83,7 +107,10 @@ class SettingsViewModelTest {
 
     @Test
     fun `setMusicEnabled updates musicEnabled in state`() = runTest(testDispatcher) {
-        val viewModel = SettingsViewModel(FakeGameSettingsRepository())
+        val viewModel = SettingsViewModel(
+            FakeGameSettingsRepository(),
+            AdaptiveAiManager(FakeAdaptiveAiRepository())
+        )
         advanceUntilIdle()
         viewModel.setMusicEnabled(false)
         advanceUntilIdle()
@@ -92,7 +119,10 @@ class SettingsViewModelTest {
 
     @Test
     fun `setVibrationEnabled updates vibrationEnabled in state`() = runTest(testDispatcher) {
-        val viewModel = SettingsViewModel(FakeGameSettingsRepository())
+        val viewModel = SettingsViewModel(
+            FakeGameSettingsRepository(),
+            AdaptiveAiManager(FakeAdaptiveAiRepository())
+        )
         advanceUntilIdle()
         viewModel.setVibrationEnabled(false)
         advanceUntilIdle()
@@ -100,17 +130,11 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `setAiDifficulty updates aiDifficulty in state`() = runTest(testDispatcher) {
-        val viewModel = SettingsViewModel(FakeGameSettingsRepository())
-        advanceUntilIdle()
-        viewModel.setAiDifficulty("hard")
-        advanceUntilIdle()
-        assertEquals("hard", viewModel.uiState.first().aiDifficulty)
-    }
-
-    @Test
     fun `setLanguage updates language in state`() = runTest(testDispatcher) {
-        val viewModel = SettingsViewModel(FakeGameSettingsRepository())
+        val viewModel = SettingsViewModel(
+            FakeGameSettingsRepository(),
+            AdaptiveAiManager(FakeAdaptiveAiRepository())
+        )
         advanceUntilIdle()
         viewModel.setLanguage("zh-TW")
         advanceUntilIdle()
@@ -119,7 +143,10 @@ class SettingsViewModelTest {
 
     @Test
     fun `setDarkModeEnabled updates darkModeEnabled in state`() = runTest(testDispatcher) {
-        val viewModel = SettingsViewModel(FakeGameSettingsRepository())
+        val viewModel = SettingsViewModel(
+            FakeGameSettingsRepository(),
+            AdaptiveAiManager(FakeAdaptiveAiRepository())
+        )
         advanceUntilIdle()
         viewModel.setDarkModeEnabled(true)
         advanceUntilIdle()

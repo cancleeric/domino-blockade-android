@@ -4,6 +4,7 @@ import com.cancleeric.dominoblockade.data.analytics.AnalyticsHelper
 import com.cancleeric.dominoblockade.data.preferences.GameSettingsRepositoryImpl
 import com.cancleeric.dominoblockade.data.preferences.TutorialRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.AchievementRepositoryImpl
+import com.cancleeric.dominoblockade.data.repository.AdaptiveAiRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.GameRecordRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.GameReplayRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.GameRepositoryImpl
@@ -12,6 +13,7 @@ import com.cancleeric.dominoblockade.data.repository.PlayerStatsRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.ThemeRepositoryImpl
 import com.cancleeric.dominoblockade.domain.analytics.AnalyticsTracker
 import com.cancleeric.dominoblockade.domain.repository.AchievementRepository
+import com.cancleeric.dominoblockade.domain.repository.AdaptiveAiRepository
 import com.cancleeric.dominoblockade.domain.repository.GameRecordRepository
 import com.cancleeric.dominoblockade.domain.repository.GameReplayRepository
 import com.cancleeric.dominoblockade.domain.repository.GameRepository
@@ -62,6 +64,10 @@ abstract class AppModule {
     @Binds
     @Singleton
     abstract fun bindAchievementRepository(impl: AchievementRepositoryImpl): AchievementRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAdaptiveAiRepository(impl: AdaptiveAiRepositoryImpl): AdaptiveAiRepository
 
     @Binds
     @Singleton

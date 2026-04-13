@@ -3,7 +3,9 @@ package com.cancleeric.dominoblockade.presentation.tournament
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cancleeric.dominoblockade.domain.model.Tournament
+import com.cancleeric.dominoblockade.domain.model.GameMode
 import com.cancleeric.dominoblockade.domain.repository.TournamentRepository
+import com.cancleeric.dominoblockade.domain.usecase.AdaptiveAiManager
 import com.cancleeric.dominoblockade.domain.usecase.AdvanceTournamentUseCase
 import com.cancleeric.dominoblockade.domain.usecase.CreateTournamentUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +26,8 @@ sealed class TournamentUiState {
 class TournamentViewModel @Inject constructor(
     private val createTournamentUseCase: CreateTournamentUseCase,
     private val advanceTournamentUseCase: AdvanceTournamentUseCase,
-    private val tournamentRepository: TournamentRepository
+    private val tournamentRepository: TournamentRepository,
+    private val adaptiveAiManager: AdaptiveAiManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<TournamentUiState>(TournamentUiState.Setup)
@@ -60,7 +63,24 @@ class TournamentViewModel @Inject constructor(
 
     fun recordMatchWinner(tournamentId: String, roundIndex: Int, matchIndex: Int, winnerId: String) {
         viewModelScope.launch {
+            val selectedWinnerName = _tournament.value
+                ?.rounds
+                ?.getOrNull(roundIndex)
+                ?.getOrNull(matchIndex)
+                ?.let { match ->
+                    when (winnerId) {
+                        match.player1?.playerId -> match.player1?.playerName
+                        match.player2?.playerId -> match.player2?.playerName
+                        else -> null
+                    }
+                }.orEmpty()
             runCatching { advanceTournamentUseCase(tournamentId, roundIndex, matchIndex, winnerId) }
+                .onSuccess {
+                    adaptiveAiManager.recordGameResult(
+                        gameMode = GameMode.TOURNAMENT,
+                        playerWon = !selectedWinnerName.startsWith(prefix = "AI", ignoreCase = true)
+                    )
+                }
                 .onFailure { error ->
                     _uiState.value = TournamentUiState.Error(error.message ?: "Unknown error")
                 }

@@ -3,6 +3,7 @@ package com.cancleeric.dominoblockade.presentation.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cancleeric.dominoblockade.domain.repository.GameSettingsRepository
+import com.cancleeric.dominoblockade.domain.usecase.AdaptiveAiManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,14 +16,15 @@ data class SettingsUiState(
     val soundEnabled: Boolean = true,
     val musicEnabled: Boolean = true,
     val vibrationEnabled: Boolean = true,
-    val aiDifficulty: String = "medium",
+    val adaptiveAiLevel: Int = 50,
     val language: String = "en",
     val darkModeEnabled: Boolean = false
 )
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val repository: GameSettingsRepository
+    private val repository: GameSettingsRepository,
+    adaptiveAiManager: AdaptiveAiManager
 ) : ViewModel() {
 
     val uiState: StateFlow<SettingsUiState> = combine(
@@ -32,12 +34,12 @@ class SettingsViewModel @Inject constructor(
             repository.vibrationEnabled
         ) { sound, music, vibration -> Triple(sound, music, vibration) },
         combine(
-            repository.defaultAiDifficulty,
             repository.language,
             repository.darkModeEnabled
-        ) { ai, lang, dark -> Triple(ai, lang, dark) }
-    ) { (sound, music, vibration), (ai, lang, dark) ->
-        SettingsUiState(sound, music, vibration, ai, lang, dark)
+        ) { lang, dark -> lang to dark },
+        adaptiveAiManager.currentLevel
+    ) { (sound, music, vibration), (lang, dark), aiLevel ->
+        SettingsUiState(sound, music, vibration, aiLevel, lang, dark)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, SettingsUiState())
 
     fun setSoundEnabled(enabled: Boolean) {
@@ -50,10 +52,6 @@ class SettingsViewModel @Inject constructor(
 
     fun setVibrationEnabled(enabled: Boolean) {
         viewModelScope.launch { repository.setVibrationEnabled(enabled) }
-    }
-
-    fun setAiDifficulty(difficulty: String) {
-        viewModelScope.launch { repository.setDefaultAiDifficulty(difficulty) }
     }
 
     fun setLanguage(language: String) {

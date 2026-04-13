@@ -11,7 +11,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,9 +30,6 @@ private const val SCREEN_PADDING_DP = 16
 private const val ITEM_SPACING_DP = 8
 private const val SECTION_SPACING_DP = 16
 private const val CHIP_SPACING_DP = 8
-
-private val aiDifficultyOptions = listOf("easy", "medium", "hard")
-private val aiDifficultyLabels = mapOf("easy" to "Easy", "medium" to "Medium", "hard" to "Hard")
 
 private val languageOptions = listOf("en", "zh-TW", "zh-CN")
 private val languageLabels = mapOf("en" to "English", "zh-TW" to "繁中", "zh-CN" to "簡中")
@@ -68,7 +64,6 @@ fun SettingsScreen(
             onSoundToggle = viewModel::setSoundEnabled,
             onMusicToggle = viewModel::setMusicEnabled,
             onVibrationToggle = viewModel::setVibrationEnabled,
-            onAiDifficultyChange = viewModel::setAiDifficulty,
             onLanguageChange = viewModel::setLanguage,
             onDarkModeToggle = viewModel::setDarkModeEnabled,
             modifier = Modifier.padding(innerPadding)
@@ -82,7 +77,6 @@ private fun SettingsContent(
     onSoundToggle: (Boolean) -> Unit,
     onMusicToggle: (Boolean) -> Unit,
     onVibrationToggle: (Boolean) -> Unit,
-    onAiDifficultyChange: (String) -> Unit,
     onLanguageChange: (String) -> Unit,
     onDarkModeToggle: (Boolean) -> Unit,
     modifier: Modifier = Modifier
@@ -94,10 +88,10 @@ private fun SettingsContent(
             .padding(horizontal = SCREEN_PADDING_DP.dp),
         verticalArrangement = Arrangement.spacedBy(ITEM_SPACING_DP.dp)
     ) {
-        SettingsSectionHeader(title = "AI Difficulty")
-        AiDifficultySelector(
-            selected = uiState.aiDifficulty,
-            onSelect = onAiDifficultyChange
+        SettingsSectionHeader(title = "Adaptive AI Difficulty")
+        SettingsReadOnlyItem(
+            label = "Current Level",
+            value = "${uiState.adaptiveAiLevel}/100"
         )
         SettingsSectionHeader(
             title = "Audio",
@@ -170,22 +164,18 @@ private fun SettingsToggleItem(
 }
 
 @Composable
-private fun AiDifficultySelector(
-    selected: String,
-    onSelect: (String) -> Unit,
+private fun SettingsReadOnlyItem(
+    label: String,
+    value: String,
     modifier: Modifier = Modifier
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(CHIP_SPACING_DP.dp),
-        modifier = modifier
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        aiDifficultyOptions.forEach { option ->
-            FilterChip(
-                selected = selected == option,
-                onClick = { onSelect(option) },
-                label = { Text(aiDifficultyLabels[option] ?: option) }
-            )
-        }
+        Text(text = label, style = MaterialTheme.typography.bodyLarge)
+        Text(text = value, style = MaterialTheme.typography.bodyLarge)
     }
 }
 
@@ -200,7 +190,7 @@ private fun LanguageSelector(
         modifier = modifier
     ) {
         languageOptions.forEach { option ->
-            FilterChip(
+            androidx.compose.material3.FilterChip(
                 selected = selected == option,
                 onClick = { onSelect(option) },
                 label = { Text(languageLabels[option] ?: option) }

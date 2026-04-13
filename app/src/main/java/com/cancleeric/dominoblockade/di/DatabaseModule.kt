@@ -9,6 +9,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.cancleeric.dominoblockade.data.local.AppDatabase
 import com.cancleeric.dominoblockade.data.local.dao.AchievementDao
+import com.cancleeric.dominoblockade.data.local.dao.AdaptiveAiDao
 import com.cancleeric.dominoblockade.data.local.dao.GameRecordDao
 import com.cancleeric.dominoblockade.data.local.dao.GameReplayDao
 import com.cancleeric.dominoblockade.data.local.dao.PlayerProfileDao
@@ -79,6 +80,25 @@ private val MIGRATION_5_6 = object : Migration(5, 6) {
     }
 }
 
+private val MIGRATION_6_7 = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `adaptive_ai_games` " +
+                "(`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "`gameMode` TEXT NOT NULL, " +
+                "`playerWon` INTEGER NOT NULL, " +
+                "`timestamp` INTEGER NOT NULL)"
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `adaptive_ai_state` " +
+                "(`id` INTEGER NOT NULL, `currentLevel` INTEGER NOT NULL, PRIMARY KEY(`id`))"
+        )
+        db.execSQL(
+            "INSERT OR IGNORE INTO `adaptive_ai_state` (`id`, `currentLevel`) VALUES (1, 50)"
+        )
+    }
+}
+
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
@@ -87,7 +107,7 @@ object DatabaseModule {
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, "domino_blockade.db")
-            .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+            .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
             .fallbackToDestructiveMigration()
             .build()
 
@@ -108,6 +128,9 @@ object DatabaseModule {
 
     @Provides
     fun provideGameReplayDao(db: AppDatabase): GameReplayDao = db.gameReplayDao()
+
+    @Provides
+    fun provideAdaptiveAiDao(db: AppDatabase): AdaptiveAiDao = db.adaptiveAiDao()
 
     @Provides
     @Singleton
