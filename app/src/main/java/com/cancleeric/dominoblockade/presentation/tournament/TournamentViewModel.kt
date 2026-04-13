@@ -76,10 +76,12 @@ class TournamentViewModel @Inject constructor(
                 }.orEmpty()
             runCatching { advanceTournamentUseCase(tournamentId, roundIndex, matchIndex, winnerId) }
                 .onSuccess {
-                    adaptiveAiManager.recordGameResult(
-                        gameMode = GameMode.TOURNAMENT,
-                        playerWon = !selectedWinnerName.startsWith(prefix = "AI", ignoreCase = true)
-                    )
+                    if (selectedWinnerName.isNotBlank()) {
+                        adaptiveAiManager.recordGameResult(
+                            gameMode = GameMode.TOURNAMENT,
+                            playerWon = !selectedWinnerName.startsWith(prefix = "AI", ignoreCase = true)
+                        )
+                    }
                 }
                 .onFailure { error ->
                     _uiState.value = TournamentUiState.Error(error.message ?: "Unknown error")
