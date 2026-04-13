@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.tasks.await
+import java.security.SecureRandom
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -56,6 +57,7 @@ private const val PRESENCE_LAST_SEEN = "lastSeen"
 private const val SEARCH_LIMIT = 25L
 private const val CHALLENGE_ROOM_CODE_LENGTH = 6
 private const val CHALLENGE_ROOM_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+private val secureRandom = SecureRandom()
 
 @Singleton
 class FirestoreSocialRepository @Inject constructor(
@@ -378,6 +380,7 @@ class FirestoreSocialRepository @Inject constructor(
 
     private suspend fun fetchUsersByIds(friendIds: List<String>): List<Friend> {
         if (friendIds.isEmpty()) return emptyList()
+        // Firestore whereIn supports up to 10 values per query, so we query in batches.
         return friendIds.chunked(10).flatMap { batch ->
             val query = firestore.collection(COLLECTION_USERS)
                 .whereIn(FieldPath.documentId(), batch)
@@ -414,8 +417,11 @@ class FirestoreSocialRepository @Inject constructor(
         return builder.build().toString()
     }
 
-    private fun generateChallengeRoomCode(): String =
-        (1..CHALLENGE_ROOM_CODE_LENGTH).map { CHALLENGE_ROOM_CHARS.random() }.joinToString("")
+    private fun generateChallengeRoomCode(): String = buildString(CHALLENGE_ROOM_CODE_LENGTH) {
+        repeat(CHALLENGE_ROOM_CODE_LENGTH) {
+            append(CHALLENGE_ROOM_CHARS[secureRandom.nextInt(CHALLENGE_ROOM_CHARS.length)])
+        }
+    }
 
     private fun DocumentSnapshot.toFriendRequest(): FriendRequest? {
         val fromUid = getString(FIELD_FROM_UID).orEmpty()

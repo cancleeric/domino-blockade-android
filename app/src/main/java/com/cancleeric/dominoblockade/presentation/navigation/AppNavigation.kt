@@ -108,7 +108,9 @@ fun AppNavigation(
                 "challenge" -> {
                     val action = uri.pathSegments.firstOrNull()
                     val challengeId = uri.getQueryParameter("challengeId")
-                    navController.navigate(Screen.Social.createRoute(challengeId, action))
+                    if (!challengeId.isNullOrBlank() && !action.isNullOrBlank()) {
+                        navController.navigate(Screen.Social.createRoute(challengeId, action))
+                    }
                 }
                 "friend" -> navController.navigate(Screen.Social.createRoute())
             }
