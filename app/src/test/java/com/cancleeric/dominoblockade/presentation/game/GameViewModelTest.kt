@@ -10,15 +10,25 @@ import com.cancleeric.dominoblockade.domain.repository.GameReplayRepository
 import com.cancleeric.dominoblockade.domain.usecase.AdaptiveAiManager
 import com.cancleeric.dominoblockade.domain.usecase.StartGameUseCase
 import com.cancleeric.dominoblockade.presentation.replay.GameReplayRecorder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Before
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class GameViewModelTest {
+
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val fakeAnalyticsTracker = object : AnalyticsTracker {
         override fun logTutorialStarted() {}
@@ -44,12 +54,23 @@ class GameViewModelTest {
             emptyList()
     }
 
-    private val viewModel = GameViewModel(
-        StartGameUseCase(),
-        fakeAnalyticsTracker,
-        GameReplayRecorder(fakeReplayRepository),
-        AdaptiveAiManager(fakeAdaptiveAiRepository)
-    )
+    private lateinit var viewModel: GameViewModel
+
+    @Before
+    fun setUp() {
+        Dispatchers.setMain(testDispatcher)
+        viewModel = GameViewModel(
+            StartGameUseCase(),
+            fakeAnalyticsTracker,
+            GameReplayRecorder(fakeReplayRepository),
+            AdaptiveAiManager(fakeAdaptiveAiRepository)
+        )
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
 
     @Test
     fun `startGame initializes game state with correct player count`() {

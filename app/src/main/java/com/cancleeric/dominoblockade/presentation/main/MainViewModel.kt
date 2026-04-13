@@ -9,13 +9,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
-private const val STOP_TIMEOUT_MS = 5000L
-
 @HiltViewModel
 class MainViewModel @Inject constructor(
     settingsRepository: GameSettingsRepository
 ) : ViewModel() {
 
     val darkModeEnabled: StateFlow<Boolean> = settingsRepository.darkModeEnabled
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), false)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 }

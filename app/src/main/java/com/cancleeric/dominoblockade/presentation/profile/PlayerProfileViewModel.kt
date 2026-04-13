@@ -22,11 +22,11 @@ class PlayerProfileViewModel @Inject constructor(
 ) : ViewModel() {
 
     val profile: StateFlow<PlayerProfile> = profileRepository.getProfile()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), PlayerProfile())
+        .stateIn(viewModelScope, SharingStarted.Eagerly, PlayerProfile())
 
     val stats: StateFlow<PlayerStatsEntity?> = profileRepository.getProfile()
         .flatMapLatest { p -> flow { emit(statsRepository.getByName(p.playerName)) } }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     fun saveName(name: String) {
         viewModelScope.launch {
@@ -40,7 +40,4 @@ class PlayerProfileViewModel @Inject constructor(
         }
     }
 
-    companion object {
-        private const val STOP_TIMEOUT_MS = 5000L
-    }
 }

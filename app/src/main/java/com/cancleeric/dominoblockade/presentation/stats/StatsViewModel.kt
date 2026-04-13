@@ -16,9 +16,5 @@ class StatsViewModel @Inject constructor(
 ) : ViewModel() {
 
     val playerStats: StateFlow<List<PlayerStatsEntity>> = repository.getAll()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), emptyList())
-
-    companion object {
-        private const val STOP_TIMEOUT_MS = 5000L
-    }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 }
