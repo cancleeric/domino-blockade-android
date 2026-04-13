@@ -2,6 +2,7 @@
 
 package com.cancleeric.dominoblockade.data.remote.firestore
 
+import android.net.Uri
 import com.cancleeric.dominoblockade.domain.model.ChallengeInvitation
 import com.cancleeric.dominoblockade.domain.model.ChallengeStatus
 import com.cancleeric.dominoblockade.domain.model.Friend
@@ -265,8 +266,21 @@ class FirestoreSocialRepository @Inject constructor(
             .ifBlank { "Player-${uid.take(6)}" }
         val challengeRef = firestore.collection(COLLECTION_CHALLENGES).document()
         val roomId = generateChallengeRoomCode()
-        val acceptDeepLink = "domino-blockade://challenge/accept?challengeId=${challengeRef.id}&roomId=$roomId"
-        val declineDeepLink = "domino-blockade://challenge/decline?challengeId=${challengeRef.id}"
+        val acceptDeepLink = Uri.Builder()
+            .scheme("domino-blockade")
+            .authority("challenge")
+            .appendPath("accept")
+            .appendQueryParameter("challengeId", challengeRef.id)
+            .appendQueryParameter("roomId", roomId)
+            .build()
+            .toString()
+        val declineDeepLink = Uri.Builder()
+            .scheme("domino-blockade")
+            .authority("challenge")
+            .appendPath("decline")
+            .appendQueryParameter("challengeId", challengeRef.id)
+            .build()
+            .toString()
         val challengeData = mapOf(
             FIELD_CHALLENGER_UID to uid,
             FIELD_CHALLENGER_NAME to challengerName,

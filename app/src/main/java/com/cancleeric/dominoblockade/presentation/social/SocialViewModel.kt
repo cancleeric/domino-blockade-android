@@ -46,8 +46,8 @@ class SocialViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             runCatching {
-                socialRepository.ensureSignedIn()
-                socialRepository.ensureUserProfile("")
+                val uid = socialRepository.ensureSignedIn()
+                socialRepository.ensureUserProfile("Player-${uid.take(6)}")
             }.onFailure { error ->
                 _uiState.update { it.copy(error = error.message ?: "Unable to authenticate user") }
             }

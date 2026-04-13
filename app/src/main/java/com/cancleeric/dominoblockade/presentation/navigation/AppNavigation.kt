@@ -263,7 +263,8 @@ fun AppNavigation(
                 }
             )
         ) { backStackEntry ->
-            val roomCode = backStackEntry.arguments?.getString("roomCode").orEmpty()
+            val roomCode = backStackEntry.arguments?.getString("roomCode")
+                ?.takeIf { it.isNotBlank() }
             LobbyScreen(
                 initialRoomCode = roomCode,
                 onNavigateToGame = { roomId, playerIndex, playerId ->

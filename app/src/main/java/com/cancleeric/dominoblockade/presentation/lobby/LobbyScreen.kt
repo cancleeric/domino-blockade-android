@@ -38,14 +38,14 @@ private const val TITLE_SPACING_DP = 24
 fun LobbyScreen(
     onNavigateToGame: (roomId: String, localPlayerIndex: Int, localPlayerId: String) -> Unit,
     onNavigateBack: () -> Unit,
-    initialRoomCode: String = "",
+    initialRoomCode: String? = null,
     modifier: Modifier = Modifier,
     viewModel: LobbyViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(initialRoomCode) {
-        if (initialRoomCode.isNotBlank()) {
+        if (!initialRoomCode.isNullOrBlank()) {
             viewModel.setRoomCode(initialRoomCode)
         }
     }
