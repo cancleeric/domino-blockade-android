@@ -20,6 +20,8 @@ import com.cancleeric.dominoblockade.domain.repository.PlayerProfileRepository
 import com.cancleeric.dominoblockade.domain.repository.PlayerStatsRepository
 import com.cancleeric.dominoblockade.domain.repository.ThemeRepository
 import com.cancleeric.dominoblockade.domain.repository.TutorialRepository
+import com.cancleeric.dominoblockade.data.remote.firestore.FirestoreTournamentRepository
+import com.cancleeric.dominoblockade.domain.repository.TournamentRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -68,4 +70,8 @@ abstract class AppModule {
     @Binds
     @Singleton
     abstract fun bindGameReplayRepository(impl: GameReplayRepositoryImpl): GameReplayRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTournamentRepository(impl: FirestoreTournamentRepository): TournamentRepository
 }
