@@ -35,6 +35,7 @@ private const val HUMAN_PLAYER_NAME = "Player 1"
 private const val DEFAULT_AI_LEVEL = 50
 
 @HiltViewModel
+@Suppress("TooManyFunctions")
 class GameViewModel @Inject constructor(
     private val startGameUseCase: StartGameUseCase,
     private val analyticsTracker: AnalyticsTracker,
@@ -206,6 +207,7 @@ class GameViewModel @Inject constructor(
         }
     }
 
+    @Suppress("ReturnCount", "CyclomaticComplexMethod")
     private suspend fun playAiTurns(initialState: GameState) {
         var state = initialState
         while (state.currentPlayerIndex != HUMAN_PLAYER_INDEX && !_uiState.value.isGameOver) {
