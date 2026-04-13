@@ -16,10 +16,9 @@ class HistoryViewModel @Inject constructor(
 ) : ViewModel() {
 
     val records: StateFlow<List<GameRecordEntity>> = repository.getRecent(HISTORY_LIMIT)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), emptyList())
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     companion object {
-        private const val STOP_TIMEOUT_MS = 5000L
         private const val HISTORY_LIMIT = 100
     }
 }
