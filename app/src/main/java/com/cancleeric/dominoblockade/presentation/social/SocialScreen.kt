@@ -43,9 +43,9 @@ import com.cancleeric.dominoblockade.domain.model.ChallengeInvitation
 import com.cancleeric.dominoblockade.domain.model.Friend
 import com.cancleeric.dominoblockade.domain.model.FriendRequest
 import com.google.android.gms.common.api.CommonStatusCodes
-import com.google.android.gms.mlkit.common.MlKitException
-import com.google.android.gms.mlkit.vision.codescanner.GmsBarcodeScannerOptions
-import com.google.android.gms.mlkit.vision.codescanner.GmsBarcodeScanning
+import com.google.mlkit.common.MlKitException
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
@@ -193,9 +193,10 @@ private fun QrSection(qrValue: String, onScan: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(PADDING_DP.dp), verticalArrangement = Arrangement.spacedBy(SPACING_DP.dp)) {
             Text(text = "Add Friend with QR", style = MaterialTheme.typography.titleMedium)
-            if (bitmap != null) {
+            val bmp = bitmap
+            if (bmp != null) {
                 Image(
-                    bitmap = bitmap.asImageBitmap(),
+                    bitmap = bmp.asImageBitmap(),
                     contentDescription = "Friend QR code",
                     modifier = Modifier
                         .fillMaxWidth()
