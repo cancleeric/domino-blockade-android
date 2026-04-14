@@ -34,4 +34,15 @@ interface OnlineGameRepository {
      * stale disconnect flag left from a previous session.
      */
     suspend fun registerPresence(roomId: String, playerId: String)
+
+    /**
+     * Adds a player to the ranked queue and creates a match when another player is available.
+     */
+    suspend fun joinRankedQueue(playerId: String, playerName: String)
+
+    /** Observes ranked queue assignments for the given player ID. */
+    fun observeRankedAssignment(playerId: String): Flow<Pair<String, Int>?>
+
+    /** Removes a player from ranked queue and pending assignment. */
+    suspend fun leaveRankedQueue(playerId: String)
 }

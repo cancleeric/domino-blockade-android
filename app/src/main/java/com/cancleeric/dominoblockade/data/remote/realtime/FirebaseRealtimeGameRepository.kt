@@ -19,8 +19,16 @@ private const val PATH_ROOMS = "rooms"
 private const val KEY_GUEST_ID = "guestId"
 private const val KEY_GUEST_NAME = "guestName"
 private const val KEY_STATUS = "status"
+private const val KEY_IS_RANKED = "isRanked"
 private const val KEY_GAME_STATE = "gameState"
 private const val KEY_DISCONNECTED_PLAYER_ID = "disconnectedPlayerId"
+private const val PATH_RANKED_QUEUE = "rankedQueue"
+private const val PATH_RANKED_ASSIGNMENTS = "rankedAssignments"
+private const val KEY_PLAYER_ID = "playerId"
+private const val KEY_PLAYER_NAME = "playerName"
+private const val KEY_CREATED_AT = "createdAt"
+private const val KEY_ROOM_ID = "roomId"
+private const val KEY_PLAYER_INDEX = "playerIndex"
 private const val ROOM_CODE_LENGTH = 6
 private const val ROOM_CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
@@ -36,7 +44,8 @@ class FirebaseRealtimeGameRepository @Inject constructor(
         val data = mapOf(
             "hostId" to hostId,
             "hostName" to hostName,
-            KEY_STATUS to OnlineRoomStatus.WAITING.name
+            KEY_STATUS to OnlineRoomStatus.WAITING.name,
+            KEY_IS_RANKED to false
         )
         roomsRef.child(roomCode).setValue(data).await()
         return roomCode
@@ -81,6 +90,70 @@ class FirebaseRealtimeGameRepository @Inject constructor(
         val ref = roomsRef.child(roomId).child(KEY_DISCONNECTED_PLAYER_ID)
         ref.setValue(null).await()
         ref.onDisconnect().setValue(playerId).await()
+    }
+
+    override suspend fun joinRankedQueue(playerId: String, playerName: String) {
+        val queueRef = database.getReference(PATH_RANKED_QUEUE)
+        val assignmentRef = database.getReference(PATH_RANKED_ASSIGNMENTS)
+        val waitingSnapshot = queueRef.orderByChild(KEY_CREATED_AT).limitToFirst(1).get().await()
+        val waiting = waitingSnapshot.children.firstOrNull()
+        val waitingPlayerId = waiting?.child(KEY_PLAYER_ID)?.getValue(String::class.java)
+        val waitingPlayerName = waiting?.child(KEY_PLAYER_NAME)?.getValue(String::class.java)
+
+        if (!waitingPlayerId.isNullOrBlank() && waitingPlayerId != playerId && !waitingPlayerName.isNullOrBlank()) {
+            val roomId = generateRoomCode()
+            val roomData = mapOf(
+                "hostId" to waitingPlayerId,
+                "hostName" to waitingPlayerName,
+                KEY_GUEST_ID to playerId,
+                KEY_GUEST_NAME to playerName,
+                KEY_STATUS to OnlineRoomStatus.PLAYING.name,
+                KEY_IS_RANKED to true
+            )
+            roomsRef.child(roomId).setValue(roomData).await()
+            assignmentRef.child(waitingPlayerId).setValue(
+                mapOf(KEY_ROOM_ID to roomId, KEY_PLAYER_INDEX to 0)
+            ).await()
+            assignmentRef.child(playerId).setValue(
+                mapOf(KEY_ROOM_ID to roomId, KEY_PLAYER_INDEX to 1)
+            ).await()
+            queueRef.child(waitingPlayerId).removeValue().await()
+            return
+        }
+
+        queueRef.child(playerId).setValue(
+            mapOf(
+                KEY_PLAYER_ID to playerId,
+                KEY_PLAYER_NAME to playerName,
+                KEY_CREATED_AT to System.currentTimeMillis()
+            )
+        ).await()
+    }
+
+    override fun observeRankedAssignment(playerId: String): Flow<Pair<String, Int>?> = callbackFlow {
+        val ref = database.getReference(PATH_RANKED_ASSIGNMENTS).child(playerId)
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val roomId = snapshot.child(KEY_ROOM_ID).getValue(String::class.java)
+                val index = snapshot.child(KEY_PLAYER_INDEX).getValue(Long::class.java)?.toInt()
+                if (roomId.isNullOrBlank() || index == null) {
+                    trySend(null)
+                    return
+                }
+                trySend(roomId to index)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        ref.addValueEventListener(listener)
+        awaitClose { ref.removeEventListener(listener) }
+    }
+
+    override suspend fun leaveRankedQueue(playerId: String) {
+        database.getReference(PATH_RANKED_QUEUE).child(playerId).removeValue().await()
+        database.getReference(PATH_RANKED_ASSIGNMENTS).child(playerId).removeValue().await()
     }
 
     private fun generateRoomCode(): String =

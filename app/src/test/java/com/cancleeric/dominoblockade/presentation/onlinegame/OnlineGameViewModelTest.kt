@@ -5,10 +5,13 @@ import com.cancleeric.dominoblockade.domain.model.GameState
 import com.cancleeric.dominoblockade.domain.model.OnlineRoom
 import com.cancleeric.dominoblockade.domain.model.OnlineRoomStatus
 import com.cancleeric.dominoblockade.domain.model.Player
+import com.cancleeric.dominoblockade.domain.repository.LeaderboardRepository
+import com.cancleeric.dominoblockade.domain.repository.LeaderboardSegment
 import com.cancleeric.dominoblockade.domain.repository.OnlineGameRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
@@ -40,6 +43,30 @@ class OnlineGameViewModelTest {
         override suspend fun updateGameState(roomId: String, gameState: GameState) = Unit
         override suspend fun leaveRoom(roomId: String) = Unit
         override suspend fun registerPresence(roomId: String, playerId: String) = Unit
+        override suspend fun joinRankedQueue(playerId: String, playerName: String) = Unit
+        override fun observeRankedAssignment(playerId: String): Flow<Pair<String, Int>?> = roomFlow.map { null }
+        override suspend fun leaveRankedQueue(playerId: String) = Unit
+    }
+
+    private val fakeLeaderboardRepository = object : LeaderboardRepository {
+        override fun getTopPlayers(
+            limit: Int,
+            segment: LeaderboardSegment,
+            currentUserId: String?
+        ): Flow<List<com.cancleeric.dominoblockade.domain.model.LeaderboardEntry>> = roomFlow.map { emptyList() }
+        override fun getPlayerRank(
+            userId: String,
+            segment: LeaderboardSegment,
+            currentUserId: String?
+        ): Flow<Int?> = roomFlow.map { null }
+        override suspend fun ensurePlayerEntry(userId: String, displayName: String) = Unit
+        override suspend fun updateRankedMatchResult(
+            winnerId: String,
+            winnerDisplayName: String,
+            loserId: String,
+            loserDisplayName: String
+        ) = Unit
+        override suspend fun resetSeasonIfNeeded() = Unit
     }
 
     private lateinit var viewModel: OnlineGameViewModel
@@ -47,7 +74,7 @@ class OnlineGameViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = OnlineGameViewModel(fakeRepository, GRACE_PERIOD)
+        viewModel = OnlineGameViewModel(fakeRepository, fakeLeaderboardRepository, GRACE_PERIOD)
     }
 
     @After

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -76,6 +77,10 @@ fun LobbyScreen(
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
+        ModeSelector(
+            mode = uiState.mode,
+            onModeChange = viewModel::setMatchMode
+        )
         val errorMessage = uiState.error
         if (errorMessage != null) {
             Text(
@@ -87,10 +92,13 @@ fun LobbyScreen(
         val createdRoomId = uiState.createdRoomId
         if (uiState.isLoading) {
             CircularProgressIndicator()
+        } else if (uiState.isQueueingRanked) {
+            RankedQueueSection(onCancelQueue = viewModel::cancelRankedQueue)
         } else if (createdRoomId != null) {
             WaitingSection(roomId = createdRoomId, status = uiState.roomStatus)
         } else {
             LobbyActions(
+                mode = uiState.mode,
                 roomCode = uiState.roomCode,
                 onRoomCodeChange = viewModel::setRoomCode,
                 onCreateRoom = viewModel::createRoom,
@@ -98,8 +106,46 @@ fun LobbyScreen(
             )
         }
         HorizontalDivider(modifier = Modifier.padding(top = SPACING_DP.dp))
-        OutlinedButton(onClick = onNavigateBack, modifier = Modifier.fillMaxWidth()) {
+        OutlinedButton(
+            onClick = {
+                if (uiState.isQueueingRanked) {
+                    viewModel.cancelRankedQueue()
+                }
+                onNavigateBack()
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text("Back to Menu")
+        }
+    }
+}
+
+@Composable
+private fun ModeSelector(mode: MatchMode, onModeChange: (MatchMode) -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(SPACING_DP.dp)) {
+        FilterChip(
+            selected = mode == MatchMode.CASUAL,
+            onClick = { onModeChange(MatchMode.CASUAL) },
+            label = { Text("Casual") }
+        )
+        FilterChip(
+            selected = mode == MatchMode.RANKED,
+            onClick = { onModeChange(MatchMode.RANKED) },
+            label = { Text("Ranked") }
+        )
+    }
+}
+
+@Composable
+private fun RankedQueueSection(onCancelQueue: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(SPACING_DP.dp)
+    ) {
+        CircularProgressIndicator()
+        Text("Searching ranked opponent…", style = MaterialTheme.typography.bodyMedium)
+        OutlinedButton(onClick = onCancelQueue) {
+            Text("Cancel Queue")
         }
     }
 }
@@ -126,6 +172,7 @@ private fun WaitingSection(roomId: String, status: OnlineRoomStatus?) {
 
 @Composable
 private fun LobbyActions(
+    mode: MatchMode,
     roomCode: String,
     onRoomCodeChange: (String) -> Unit,
     onCreateRoom: () -> Unit,
@@ -135,24 +182,30 @@ private fun LobbyActions(
         verticalArrangement = Arrangement.spacedBy(SPACING_DP.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Button(onClick = onCreateRoom, modifier = Modifier.fillMaxWidth()) {
-            Text("Create Room")
-        }
-        HorizontalDivider()
-        Text("— or join an existing room —", style = MaterialTheme.typography.bodySmall)
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(SPACING_DP.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OutlinedTextField(
-                value = roomCode,
-                onValueChange = onRoomCodeChange,
-                label = { Text("Room Code") },
-                singleLine = true,
-                modifier = Modifier.weight(1f)
-            )
-            Button(onClick = onJoinRoom) {
-                Text("Join")
+        if (mode == MatchMode.RANKED) {
+            Button(onClick = onCreateRoom, modifier = Modifier.fillMaxWidth()) {
+                Text("Find Ranked Match")
+            }
+        } else {
+            Button(onClick = onCreateRoom, modifier = Modifier.fillMaxWidth()) {
+                Text("Create Room")
+            }
+            HorizontalDivider()
+            Text("— or join an existing room —", style = MaterialTheme.typography.bodySmall)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(SPACING_DP.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = roomCode,
+                    onValueChange = onRoomCodeChange,
+                    label = { Text("Room Code") },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f)
+                )
+                Button(onClick = onJoinRoom) {
+                    Text("Join")
+                }
             }
         }
     }

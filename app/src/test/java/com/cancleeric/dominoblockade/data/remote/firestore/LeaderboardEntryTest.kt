@@ -11,25 +11,24 @@ class LeaderboardEntryTest {
         val entry = LeaderboardEntry()
         assertEquals("", entry.userId)
         assertEquals("", entry.displayName)
-        assertEquals(0, entry.highScore)
-        assertEquals(0, entry.totalWins)
-        assertEquals(LeaderboardEntry.PLATFORM_ANDROID, entry.platform)
-        assertEquals(0L, entry.lastUpdated)
+        assertEquals(LeaderboardEntry.DEFAULT_ELO, entry.elo)
+        assertEquals(0, entry.wins)
+        assertEquals(0, entry.losses)
+        assertEquals("", entry.season)
     }
 
     @Test
-    fun `platform constants have correct values`() {
-        assertEquals("android", LeaderboardEntry.PLATFORM_ANDROID)
-        assertEquals("ios", LeaderboardEntry.PLATFORM_IOS)
+    fun `default elo constant has correct value`() {
+        assertEquals(1000, LeaderboardEntry.DEFAULT_ELO)
     }
 
     @Test
     fun `field name constants have correct values`() {
         assertEquals("displayName", LeaderboardEntry.FIELD_DISPLAY_NAME)
-        assertEquals("highScore", LeaderboardEntry.FIELD_HIGH_SCORE)
-        assertEquals("totalWins", LeaderboardEntry.FIELD_TOTAL_WINS)
-        assertEquals("platform", LeaderboardEntry.FIELD_PLATFORM)
-        assertEquals("lastUpdated", LeaderboardEntry.FIELD_LAST_UPDATED)
+        assertEquals("elo", LeaderboardEntry.FIELD_ELO)
+        assertEquals("wins", LeaderboardEntry.FIELD_WINS)
+        assertEquals("losses", LeaderboardEntry.FIELD_LOSSES)
+        assertEquals("season", LeaderboardEntry.FIELD_SEASON)
     }
 
     @Test
@@ -37,17 +36,17 @@ class LeaderboardEntryTest {
         val original = LeaderboardEntry(
             userId = "user1",
             displayName = "Alice",
-            highScore = 100,
-            totalWins = 5,
-            platform = LeaderboardEntry.PLATFORM_ANDROID,
-            lastUpdated = 1000L
+            elo = 1200,
+            wins = 5,
+            losses = 2,
+            season = "2026-04"
         )
-        val updated = original.copy(highScore = 200, totalWins = 6)
+        val updated = original.copy(elo = 1212, wins = 6, losses = 2)
         assertEquals("user1", updated.userId)
         assertEquals("Alice", updated.displayName)
-        assertEquals(200, updated.highScore)
-        assertEquals(6, updated.totalWins)
-        assertEquals(LeaderboardEntry.PLATFORM_ANDROID, updated.platform)
-        assertEquals(1000L, updated.lastUpdated)
+        assertEquals(1212, updated.elo)
+        assertEquals(6, updated.wins)
+        assertEquals(2, updated.losses)
+        assertEquals("2026-04", updated.season)
     }
 }

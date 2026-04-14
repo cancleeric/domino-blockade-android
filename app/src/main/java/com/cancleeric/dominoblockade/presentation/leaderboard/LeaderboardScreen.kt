@@ -22,6 +22,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,8 +44,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cancleeric.dominoblockade.domain.model.LeaderboardEntry
-import com.cancleeric.dominoblockade.domain.model.LeaderboardEntry.Companion.PLATFORM_ANDROID
-import com.cancleeric.dominoblockade.domain.model.LeaderboardEntry.Companion.PLATFORM_IOS
+import com.cancleeric.dominoblockade.domain.repository.LeaderboardSegment
 
 private const val RANK_GOLD = 1
 private const val RANK_SILVER = 2
@@ -56,11 +56,8 @@ private const val SPACER_LARGE_DP = 12
 private const val SPACER_SMALL_DP = 4
 private const val CONTENT_PADDING_DP = 16
 private const val BUTTON_END_PADDING_DP = 8
-private const val BADGE_HORIZONTAL_PADDING_DP = 6
-private const val BADGE_VERTICAL_PADDING_DP = 2
 private const val ITEM_SPACING_DP = 8
 private const val RANK_LABEL_PADDING_DP = 8
-private const val ALPHA_BADGE_BACKGROUND = 0.2f
 private const val AVATAR_INITIALS_MAX = 2
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -107,6 +104,7 @@ fun LeaderboardScreen(
     ) { paddingValues ->
         LeaderboardContent(
             uiState = uiState,
+            onSegmentSelected = viewModel::selectSegment,
             modifier = Modifier.padding(paddingValues)
         )
     }
@@ -133,34 +131,31 @@ private fun AuthButton(
 @Composable
 private fun LeaderboardContent(
     uiState: LeaderboardUiState,
+    onSegmentSelected: (LeaderboardSegment) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
-        when {
-            uiState.isLoading -> {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-            uiState.entries.isEmpty() -> {
-                Text(
-                    text = "No scores yet. Be the first!",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-            else -> {
-                LeaderboardList(uiState = uiState)
-            }
+        if (uiState.isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        } else {
+            LeaderboardList(uiState = uiState, onSegmentSelected = onSegmentSelected)
         }
     }
 }
 
 @Composable
-private fun LeaderboardList(uiState: LeaderboardUiState) {
+private fun LeaderboardList(uiState: LeaderboardUiState, onSegmentSelected: (LeaderboardSegment) -> Unit) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(ITEM_SPACING_DP.dp),
         contentPadding = PaddingValues(CONTENT_PADDING_DP.dp)
     ) {
+        item {
+            SegmentSelector(
+                selected = uiState.selectedSegment,
+                onSelected = onSegmentSelected
+            )
+        }
         uiState.playerRank?.let { rank ->
             item {
                 Text(
@@ -168,6 +163,14 @@ private fun LeaderboardList(uiState: LeaderboardUiState) {
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = RANK_LABEL_PADDING_DP.dp)
+                )
+            }
+        }
+        if (uiState.entries.isEmpty()) {
+            item {
+                Text(
+                    text = "No scores yet. Be the first!",
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
         }
@@ -244,17 +247,15 @@ private fun LeaderboardEntryCard(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
-                    Spacer(modifier = Modifier.width(SPACER_SMALL_DP.dp))
-                    PlatformBadge(platform = entry.platform)
                 }
                 Text(
-                    text = "Wins: ${entry.totalWins}",
+                    text = "W/L: ${entry.wins}/${entry.losses}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Text(
-                text = "${entry.highScore}",
+                text = "${entry.elo}",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -285,33 +286,25 @@ private fun RankBadge(rank: Int, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun PlatformBadge(platform: String, modifier: Modifier = Modifier) {
-    val label = when (platform) {
-        PLATFORM_ANDROID -> "Android"
-        PLATFORM_IOS -> "iOS"
-        else -> platform
-    }
-    val color = when (platform) {
-        PLATFORM_ANDROID -> Color(0xFF3DDC84)
-        PLATFORM_IOS -> Color(0xFF888888)
-        else -> MaterialTheme.colorScheme.secondary
-    }
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .background(
-                color = color.copy(alpha = ALPHA_BADGE_BACKGROUND),
-                shape = MaterialTheme.shapes.small
-            )
-            .padding(
-                horizontal = BADGE_HORIZONTAL_PADDING_DP.dp,
-                vertical = BADGE_VERTICAL_PADDING_DP.dp
-            )
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = color
+private fun SegmentSelector(
+    selected: LeaderboardSegment,
+    onSelected: (LeaderboardSegment) -> Unit
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(SPACER_SMALL_DP.dp)) {
+        FilterChip(
+            selected = selected == LeaderboardSegment.CURRENT_SEASON,
+            onClick = { onSelected(LeaderboardSegment.CURRENT_SEASON) },
+            label = { Text("Current Season") }
+        )
+        FilterChip(
+            selected = selected == LeaderboardSegment.ALL_TIME,
+            onClick = { onSelected(LeaderboardSegment.ALL_TIME) },
+            label = { Text("All Time") }
+        )
+        FilterChip(
+            selected = selected == LeaderboardSegment.FRIENDS_ONLY,
+            onClick = { onSelected(LeaderboardSegment.FRIENDS_ONLY) },
+            label = { Text("Friends Only") }
         )
     }
 }
