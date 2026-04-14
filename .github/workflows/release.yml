@@ -1,17 +1,20 @@
 name: Release
 
 on:
-  push:
-    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: 'Version name override (e.g. 1.2.0). Leave empty to read from build.gradle.kts.'
+        required: false
+        default: ''
 
 jobs:
   release:
     name: Build & Release
     runs-on: ubuntu-latest
-    # Skip when this workflow itself commits the version bump
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     permissions:
       contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout code
@@ -49,35 +52,34 @@ jobs:
             cp app/google-services.json.ci app/google-services.json
           fi
 
-      - name: Bump versionCode and push
+      - name: Bump versionCode on release branch
         id: bump_version
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          MAX_RETRIES=3
-          for i in $(seq 1 $MAX_RETRIES); do
-            git fetch origin main
-            git rebase origin/main
+          CURRENT_VERSION=$(grep -oP 'versionCode\s*=\s*\K[0-9]+' app/build.gradle.kts)
+          NEW_VERSION=$((CURRENT_VERSION + 1))
 
-            CURRENT_VERSION=$(grep -oP 'versionCode\s*=\s*\K[0-9]+' app/build.gradle.kts)
-            NEW_VERSION=$((CURRENT_VERSION + 1))
+          if [ -n "${{ github.event.inputs.version_name }}" ]; then
+            VERSION_NAME="${{ github.event.inputs.version_name }}"
+            sed -i "s/versionName = \"[^\"]*\"/versionName = \"${VERSION_NAME}\"/" app/build.gradle.kts
+          else
             VERSION_NAME=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
+          fi
 
-            sed -i "s/versionCode = ${CURRENT_VERSION}/versionCode = ${NEW_VERSION}/" app/build.gradle.kts
-            git add app/build.gradle.kts
-            git commit -m "chore: bump versionCode to ${NEW_VERSION} [skip ci]"
+          sed -i "s/versionCode = ${CURRENT_VERSION}/versionCode = ${NEW_VERSION}/" app/build.gradle.kts
 
-            git push origin main && break || {
-              if [ "$i" -eq "$MAX_RETRIES" ]; then exit 1; fi
-              git reset --soft HEAD~1
-              sleep $((i * 5))
-            }
-          done
+          BRANCH_NAME="ci/bump-versioncode-${{ github.run_number }}"
+          git checkout -b "${BRANCH_NAME}"
+          git add app/build.gradle.kts
+          git commit -m "chore: bump versionCode to ${NEW_VERSION} for release v${VERSION_NAME}.${NEW_VERSION}"
+          git push origin "${BRANCH_NAME}"
 
           echo "new_version_code=$NEW_VERSION" >> "$GITHUB_OUTPUT"
           echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
           echo "tag=v${VERSION_NAME}.${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "branch=${BRANCH_NAME}" >> "$GITHUB_OUTPUT"
 
       - name: Set up keystore
         env:
@@ -126,3 +128,27 @@ jobs:
               --title "Release $TAG" \
               --generate-notes
           fi
+
+      - name: Create PR to merge versionCode bump into main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.bump_version.outputs.tag }}"
+          BRANCH="${{ steps.bump_version.outputs.branch }}"
+          gh pr create \
+            --repo cancleeric/domino-blockade-android \
+            --title "chore: bump versionCode for ${TAG}" \
+            --body "Automated versionCode bump created by Release workflow (run #${{ github.run_number }}).
+
+          - New versionCode: ${{ steps.bump_version.outputs.new_version_code }}
+          - Release tag: ${TAG}
+
+          This PR merges the versionCode change back into main after a successful release build." \
+            --base main \
+            --head "${BRANCH}"
+
+          gh pr merge "${BRANCH}" \
+            --repo cancleeric/domino-blockade-android \
+            --squash \
+            --auto \
+            --delete-branch
