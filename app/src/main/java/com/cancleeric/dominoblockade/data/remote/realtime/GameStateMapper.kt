@@ -26,6 +26,7 @@ private const val KEY_HOST_NAME = "hostName"
 private const val KEY_GUEST_ID = "guestId"
 private const val KEY_GUEST_NAME = "guestName"
 private const val KEY_STATUS = "status"
+private const val KEY_IS_RANKED = "isRanked"
 private const val KEY_GAME_STATE = "gameState"
 private const val KEY_DISCONNECTED_PLAYER_ID = "disconnectedPlayerId"
 
@@ -114,6 +115,7 @@ internal fun snapshotToOnlineRoom(snapshot: DataSnapshot): OnlineRoom? {
     } else {
         null
     }
+    val isRanked = snapshot.child(KEY_IS_RANKED).getValue(Boolean::class.java) == true
     val disconnectedPlayerId = snapshot.child(KEY_DISCONNECTED_PLAYER_ID).getValue(String::class.java)
     return OnlineRoom(
         roomId = snapshot.key ?: "",
@@ -122,6 +124,7 @@ internal fun snapshotToOnlineRoom(snapshot: DataSnapshot): OnlineRoom? {
         guestId = guestId,
         guestName = guestName,
         status = status,
+        isRanked = isRanked,
         gameState = gameState,
         disconnectedPlayerId = disconnectedPlayerId
     )

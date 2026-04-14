@@ -32,6 +32,10 @@ class LobbyViewModelTest {
         override suspend fun updateGameState(roomId: String, gameState: GameState) = Unit
         override suspend fun leaveRoom(roomId: String) = Unit
         override suspend fun registerPresence(roomId: String, playerId: String) = Unit
+        override suspend fun joinRankedQueue(playerId: String, playerName: String) = Unit
+        override fun observeRankedAssignment(playerId: String): Flow<Pair<String, Int>?> =
+            MutableSharedFlow()
+        override suspend fun leaveRankedQueue(playerId: String) = Unit
     }
 
     private lateinit var viewModel: LobbyViewModel

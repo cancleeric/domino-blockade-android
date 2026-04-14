@@ -6,10 +6,12 @@ import com.cancleeric.dominoblockade.domain.model.OnlineRoom
 import com.cancleeric.dominoblockade.domain.model.OnlineRoomStatus
 import com.cancleeric.dominoblockade.domain.repository.OnlineGameRepository
 import com.cancleeric.dominoblockade.domain.usecase.StartGameUseCase
+import kotlinx.coroutines.Job
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -28,6 +30,7 @@ class LobbyViewModel @Inject constructor(
 
     private val localId = UUID.randomUUID().toString()
     private var gameInitialized = false
+    private var rankedAssignmentJob: Job? = null
 
     fun setPlayerName(name: String) {
         _uiState.value = _uiState.value.copy(playerName = name, error = null)
@@ -37,7 +40,19 @@ class LobbyViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(roomCode = code.uppercase(), error = null)
     }
 
+    fun setMatchMode(mode: MatchMode) {
+        val isQueueing = _uiState.value.isQueueingRanked
+        if (isQueueing && mode == MatchMode.CASUAL) {
+            cancelRankedQueue()
+        }
+        _uiState.value = _uiState.value.copy(mode = mode, error = null)
+    }
+
     fun createRoom() {
+        if (_uiState.value.mode == MatchMode.RANKED) {
+            joinRankedQueue()
+            return
+        }
         val name = _uiState.value.playerName.trim()
         if (name.isEmpty()) {
             _uiState.value = _uiState.value.copy(error = "Enter your name first")
@@ -57,6 +72,10 @@ class LobbyViewModel @Inject constructor(
     }
 
     fun joinRoom() {
+        if (_uiState.value.mode == MatchMode.RANKED) {
+            joinRankedQueue()
+            return
+        }
         val name = _uiState.value.playerName.trim()
         val code = _uiState.value.roomCode.trim()
         if (name.isEmpty() || code.isEmpty()) {
@@ -88,6 +107,58 @@ class LobbyViewModel @Inject constructor(
             onlineGameRepository.observeRoom(roomId).collect { room ->
                 _uiState.value = _uiState.value.copy(roomStatus = room.status)
                 handleRoomUpdate(room, roomId, localPlayerIndex)
+            }
+        }
+    }
+
+    fun cancelRankedQueue() {
+        rankedAssignmentJob?.cancel()
+        rankedAssignmentJob = null
+        viewModelScope.launch {
+            runCatching { onlineGameRepository.leaveRankedQueue(localId) }
+                .onFailure {
+                    _uiState.value = _uiState.value.copy(error = "Failed to leave ranked queue")
+                }
+            _uiState.value = _uiState.value.copy(isQueueingRanked = false, createdRoomId = null)
+        }
+    }
+
+    private fun joinRankedQueue() {
+        val name = _uiState.value.playerName.trim()
+        if (name.isEmpty()) {
+            _uiState.value = _uiState.value.copy(error = "Enter your name first")
+            return
+        }
+        _uiState.value = _uiState.value.copy(isLoading = true, isQueueingRanked = true, error = null)
+        viewModelScope.launch {
+            val enqueueResult = runCatching { onlineGameRepository.joinRankedQueue(localId, name) }
+            if (enqueueResult.isFailure) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    isQueueingRanked = false,
+                    error = "Failed to join ranked queue"
+                )
+                return@launch
+            }
+            _uiState.value = _uiState.value.copy(isLoading = false)
+            observeRankedAssignment()
+        }
+    }
+
+    private fun observeRankedAssignment() {
+        if (rankedAssignmentJob?.isActive == true) return
+        rankedAssignmentJob = viewModelScope.launch {
+            onlineGameRepository.observeRankedAssignment(localId).collectLatest { assignment ->
+                if (assignment == null || _uiState.value.navigateToGame != null) return@collectLatest
+                val (roomId, localPlayerIndex) = assignment
+                _uiState.value = _uiState.value.copy(
+                    isQueueingRanked = false,
+                    navigateToGame = NavigateToOnlineGame(roomId, localPlayerIndex, localId)
+                )
+                runCatching { onlineGameRepository.leaveRankedQueue(localId) }
+                    .onFailure {
+                        _uiState.value = _uiState.value.copy(error = "Failed to clean ranked queue")
+                    }
             }
         }
     }

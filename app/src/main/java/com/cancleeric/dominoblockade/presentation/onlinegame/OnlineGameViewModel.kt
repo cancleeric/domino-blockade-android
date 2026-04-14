@@ -6,6 +6,7 @@ import com.cancleeric.dominoblockade.domain.model.Domino
 import com.cancleeric.dominoblockade.domain.model.GameState
 import com.cancleeric.dominoblockade.domain.model.OnlineRoom
 import com.cancleeric.dominoblockade.domain.model.OnlineRoomStatus
+import com.cancleeric.dominoblockade.domain.repository.LeaderboardRepository
 import com.cancleeric.dominoblockade.domain.repository.OnlineGameRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -20,6 +21,7 @@ import javax.inject.Named
 @HiltViewModel
 class OnlineGameViewModel @Inject constructor(
     private val onlineGameRepository: OnlineGameRepository,
+    private val leaderboardRepository: LeaderboardRepository,
     @Named("reconnectTimeout") private val reconnectTimeoutSeconds: Int
 ) : ViewModel() {
 
@@ -31,6 +33,7 @@ class OnlineGameViewModel @Inject constructor(
     private var localPlayerId: String = ""
     private var observeJob: Job? = null
     private var countdownJob: Job? = null
+    private var rankedResultSubmitted = false
 
     fun setup(roomId: String, localPlayerIndex: Int, localPlayerId: String = "") {
         if (this.roomId == roomId) return
@@ -89,6 +92,7 @@ class OnlineGameViewModel @Inject constructor(
                 val opponentIndex = 1 - localPlayerIndex
                 val opponent = gameState.players.getOrNull(opponentIndex)
                 handleDisconnectState(room, opponent?.id.orEmpty(), opponent?.name.orEmpty())
+                maybeSubmitRankedResult(room, gameState)
                 _uiState.value = _uiState.value.copy(
                     gameState = gameState,
                     isMyTurn = gameState.currentPlayerIndex == localPlayerIndex,
@@ -97,8 +101,31 @@ class OnlineGameViewModel @Inject constructor(
                     isBlocked = gameState.isBlocked,
                     opponentName = opponent?.name ?: "",
                     opponentTileCount = opponent?.hand?.size ?: 0,
+                    isRankedMatch = room.isRanked,
                     isLoading = false
                 )
+            }
+        }
+    }
+
+    private fun maybeSubmitRankedResult(room: OnlineRoom, gameState: GameState) {
+        if (!room.isRanked || !gameState.isGameOver || rankedResultSubmitted) return
+        val winner = gameState.winner ?: gameState.players.minByOrNull { player ->
+            player.hand.sumOf { it.left + it.right }
+        } ?: return
+        val loser = gameState.players.firstOrNull { it.id != winner.id } ?: return
+        rankedResultSubmitted = true
+        viewModelScope.launch {
+            runCatching {
+                leaderboardRepository.updateRankedMatchResult(
+                    matchId = roomId,
+                    winnerId = winner.id,
+                    winnerDisplayName = winner.name,
+                    loserId = loser.id,
+                    loserDisplayName = loser.name
+                )
+            }.onFailure {
+                rankedResultSubmitted = false
             }
         }
     }

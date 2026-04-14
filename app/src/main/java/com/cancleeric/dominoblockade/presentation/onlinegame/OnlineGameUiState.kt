@@ -13,6 +13,7 @@ data class OnlineGameUiState(
     val isBlocked: Boolean = false,
     val opponentName: String = "",
     val opponentTileCount: Int = 0,
+    val isRankedMatch: Boolean = false,
     val isLoading: Boolean = true,
     val roomFinished: Boolean = false,
     val reconnectionCountdown: Int? = null,

@@ -3,6 +3,7 @@ package com.cancleeric.dominoblockade.presentation.leaderboard
 import com.cancleeric.dominoblockade.data.remote.auth.AuthService
 import com.cancleeric.dominoblockade.data.remote.auth.User
 import com.cancleeric.dominoblockade.domain.model.LeaderboardEntry
+import com.cancleeric.dominoblockade.domain.repository.LeaderboardSegment
 import com.cancleeric.dominoblockade.domain.repository.LeaderboardRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,9 +35,25 @@ class LeaderboardViewModelTest {
         fun setEntries(entries: List<LeaderboardEntry>) { _entries.value = entries }
         fun setPlayerRank(rank: Int?) { _playerRank.value = rank }
 
-        override fun getTopPlayers(limit: Int): Flow<List<LeaderboardEntry>> = _entries
-        override suspend fun submitScore(entry: LeaderboardEntry) { /* no-op */ }
-        override fun getPlayerRank(userId: String): Flow<Int?> = _playerRank
+        override fun getTopPlayers(
+            limit: Int,
+            segment: LeaderboardSegment,
+            currentUserId: String?
+        ): Flow<List<LeaderboardEntry>> = _entries
+        override fun getPlayerRank(
+            userId: String,
+            segment: LeaderboardSegment,
+            currentUserId: String?
+        ): Flow<Int?> = _playerRank
+        override suspend fun ensurePlayerEntry(userId: String, displayName: String) = Unit
+        override suspend fun updateRankedMatchResult(
+            matchId: String,
+            winnerId: String,
+            winnerDisplayName: String,
+            loserId: String,
+            loserDisplayName: String
+        ) = Unit
+        override suspend fun resetSeasonIfNeeded() = Unit
     }
 
     private class FakeAuthService : AuthService {
@@ -87,8 +104,8 @@ class LeaderboardViewModelTest {
     @Test
     fun `entries are populated after repository emits`() = runTest(testDispatcher) {
         val entries = listOf(
-            LeaderboardEntry(userId = "u1", displayName = "Alice", highScore = 100, totalWins = 5),
-            LeaderboardEntry(userId = "u2", displayName = "Bob", highScore = 80, totalWins = 3)
+            LeaderboardEntry(userId = "u1", displayName = "Alice", elo = 1200, wins = 5, losses = 1),
+            LeaderboardEntry(userId = "u2", displayName = "Bob", elo = 1100, wins = 3, losses = 2)
         )
         fakeRepository.setEntries(entries)
         val viewModel = LeaderboardViewModel(fakeRepository, fakeAuthService)
@@ -158,10 +175,19 @@ class LeaderboardViewModelTest {
         assertTrue(viewModel.uiState.first().entries.isEmpty())
 
         fakeRepository.setEntries(
-            listOf(LeaderboardEntry(userId = "u1", displayName = "Charlie", highScore = 50, totalWins = 2))
+            listOf(LeaderboardEntry(userId = "u1", displayName = "Charlie", elo = 1050, wins = 2, losses = 1))
         )
         advanceUntilIdle()
         assertEquals(1, viewModel.uiState.first().entries.size)
         assertEquals("Charlie", viewModel.uiState.first().entries[0].displayName)
+    }
+
+    @Test
+    fun `selectSegment updates selected segment`() = runTest(testDispatcher) {
+        val viewModel = LeaderboardViewModel(fakeRepository, fakeAuthService)
+        advanceUntilIdle()
+        viewModel.selectSegment(LeaderboardSegment.ALL_TIME)
+        advanceUntilIdle()
+        assertEquals(LeaderboardSegment.ALL_TIME, viewModel.uiState.first().selectedSegment)
     }
 }
