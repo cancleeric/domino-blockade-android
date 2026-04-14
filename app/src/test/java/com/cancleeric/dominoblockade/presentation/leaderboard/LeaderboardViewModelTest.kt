@@ -47,6 +47,7 @@ class LeaderboardViewModelTest {
         ): Flow<Int?> = _playerRank
         override suspend fun ensurePlayerEntry(userId: String, displayName: String) = Unit
         override suspend fun updateRankedMatchResult(
+            matchId: String,
             winnerId: String,
             winnerDisplayName: String,
             loserId: String,

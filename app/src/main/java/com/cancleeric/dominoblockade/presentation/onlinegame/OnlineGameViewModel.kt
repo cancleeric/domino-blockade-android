@@ -109,7 +109,7 @@ class OnlineGameViewModel @Inject constructor(
     }
 
     private fun maybeSubmitRankedResult(room: OnlineRoom, gameState: GameState) {
-        if (!room.isRanked || !gameState.isGameOver || localPlayerIndex != 0 || rankedResultSubmitted) return
+        if (!room.isRanked || !gameState.isGameOver || rankedResultSubmitted) return
         val winner = gameState.winner ?: gameState.players.minByOrNull { player ->
             player.hand.sumOf { it.left + it.right }
         } ?: return
@@ -118,6 +118,7 @@ class OnlineGameViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 leaderboardRepository.updateRankedMatchResult(
+                    matchId = roomId,
                     winnerId = winner.id,
                     winnerDisplayName = winner.name,
                     loserId = loser.id,

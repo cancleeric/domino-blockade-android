@@ -6,8 +6,11 @@ import com.cancleeric.dominoblockade.domain.model.OnlineRoomStatus
 import com.cancleeric.dominoblockade.domain.repository.OnlineGameRepository
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.MutableData
+import com.google.firebase.database.Transaction
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.DataSnapshot
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -29,6 +32,7 @@ private const val KEY_PLAYER_NAME = "playerName"
 private const val KEY_CREATED_AT = "createdAt"
 private const val KEY_ROOM_ID = "roomId"
 private const val KEY_PLAYER_INDEX = "playerIndex"
+private const val KEY_CLAIMED_BY = "claimedBy"
 private const val ROOM_CODE_LENGTH = 6
 private const val ROOM_CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
@@ -101,31 +105,35 @@ class FirebaseRealtimeGameRepository @Inject constructor(
         val waitingPlayerName = waiting?.child(KEY_PLAYER_NAME)?.getValue(String::class.java)
 
         if (!waitingPlayerId.isNullOrBlank() && waitingPlayerId != playerId && !waitingPlayerName.isNullOrBlank()) {
-            val roomId = generateRoomCode()
-            val roomData = mapOf(
-                "hostId" to waitingPlayerId,
-                "hostName" to waitingPlayerName,
-                KEY_GUEST_ID to playerId,
-                KEY_GUEST_NAME to playerName,
-                KEY_STATUS to OnlineRoomStatus.PLAYING.name,
-                KEY_IS_RANKED to true
-            )
-            roomsRef.child(roomId).setValue(roomData).await()
-            assignmentRef.child(waitingPlayerId).setValue(
-                mapOf(KEY_ROOM_ID to roomId, KEY_PLAYER_INDEX to 0)
-            ).await()
-            assignmentRef.child(playerId).setValue(
-                mapOf(KEY_ROOM_ID to roomId, KEY_PLAYER_INDEX to 1)
-            ).await()
-            queueRef.child(waitingPlayerId).removeValue().await()
-            return
+            val claimed = claimWaitingPlayer(queueRef, waitingPlayerId, playerId)
+            if (claimed) {
+                val roomId = generateRoomCode()
+                val roomData = mapOf(
+                    "hostId" to waitingPlayerId,
+                    "hostName" to waitingPlayerName,
+                    KEY_GUEST_ID to playerId,
+                    KEY_GUEST_NAME to playerName,
+                    KEY_STATUS to OnlineRoomStatus.PLAYING.name,
+                    KEY_IS_RANKED to true
+                )
+                roomsRef.child(roomId).setValue(roomData).await()
+                assignmentRef.child(waitingPlayerId).setValue(
+                    mapOf(KEY_ROOM_ID to roomId, KEY_PLAYER_INDEX to 0)
+                ).await()
+                assignmentRef.child(playerId).setValue(
+                    mapOf(KEY_ROOM_ID to roomId, KEY_PLAYER_INDEX to 1)
+                ).await()
+                queueRef.child(waitingPlayerId).removeValue().await()
+                return
+            }
         }
 
         queueRef.child(playerId).setValue(
             mapOf(
                 KEY_PLAYER_ID to playerId,
                 KEY_PLAYER_NAME to playerName,
-                KEY_CREATED_AT to System.currentTimeMillis()
+                KEY_CREATED_AT to System.currentTimeMillis(),
+                KEY_CLAIMED_BY to null
             )
         ).await()
     }
@@ -154,6 +162,43 @@ class FirebaseRealtimeGameRepository @Inject constructor(
     override suspend fun leaveRankedQueue(playerId: String) {
         database.getReference(PATH_RANKED_QUEUE).child(playerId).removeValue().await()
         database.getReference(PATH_RANKED_ASSIGNMENTS).child(playerId).removeValue().await()
+    }
+
+    private suspend fun claimWaitingPlayer(
+        queueRef: com.google.firebase.database.DatabaseReference,
+        waitingPlayerId: String,
+        claimerId: String
+    ): Boolean = suspendCancellableCoroutine { continuation ->
+        queueRef.child(waitingPlayerId).runTransaction(
+            object : Transaction.Handler {
+                override fun doTransaction(currentData: MutableData): Transaction.Result {
+                    val value = currentData.value as? Map<*, *> ?: return Transaction.abort()
+                    val playerId = value[KEY_PLAYER_ID] as? String ?: return Transaction.abort()
+                    val alreadyClaimedBy = value[KEY_CLAIMED_BY] as? String
+                    if (playerId != waitingPlayerId || !alreadyClaimedBy.isNullOrBlank()) {
+                        return Transaction.abort()
+                    }
+                    currentData.value = value.toMutableMap().apply { put(KEY_CLAIMED_BY, claimerId) }
+                    return Transaction.success(currentData)
+                }
+
+                override fun onComplete(
+                    error: DatabaseError?,
+                    committed: Boolean,
+                    currentData: DataSnapshot?
+                ) {
+                    if (error != null) {
+                        if (continuation.isActive) {
+                            continuation.resumeWith(Result.failure(error.toException()))
+                        }
+                        return
+                    }
+                    if (continuation.isActive) {
+                        continuation.resumeWith(Result.success(committed))
+                    }
+                }
+            }
+        )
     }
 
     private fun generateRoomCode(): String =

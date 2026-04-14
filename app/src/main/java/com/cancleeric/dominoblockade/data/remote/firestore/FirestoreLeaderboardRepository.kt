@@ -21,6 +21,7 @@ private const val COLLECTION_LEADERBOARD_ALL_TIME = "leaderboard_all_time"
 private const val COLLECTION_LEADERBOARD_HISTORY = "leaderboard_history"
 private const val COLLECTION_FRIENDSHIPS = "friendships"
 private const val COLLECTION_LEADERBOARD_META = "leaderboard_meta"
+private const val COLLECTION_RANKED_MATCH_RESULTS = "ranked_match_results"
 private const val DOCUMENT_SEASON_STATE = "season_state"
 private const val COLLECTION_HISTORY_PLAYERS = "players"
 private const val FIELD_USERS = "users"
@@ -126,6 +127,7 @@ class FirestoreLeaderboardRepository @Inject constructor(
     }
 
     override suspend fun updateRankedMatchResult(
+        matchId: String,
         winnerId: String,
         winnerDisplayName: String,
         loserId: String,
@@ -141,6 +143,10 @@ class FirestoreLeaderboardRepository @Inject constructor(
             val loserSeasonRef = leaderboardRef.document(loserId)
             val winnerAllTimeRef = allTimeRef.document(winnerId)
             val loserAllTimeRef = allTimeRef.document(loserId)
+            val matchResultRef = firestore.collection(COLLECTION_RANKED_MATCH_RESULTS).document(matchId)
+
+            val existingMatch = transaction.get(matchResultRef)
+            if (existingMatch.exists()) return@runTransaction null
 
             val winnerSeasonSnap = transaction.get(winnerSeasonRef)
             val loserSeasonSnap = transaction.get(loserSeasonRef)
@@ -184,9 +190,12 @@ class FirestoreLeaderboardRepository @Inject constructor(
             val loserAllTimeLosses = (loserAllTimeSnap.getLong(FIELD_LOSSES) ?: 0L) + 1L
             val winnerAllTimeElo = winnerAllTimeSnap.getLong(FIELD_ELO)?.toInt() ?: LeaderboardEntry.DEFAULT_ELO
             val loserAllTimeElo = loserAllTimeSnap.getLong(FIELD_ELO)?.toInt() ?: LeaderboardEntry.DEFAULT_ELO
+            val expectedWinnerAllTime = 1.0 / (1.0 + 10.0.pow((loserAllTimeElo - winnerAllTimeElo) / 400.0))
+            val expectedLoserAllTime = 1.0 - expectedWinnerAllTime
             val winnerAllTimeNewElo =
-                (winnerAllTimeElo + K_FACTOR * (1.0 - expectedWinner)).roundToInt().coerceAtLeast(0)
-            val loserAllTimeNewElo = (loserAllTimeElo - K_FACTOR * expectedLoser).roundToInt().coerceAtLeast(0)
+                (winnerAllTimeElo + K_FACTOR * (1.0 - expectedWinnerAllTime)).roundToInt().coerceAtLeast(0)
+            val loserAllTimeNewElo =
+                (loserAllTimeElo - K_FACTOR * expectedLoserAllTime).roundToInt().coerceAtLeast(0)
 
             transaction.set(
                 winnerAllTimeRef,
@@ -205,6 +214,16 @@ class FirestoreLeaderboardRepository @Inject constructor(
                     FIELD_ELO to loserAllTimeNewElo,
                     FIELD_LOSSES to loserAllTimeLosses,
                     FIELD_SEASON to "all-time"
+                ),
+                SetOptions.merge()
+            )
+
+            transaction.set(
+                matchResultRef,
+                mapOf(
+                    "winnerId" to winnerId,
+                    "loserId" to loserId,
+                    FIELD_UPDATED_AT to System.currentTimeMillis()
                 ),
                 SetOptions.merge()
             )
@@ -337,5 +356,8 @@ class FirestoreLeaderboardRepository @Inject constructor(
         )
     }
 
+    /**
+     * Returns the current leaderboard season in UTC as YYYY-MM (for example: 2026-04).
+     */
     private fun currentSeason(): String = YearMonth.now(ZoneOffset.UTC).toString()
 }

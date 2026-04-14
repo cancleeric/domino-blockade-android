@@ -116,7 +116,10 @@ class LobbyViewModel @Inject constructor(
         rankedAssignmentJob = null
         viewModelScope.launch {
             runCatching { onlineGameRepository.leaveRankedQueue(localId) }
-            _uiState.value = _uiState.value.copy(isQueueingRanked = false)
+                .onFailure {
+                    _uiState.value = _uiState.value.copy(error = "Failed to leave ranked queue")
+                }
+            _uiState.value = _uiState.value.copy(isQueueingRanked = false, createdRoomId = null)
         }
     }
 
@@ -153,6 +156,9 @@ class LobbyViewModel @Inject constructor(
                     navigateToGame = NavigateToOnlineGame(roomId, localPlayerIndex, localId)
                 )
                 runCatching { onlineGameRepository.leaveRankedQueue(localId) }
+                    .onFailure {
+                        _uiState.value = _uiState.value.copy(error = "Failed to clean ranked queue")
+                    }
             }
         }
     }

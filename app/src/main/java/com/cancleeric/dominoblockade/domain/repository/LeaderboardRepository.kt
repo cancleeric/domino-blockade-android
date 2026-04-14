@@ -14,6 +14,7 @@ interface LeaderboardRepository {
     fun getPlayerRank(userId: String, segment: LeaderboardSegment, currentUserId: String?): Flow<Int?>
     suspend fun ensurePlayerEntry(userId: String, displayName: String)
     suspend fun updateRankedMatchResult(
+        matchId: String,
         winnerId: String,
         winnerDisplayName: String,
         loserId: String,
