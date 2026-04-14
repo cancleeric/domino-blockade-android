@@ -1,3 +1,5 @@
+@file:Suppress("LongMethod")
+
 package com.cancleeric.dominoblockade.presentation.shop
 
 import androidx.compose.foundation.layout.Arrangement
