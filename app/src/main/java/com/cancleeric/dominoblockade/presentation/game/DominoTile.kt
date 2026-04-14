@@ -102,11 +102,11 @@ fun DominoTile(
         isPlayable -> MaterialTheme.colorScheme.tertiary
         else -> MaterialTheme.colorScheme.outline
     }
-    val borderWidth: Dp = if (isSelected || isPlayable) (BORDER_WIDTH_DP * 2).dp else BORDER_WIDTH_DP.dp
     val shape = RoundedCornerShape(CORNER_RADIUS_DP.dp)
     val dominoStyle = LocalDominoStyle.current
     val dominoSkin = LocalDominoSkin.current
     val (skinTileColor, skinDotColor) = skinColors(dominoSkin)
+    val borderWidth: Dp = if (isSelected || isPlayable) (BORDER_WIDTH_DP * 2).dp else BORDER_WIDTH_DP.dp
     val bgColor = if (isSelected) {
         MaterialTheme.colorScheme.primaryContainer
     } else {
