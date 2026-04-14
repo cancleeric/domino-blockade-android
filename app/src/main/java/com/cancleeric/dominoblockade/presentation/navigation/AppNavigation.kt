@@ -91,6 +91,22 @@ fun AppNavigation(
     } else {
         Screen.Menu.route
     }
+    LaunchedEffect(incomingDeepLink) {
+        val deepLink = incomingDeepLink ?: return@LaunchedEffect
+        val uri = runCatching { Uri.parse(deepLink) }.getOrNull() ?: return@LaunchedEffect
+        if (uri.scheme != "domino-blockade") return@LaunchedEffect
+        when (uri.host) {
+            "challenge" -> {
+                val action = uri.pathSegments.firstOrNull()
+                val challengeId = uri.getQueryParameter("challengeId")
+                if (!challengeId.isNullOrBlank() && !action.isNullOrBlank()) {
+                    navController.navigate(Screen.Social.createRoute(challengeId, action))
+                }
+            }
+            "friend" -> navController.navigate(Screen.Social.createRoute())
+        }
+        onDeepLinkHandled()
+    }
     NavHost(
         navController = navController,
         startDestination = startDestination,
@@ -100,22 +116,6 @@ fun AppNavigation(
         popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) + fadeIn() },
         popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut() }
     ) {
-        LaunchedEffect(incomingDeepLink) {
-            val deepLink = incomingDeepLink ?: return@LaunchedEffect
-            val uri = runCatching { Uri.parse(deepLink) }.getOrNull() ?: return@LaunchedEffect
-            if (uri.scheme != "domino-blockade") return@LaunchedEffect
-            when (uri.host) {
-                "challenge" -> {
-                    val action = uri.pathSegments.firstOrNull()
-                    val challengeId = uri.getQueryParameter("challengeId")
-                    if (!challengeId.isNullOrBlank() && !action.isNullOrBlank()) {
-                        navController.navigate(Screen.Social.createRoute(challengeId, action))
-                    }
-                }
-                "friend" -> navController.navigate(Screen.Social.createRoute())
-            }
-            onDeepLinkHandled()
-        }
         composable(Screen.Menu.route) {
             val tutorialViewModel: TutorialViewModel = hiltViewModel()
             val tutorialState by tutorialViewModel.uiState.collectAsState()
