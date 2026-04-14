@@ -12,6 +12,7 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -27,6 +28,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val themeViewModel: ThemeViewModel by viewModels()
+    private val pendingDeepLink = mutableStateOf<String?>(null)
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,6 +40,7 @@ class MainActivity : ComponentActivity() {
         } else {
             -1
         }
+        pendingDeepLink.value = intent?.dataString
         setContent {
             val appTheme by themeViewModel.appTheme.collectAsStateWithLifecycle()
             val dominoStyle by themeViewModel.dominoStyle.collectAsStateWithLifecycle()
@@ -47,11 +50,18 @@ class MainActivity : ComponentActivity() {
                     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                         AppNavigation(
                             modifier = Modifier.padding(innerPadding),
-                            quickStartPlayerCount = quickStartPlayerCount
+                            quickStartPlayerCount = quickStartPlayerCount,
+                            incomingDeepLink = pendingDeepLink.value,
+                            onDeepLinkHandled = { pendingDeepLink.value = null }
                         )
                     }
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        pendingDeepLink.value = intent.dataString
     }
 }

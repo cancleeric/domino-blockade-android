@@ -106,6 +106,9 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.database)
+    implementation(libs.firebase.messaging)
+    implementation(libs.zxing.core)
+    implementation(libs.play.services.code.scanner)
     // DataStore
     implementation(libs.androidx.datastore.preferences)
 
