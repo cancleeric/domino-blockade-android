@@ -44,8 +44,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             val appTheme by themeViewModel.appTheme.collectAsStateWithLifecycle()
             val dominoStyle by themeViewModel.dominoStyle.collectAsStateWithLifecycle()
+            val dominoSkin by themeViewModel.dominoSkin.collectAsStateWithLifecycle()
             val windowSizeClass = calculateWindowSizeClass(this)
-            DominoBlockadeTheme(appTheme = appTheme, dominoStyle = dominoStyle) {
+            DominoBlockadeTheme(appTheme = appTheme, dominoStyle = dominoStyle, dominoSkin = dominoSkin) {
                 CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
                     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                         AppNavigation(

@@ -10,6 +10,7 @@ import com.cancleeric.dominoblockade.data.repository.GameReplayRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.GameRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.PlayerProfileRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.PlayerStatsRepositoryImpl
+import com.cancleeric.dominoblockade.data.repository.ShopRepositoryImpl
 import com.cancleeric.dominoblockade.data.repository.ThemeRepositoryImpl
 import com.cancleeric.dominoblockade.domain.analytics.AnalyticsTracker
 import com.cancleeric.dominoblockade.domain.repository.AchievementRepository
@@ -20,6 +21,7 @@ import com.cancleeric.dominoblockade.domain.repository.GameRepository
 import com.cancleeric.dominoblockade.domain.repository.GameSettingsRepository
 import com.cancleeric.dominoblockade.domain.repository.PlayerProfileRepository
 import com.cancleeric.dominoblockade.domain.repository.PlayerStatsRepository
+import com.cancleeric.dominoblockade.domain.repository.ShopRepository
 import com.cancleeric.dominoblockade.domain.repository.ThemeRepository
 import com.cancleeric.dominoblockade.domain.repository.TutorialRepository
 import com.cancleeric.dominoblockade.data.remote.firestore.FirestoreTournamentRepository
@@ -80,4 +82,8 @@ abstract class AppModule {
     @Binds
     @Singleton
     abstract fun bindTournamentRepository(impl: FirestoreTournamentRepository): TournamentRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindShopRepository(impl: ShopRepositoryImpl): ShopRepository
 }

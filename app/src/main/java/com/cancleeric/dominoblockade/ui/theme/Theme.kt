@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.cancleeric.dominoblockade.domain.model.AppTheme
+import com.cancleeric.dominoblockade.domain.model.DominoSkin
 import com.cancleeric.dominoblockade.domain.model.DominoStyle
 
 private val DarkColorScheme = darkColorScheme(
@@ -102,6 +103,11 @@ val LocalBoardBackground = staticCompositionLocalOf { ClassicBoard }
  */
 val LocalDominoStyle = staticCompositionLocalOf { DominoStyle.DOTS }
 
+/**
+ * Composition local providing the active domino skin style.
+ */
+val LocalDominoSkin = staticCompositionLocalOf { DominoSkin.CLASSIC }
+
 @Suppress("CyclomaticComplexMethod")
 private fun resolveColorSchemeAndBoard(
     appTheme: AppTheme,
@@ -127,6 +133,7 @@ private fun resolveColorSchemeAndBoard(
 fun DominoBlockadeTheme(
     appTheme: AppTheme = AppTheme.CLASSIC,
     dominoStyle: DominoStyle = DominoStyle.DOTS,
+    dominoSkin: DominoSkin = DominoSkin.CLASSIC,
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
     highContrast: Boolean = false,
@@ -149,7 +156,8 @@ fun DominoBlockadeTheme(
     CompositionLocalProvider(
         LocalHighContrast provides highContrast,
         LocalBoardBackground provides boardBackground,
-        LocalDominoStyle provides dominoStyle
+        LocalDominoStyle provides dominoStyle,
+        LocalDominoSkin provides dominoSkin
     ) {
         MaterialTheme(
             colorScheme = colorScheme,

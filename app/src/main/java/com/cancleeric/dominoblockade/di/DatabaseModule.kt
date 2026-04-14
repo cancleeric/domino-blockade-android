@@ -14,6 +14,7 @@ import com.cancleeric.dominoblockade.data.local.dao.GameRecordDao
 import com.cancleeric.dominoblockade.data.local.dao.GameReplayDao
 import com.cancleeric.dominoblockade.data.local.dao.PlayerProfileDao
 import com.cancleeric.dominoblockade.data.local.dao.PlayerStatsDao
+import com.cancleeric.dominoblockade.data.local.dao.ShopDao
 import com.cancleeric.dominoblockade.data.local.dao.ThemeDao
 import dagger.Module
 import dagger.Provides
@@ -99,6 +100,24 @@ private val MIGRATION_6_7 = object : Migration(6, 7) {
     }
 }
 
+private val MIGRATION_7_8 = object : Migration(7, 8) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "ALTER TABLE `theme_settings` " +
+                "ADD COLUMN `dominoSkin` TEXT NOT NULL DEFAULT 'CLASSIC'"
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `shop_wallet` " +
+                "(`id` INTEGER NOT NULL, `coinBalance` INTEGER NOT NULL, `lastDailyWinDate` TEXT NOT NULL, " +
+                "`updatedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))"
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `shop_purchases` " +
+                "(`itemId` TEXT NOT NULL, `purchasedAt` INTEGER NOT NULL, PRIMARY KEY(`itemId`))"
+        )
+    }
+}
+
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
@@ -107,7 +126,14 @@ object DatabaseModule {
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, "domino_blockade.db")
-            .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+            .addMigrations(
+                MIGRATION_2_3,
+                MIGRATION_3_4,
+                MIGRATION_4_5,
+                MIGRATION_5_6,
+                MIGRATION_6_7,
+                MIGRATION_7_8
+            )
             .fallbackToDestructiveMigration()
             .build()
 
@@ -131,6 +157,9 @@ object DatabaseModule {
 
     @Provides
     fun provideAdaptiveAiDao(db: AppDatabase): AdaptiveAiDao = db.adaptiveAiDao()
+
+    @Provides
+    fun provideShopDao(db: AppDatabase): ShopDao = db.shopDao()
 
     @Provides
     @Singleton

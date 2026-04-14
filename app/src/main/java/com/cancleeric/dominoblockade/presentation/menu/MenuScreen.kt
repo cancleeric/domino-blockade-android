@@ -44,6 +44,7 @@ fun MenuScreen(
     onSocial: () -> Unit = {},
     onReplayLastGame: () -> Unit = {},
     onTournament: () -> Unit = {},
+    onShop: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var selectedPlayerCount by rememberSaveable { mutableIntStateOf(MIN_PLAYERS) }
@@ -63,6 +64,7 @@ fun MenuScreen(
         onSocial = onSocial,
         onReplayLastGame = onReplayLastGame,
         onTournament = onTournament,
+        onShop = onShop,
         isMediumOrExpanded = isMediumOrExpanded,
         modifier = modifier.fillMaxSize()
     )
@@ -83,6 +85,7 @@ private fun MenuContent(
     onSocial: () -> Unit,
     onReplayLastGame: () -> Unit,
     onTournament: () -> Unit,
+    onShop: () -> Unit,
     isMediumOrExpanded: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -213,6 +216,15 @@ private fun MenuContent(
                     .padding(top = CHIP_SPACING_DP.dp)
             ) {
                 Text(text = "Tournament")
+            }
+            Button(
+                onClick = onShop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = SECTION_PADDING_DP.dp)
+                    .padding(top = CHIP_SPACING_DP.dp)
+            ) {
+                Text(text = "Shop")
             }
         }
     }

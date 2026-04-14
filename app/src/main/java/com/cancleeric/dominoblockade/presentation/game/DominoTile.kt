@@ -29,7 +29,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.cancleeric.dominoblockade.domain.model.DominoSkin
 import com.cancleeric.dominoblockade.domain.model.DominoStyle
+import com.cancleeric.dominoblockade.ui.theme.LocalDominoSkin
 import com.cancleeric.dominoblockade.ui.theme.LocalDominoStyle
 
 private const val SELECTED_SCALE = 1.08f
@@ -101,14 +103,16 @@ fun DominoTile(
         else -> MaterialTheme.colorScheme.outline
     }
     val borderWidth: Dp = if (isSelected || isPlayable) (BORDER_WIDTH_DP * 2).dp else BORDER_WIDTH_DP.dp
+    val shape = RoundedCornerShape(CORNER_RADIUS_DP.dp)
+    val dominoStyle = LocalDominoStyle.current
+    val dominoSkin = LocalDominoSkin.current
+    val (skinTileColor, skinDotColor) = skinColors(dominoSkin)
     val bgColor = if (isSelected) {
         MaterialTheme.colorScheme.primaryContainer
     } else {
-        MaterialTheme.colorScheme.surface
+        skinTileColor
     }
-    val dotColor = MaterialTheme.colorScheme.onSurface
-    val shape = RoundedCornerShape(CORNER_RADIUS_DP.dp)
-    val dominoStyle = LocalDominoStyle.current
+    val dotColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else skinDotColor
 
     val tileModifier = modifier
         .scale(scale)
@@ -197,4 +201,11 @@ private fun NumberFace(pips: Int, dotColor: Color) {
 
 private fun buildContentDescription(left: Int, right: Int): String {
     return if (left == right) "Double $left domino" else "Domino $left $right"
+}
+
+private fun skinColors(skin: DominoSkin): Pair<Color, Color> = when (skin) {
+    DominoSkin.CLASSIC -> Color.White to Color.Black
+    DominoSkin.MARBLE -> Color(0xFFF2F2F2) to Color(0xFF2C2C2C)
+    DominoSkin.NEON -> Color(0xFF101820) to Color(0xFF7DF9FF)
+    DominoSkin.GOLD -> Color(0xFFFFD54F) to Color(0xFF5D4037)
 }
