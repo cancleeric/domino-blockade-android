@@ -109,6 +109,7 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.zxing.core)
     implementation(libs.play.services.code.scanner)
+    implementation(libs.mlkit.barcode.scanning)
     // DataStore
     implementation(libs.androidx.datastore.preferences)
 
