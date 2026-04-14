@@ -104,7 +104,7 @@ class ShopRepositoryImpl @Inject constructor(
         val wallet = shopDao.getWalletOnce() ?: ShopWalletEntity()
         val today = LocalDate.now(ZoneOffset.UTC).toString()
         val dailyReward = if (isWin && wallet.lastDailyWinDate != today) DAILY_FIRST_WIN_COINS else 0
-        val achievementReward = unlockedAchievements.coerceAtLeast(0) * ACHIEVEMENT_UNLOCK_COINS
+        val achievementReward = unlockedAchievements * ACHIEVEMENT_UNLOCK_COINS
         val totalReward = dailyReward + achievementReward
         if (totalReward <= 0) return 0
         val now = System.currentTimeMillis()

@@ -57,6 +57,7 @@ class ShopViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             runCatching { shopRepository.syncWithRemote() }
+                .onFailure { _events.emit("Shop sync unavailable. Using offline cache.") }
         }
     }
 
