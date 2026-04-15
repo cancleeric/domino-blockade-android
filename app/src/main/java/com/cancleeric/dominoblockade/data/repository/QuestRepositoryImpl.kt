@@ -23,7 +23,6 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.math.absoluteValue
 
 private const val COLLECTION_QUEST_PROFILES = "challenge_quest_profiles"
 private const val FIELD_TASKS = "tasks"
@@ -277,7 +276,8 @@ private val longTermTemplates = listOf(
 )
 
 private fun dailyTemplatesFor(date: String): List<QuestTemplate> {
-    val start = date.hashCode().absoluteValue % dailyTemplatePool.size
+    val daysSinceEpoch = runCatching { LocalDate.parse(date).toEpochDay() }.getOrDefault(0L)
+    val start = (daysSinceEpoch % dailyTemplatePool.size).toInt()
     return (0 until DAILY_CHALLENGE_COUNT).map { offset ->
         val base = dailyTemplatePool[(start + offset) % dailyTemplatePool.size]
         base.copy(id = "${base.id}_$date")

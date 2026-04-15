@@ -111,7 +111,7 @@ private fun TaskCard(task: QuestTask, onClaim: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text("${task.progress}/${task.target}")
-                Text("Rewards: ${task.rewardCoins}🪙 + ${task.rewardXp} XP")
+                Text("Rewards: ${task.rewardCoins} coins + ${task.rewardXp} XP")
             }
             if (task.isCompleted && !task.isClaimed) {
                 Button(onClick = onClaim) { Text("Claim Reward") }
