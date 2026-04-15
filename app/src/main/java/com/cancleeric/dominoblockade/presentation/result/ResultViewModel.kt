@@ -8,6 +8,7 @@ import com.cancleeric.dominoblockade.domain.analytics.AnalyticsTracker
 import com.cancleeric.dominoblockade.domain.model.AchievementType
 import com.cancleeric.dominoblockade.domain.model.GameResult
 import com.cancleeric.dominoblockade.domain.repository.PlayerStatsRepository
+import com.cancleeric.dominoblockade.domain.repository.QuestRepository
 import com.cancleeric.dominoblockade.domain.repository.ShopRepository
 import com.cancleeric.dominoblockade.domain.usecase.CheckAchievementsUseCase
 import com.cancleeric.dominoblockade.presentation.notification.AchievementNotificationHelper
@@ -25,6 +26,7 @@ class ResultViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val playerStatsRepository: PlayerStatsRepository,
     private val shopRepository: ShopRepository,
+    private val questRepository: QuestRepository,
     private val checkAchievementsUseCase: CheckAchievementsUseCase,
     private val notificationHelper: AchievementNotificationHelper,
     private val analyticsTracker: AnalyticsTracker
@@ -49,6 +51,10 @@ class ResultViewModel @Inject constructor(
             shopRepository.awardGameRewards(
                 isWin = result.isWin,
                 unlockedAchievements = unlocked.size
+            )
+            questRepository.recordGameResult(
+                isWin = result.isWin,
+                isBlocked = result.isBlocked
             )
             unlocked.forEach { notificationHelper.showAchievementUnlocked(it) }
             _newAchievements.value = unlocked

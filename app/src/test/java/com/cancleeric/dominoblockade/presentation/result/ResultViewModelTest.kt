@@ -7,6 +7,8 @@ import com.cancleeric.dominoblockade.domain.model.AchievementType
 import com.cancleeric.dominoblockade.domain.model.GameResult
 import com.cancleeric.dominoblockade.domain.repository.AchievementRepository
 import com.cancleeric.dominoblockade.domain.repository.PlayerStatsRepository
+import com.cancleeric.dominoblockade.domain.repository.QuestRepository
+import com.cancleeric.dominoblockade.domain.repository.ShopRepository
 import com.cancleeric.dominoblockade.domain.usecase.CheckAchievementsUseCase
 import com.cancleeric.dominoblockade.domain.analytics.AnalyticsTracker
 import com.cancleeric.dominoblockade.presentation.notification.AchievementNotificationHelper
@@ -38,6 +40,8 @@ class ResultViewModelTest {
         coEvery { getAllUnlocked() } returns emptyList()
     }
     private val checkAchievementsUseCase = CheckAchievementsUseCase(achievementRepository)
+    private val shopRepository: ShopRepository = mockk(relaxed = true)
+    private val questRepository: QuestRepository = mockk(relaxed = true)
     private val notificationHelper: AchievementNotificationHelper = mockk(relaxed = true)
     private val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
 
@@ -55,7 +59,15 @@ class ResultViewModelTest {
         val handle = SavedStateHandle(
             mapOf("winnerName" to winnerName, "isBlocked" to isBlocked)
         )
-        return ResultViewModel(handle, playerStatsRepository, checkAchievementsUseCase, notificationHelper, analyticsTracker)
+        return ResultViewModel(
+            handle,
+            playerStatsRepository,
+            shopRepository,
+            questRepository,
+            checkAchievementsUseCase,
+            notificationHelper,
+            analyticsTracker
+        )
     }
 
     @Test

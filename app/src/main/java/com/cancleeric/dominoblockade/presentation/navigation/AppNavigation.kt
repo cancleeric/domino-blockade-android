@@ -27,6 +27,7 @@ import com.cancleeric.dominoblockade.presentation.localmultiplayer.LocalMultipla
 import com.cancleeric.dominoblockade.presentation.menu.MenuScreen
 import com.cancleeric.dominoblockade.presentation.onlinegame.OnlineGameScreen
 import com.cancleeric.dominoblockade.presentation.profile.PlayerProfileScreen
+import com.cancleeric.dominoblockade.presentation.quest.QuestScreen
 import com.cancleeric.dominoblockade.presentation.replay.ReplayScreen
 import com.cancleeric.dominoblockade.presentation.tournament.TournamentBracketScreen
 import com.cancleeric.dominoblockade.presentation.tournament.TournamentSetupScreen
@@ -78,6 +79,7 @@ sealed class Screen(val route: String) {
             "onlineGame/$roomId/$playerIndex/$playerId"
     }
     object Shop : Screen("shop")
+    object Quests : Screen("quests")
 }
 
 @Composable
@@ -150,7 +152,8 @@ fun AppNavigation(
                         navController.navigate(Screen.Replay.route)
                     },
                     onTournament = { navController.navigate(Screen.TournamentSetup.route) },
-                    onShop = { navController.navigate(Screen.Shop.route) }
+                    onShop = { navController.navigate(Screen.Shop.route) },
+                    onQuests = { navController.navigate(Screen.Quests.route) }
                 )
                 TutorialOverlay(
                     uiState = tutorialState,
@@ -333,6 +336,11 @@ fun AppNavigation(
         }
         composable(Screen.Shop.route) {
             ShopScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.Quests.route) {
+            QuestScreen(
                 onBack = { navController.popBackStack() }
             )
         }

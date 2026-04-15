@@ -8,6 +8,7 @@ import com.cancleeric.dominoblockade.data.local.dao.GameRecordDao
 import com.cancleeric.dominoblockade.data.local.dao.GameReplayDao
 import com.cancleeric.dominoblockade.data.local.dao.PlayerProfileDao
 import com.cancleeric.dominoblockade.data.local.dao.PlayerStatsDao
+import com.cancleeric.dominoblockade.data.local.dao.QuestDao
 import com.cancleeric.dominoblockade.data.local.dao.ShopDao
 import com.cancleeric.dominoblockade.data.local.dao.ThemeDao
 import com.cancleeric.dominoblockade.data.local.entity.AchievementEntity
@@ -18,6 +19,8 @@ import com.cancleeric.dominoblockade.data.local.entity.GameRecordEntity
 import com.cancleeric.dominoblockade.data.local.entity.GameReplayEntity
 import com.cancleeric.dominoblockade.data.local.entity.PlayerProfileEntity
 import com.cancleeric.dominoblockade.data.local.entity.PlayerStatsEntity
+import com.cancleeric.dominoblockade.data.local.entity.QuestProfileEntity
+import com.cancleeric.dominoblockade.data.local.entity.QuestTaskEntity
 import com.cancleeric.dominoblockade.data.local.entity.ShopPurchaseEntity
 import com.cancleeric.dominoblockade.data.local.entity.ShopWalletEntity
 import com.cancleeric.dominoblockade.data.local.entity.ThemeEntity
@@ -34,9 +37,11 @@ import com.cancleeric.dominoblockade.data.local.entity.ThemeEntity
         AdaptiveAiGameEntity::class,
         AdaptiveAiStateEntity::class,
         ShopWalletEntity::class,
-        ShopPurchaseEntity::class
+        ShopPurchaseEntity::class,
+        QuestTaskEntity::class,
+        QuestProfileEntity::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -48,4 +53,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun gameReplayDao(): GameReplayDao
     abstract fun adaptiveAiDao(): AdaptiveAiDao
     abstract fun shopDao(): ShopDao
+    abstract fun questDao(): QuestDao
 }

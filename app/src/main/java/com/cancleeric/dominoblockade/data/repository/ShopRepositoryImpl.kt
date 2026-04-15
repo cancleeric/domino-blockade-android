@@ -121,6 +121,22 @@ class ShopRepositoryImpl @Inject constructor(
         return totalReward
     }
 
+    override suspend fun grantCoins(amount: Int): Int {
+        if (amount <= 0) return 0
+        val wallet = shopDao.getWalletOnce() ?: ShopWalletEntity()
+        val now = System.currentTimeMillis()
+        shopDao.upsertWallet(
+            wallet.copy(
+                coinBalance = wallet.coinBalance + amount,
+                updatedAt = now
+            )
+        )
+        ensureUid()?.let { uid ->
+            runCatching { syncLocalToRemote(uid) }
+        }
+        return amount
+    }
+
     private suspend fun currentOwnedIds(): Set<String> {
         val purchased = shopDao.getPurchasesOnce().map { it.itemId }.toMutableSet()
         purchased.add(ShopCatalog.DEFAULT_SKIN_ID)
