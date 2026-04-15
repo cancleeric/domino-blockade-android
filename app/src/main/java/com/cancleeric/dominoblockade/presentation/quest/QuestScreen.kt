@@ -97,7 +97,8 @@ private fun SectionTitle(text: String) {
 
 @Composable
 private fun TaskCard(task: QuestTask, onClaim: () -> Unit) {
-    val normalizedProgress = if (task.target <= 0) 0f else task.progress.toFloat() / task.target.toFloat()
+    val safeTarget = task.target.coerceAtLeast(1)
+    val normalizedProgress = task.progress.toFloat() / safeTarget.toFloat()
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(CONTENT_PADDING_DP.dp),
@@ -110,7 +111,7 @@ private fun TaskCard(task: QuestTask, onClaim: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("${task.progress}/${task.target}")
+                Text("${task.progress}/${safeTarget}")
                 Text("Rewards: ${task.rewardCoins} coins + ${task.rewardXp} XP")
             }
             if (task.isCompleted && !task.isClaimed) {

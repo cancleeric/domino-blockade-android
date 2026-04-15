@@ -290,12 +290,12 @@ private fun QuestTemplate.toEntity(
     title = title,
     description = description,
     type = type.name,
-    target = target,
-    progress = progress.coerceAtMost(target),
+    target = target.coerceAtLeast(1),
+    progress = progress.coerceAtMost(target.coerceAtLeast(1)),
     rewardCoins = rewardCoins,
     rewardXp = rewardXp,
     rewardAchievement = rewardAchievement?.name,
-    isCompleted = progress >= target,
+    isCompleted = progress >= target.coerceAtLeast(1),
     isClaimed = isClaimed,
     rotationDate = rotationDate,
     updatedAt = updatedAt
@@ -345,8 +345,8 @@ private fun Map<*, *>.toTaskEntity(): QuestTaskEntity? {
         title = this["title"] as? String ?: "",
         description = this["description"] as? String ?: "",
         type = type,
-        target = (this["target"] as? Number)?.toInt() ?: 1,
-        progress = (this["progress"] as? Number)?.toInt() ?: 0,
+        target = ((this["target"] as? Number)?.toInt() ?: 1).coerceAtLeast(1),
+        progress = ((this["progress"] as? Number)?.toInt() ?: 0).coerceAtLeast(0),
         rewardCoins = (this["rewardCoins"] as? Number)?.toInt() ?: 0,
         rewardXp = (this["rewardXp"] as? Number)?.toInt() ?: 0,
         rewardAchievement = this["rewardAchievement"] as? String,
@@ -365,7 +365,7 @@ private fun parseAchievementType(name: String?): AchievementType? {
 }
 
 /**
- * Converts XP to player level using level = (XP / 100) + 1.
+ * Converts XP to player level using level = (XP.coerceAtLeast(0) / 100) + 1.
  * Negative XP values are clamped to zero, so the minimum level remains 1.
  */
 internal fun questLevelFromXp(totalXp: Int): Int = (totalXp.coerceAtLeast(0) / XP_PER_LEVEL) + 1
