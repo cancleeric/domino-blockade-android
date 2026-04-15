@@ -110,8 +110,10 @@ class QuestRepositoryImpl @Inject constructor(
         val today = LocalDate.now(ZoneOffset.UTC).toString()
         val existing = questDao.getTasksOnce()
         val nonDaily = existing.filter { it.type != QuestType.DAILY.name }
-        val shortAndLongMissing = (nonDaily.isEmpty() || nonDaily.none { it.type == QuestType.SHORT_TERM.name } ||
-            nonDaily.none { it.type == QuestType.LONG_TERM.name })
+        val hasNoNonDaily = nonDaily.isEmpty()
+        val missingShortTerm = nonDaily.none { it.type == QuestType.SHORT_TERM.name }
+        val missingLongTerm = nonDaily.none { it.type == QuestType.LONG_TERM.name }
+        val shortAndLongMissing = hasNoNonDaily || missingShortTerm || missingLongTerm
         if (shortAndLongMissing) {
             val existingById = existing.associateBy { it.id }
             val persistentTasks = (shortTermTemplates + longTermTemplates).map { template ->
