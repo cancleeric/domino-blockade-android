@@ -1,5 +1,6 @@
 package com.cancleeric.dominoblockade.data.repository
 
+import android.util.Log
 import com.cancleeric.dominoblockade.data.local.dao.QuestDao
 import com.cancleeric.dominoblockade.data.local.entity.QuestProfileEntity
 import com.cancleeric.dominoblockade.data.local.entity.QuestTaskEntity
@@ -30,6 +31,7 @@ private const val FIELD_TOTAL_XP = "totalXp"
 private const val FIELD_LEVEL = "level"
 private const val FIELD_UPDATED_AT = "updatedAt"
 private const val XP_PER_LEVEL = 100
+private const val TAG = "QuestRepository"
 
 @Singleton
 class QuestRepositoryImpl @Inject constructor(
@@ -189,7 +191,7 @@ class QuestRepositoryImpl @Inject constructor(
         tasks: List<QuestTaskEntity>,
         profile: QuestProfileEntity
     ) {
-        val updatedAt = maxOf(profile.updatedAt, tasks.maxOfOrNull { it.updatedAt } ?: System.currentTimeMillis())
+        val updatedAt = maxOf(profile.updatedAt, tasks.maxOfOrNull { it.updatedAt } ?: profile.updatedAt)
         ref.set(
             mapOf(
                 FIELD_TOTAL_XP to profile.totalXp,
@@ -314,7 +316,7 @@ private fun QuestTaskEntity.toModel(): QuestTask = QuestTask(
     progress = progress,
     rewardCoins = rewardCoins,
     rewardXp = rewardXp,
-    rewardAchievement = rewardAchievement?.let { runCatching { AchievementType.valueOf(it) }.getOrNull() },
+    rewardAchievement = parseAchievementType(rewardAchievement),
     isCompleted = isCompleted,
     isClaimed = isClaimed,
     rotationDate = rotationDate
@@ -359,4 +361,11 @@ private fun Map<*, *>.toTaskEntity(): QuestTaskEntity? {
         rotationDate = this["rotationDate"] as? String ?: "",
         updatedAt = (this[FIELD_UPDATED_AT] as? Number)?.toLong() ?: 0L
     )
+}
+
+private fun parseAchievementType(name: String?): AchievementType? {
+    if (name.isNullOrBlank()) return null
+    return runCatching { AchievementType.valueOf(name) }
+        .onFailure { Log.w(TAG, "Unknown achievement type from cache/remote: $name", it) }
+        .getOrNull()
 }
