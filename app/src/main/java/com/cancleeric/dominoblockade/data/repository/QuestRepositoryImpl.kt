@@ -90,7 +90,7 @@ class QuestRepositoryImpl @Inject constructor(
 
         val profile = questDao.getProfileOnce() ?: QuestProfileEntity()
         val newXp = profile.totalXp + task.rewardXp
-        val newLevel = levelFromXp(newXp)
+        val newLevel = questLevelFromXp(newXp)
         questDao.upsertProfile(profile.copy(totalXp = newXp, level = newLevel, updatedAt = now))
 
         val coinsAwarded = shopRepository.grantCoins(task.rewardCoins)
@@ -209,14 +209,8 @@ class QuestRepositoryImpl @Inject constructor(
         return runCatching { auth.signInAnonymously().await().user?.uid }.getOrNull()
     }
 
-    private fun levelFromXp(totalXp: Int): Int = (totalXp / XP_PER_LEVEL) + 1
-
-    private fun QuestTaskEntity.progressIncrement(isWin: Boolean, isBlocked: Boolean): Int = when {
-        id.contains("_play_") -> 1
-        id.contains("_win_") && isWin -> 1
-        id.contains("_blocked_") && isBlocked -> 1
-        else -> 0
-    }
+    private fun QuestTaskEntity.progressIncrement(isWin: Boolean, isBlocked: Boolean): Int =
+        questProgressIncrementForTaskId(id = id, isWin = isWin, isBlocked = isBlocked)
 }
 
 private const val DAILY_CHALLENGE_COUNT = 3
@@ -368,4 +362,13 @@ private fun parseAchievementType(name: String?): AchievementType? {
     return runCatching { AchievementType.valueOf(name) }
         .onFailure { Log.w(TAG, "Unknown achievement type from cache/remote: $name", it) }
         .getOrNull()
+}
+
+internal fun questLevelFromXp(totalXp: Int): Int = (totalXp.coerceAtLeast(0) / XP_PER_LEVEL) + 1
+
+internal fun questProgressIncrementForTaskId(id: String, isWin: Boolean, isBlocked: Boolean): Int = when {
+    id.contains("_play_") -> 1
+    id.contains("_win_") && isWin -> 1
+    id.contains("_blocked_") && isBlocked -> 1
+    else -> 0
 }
