@@ -3,6 +3,7 @@ package com.cancleeric.dominoblockade.data.repository
 import com.cancleeric.dominoblockade.data.local.dao.ThemeDao
 import com.cancleeric.dominoblockade.data.local.entity.ThemeEntity
 import com.cancleeric.dominoblockade.domain.model.AppTheme
+import com.cancleeric.dominoblockade.domain.model.DominoSkin
 import com.cancleeric.dominoblockade.domain.model.DominoStyle
 import com.cancleeric.dominoblockade.domain.repository.ThemeRepository
 import kotlinx.coroutines.flow.Flow
@@ -29,6 +30,12 @@ class ThemeRepositoryImpl @Inject constructor(
             DominoStyle.entries.firstOrNull { it.name == name } ?: DominoStyle.DOTS
         }
 
+    override fun getDominoSkin(): Flow<DominoSkin> =
+        themeDao.getTheme().map { entity ->
+            val name = entity?.dominoSkin ?: defaultTheme.dominoSkin
+            DominoSkin.entries.firstOrNull { it.name == name } ?: DominoSkin.CLASSIC
+        }
+
     override suspend fun setAppTheme(theme: AppTheme) {
         val current = themeDao.getThemeOnce() ?: defaultTheme
         themeDao.upsertTheme(current.copy(appTheme = theme.name))
@@ -37,5 +44,10 @@ class ThemeRepositoryImpl @Inject constructor(
     override suspend fun setDominoStyle(style: DominoStyle) {
         val current = themeDao.getThemeOnce() ?: defaultTheme
         themeDao.upsertTheme(current.copy(dominoStyle = style.name))
+    }
+
+    override suspend fun setDominoSkin(skin: DominoSkin) {
+        val current = themeDao.getThemeOnce() ?: defaultTheme
+        themeDao.upsertTheme(current.copy(dominoSkin = skin.name))
     }
 }

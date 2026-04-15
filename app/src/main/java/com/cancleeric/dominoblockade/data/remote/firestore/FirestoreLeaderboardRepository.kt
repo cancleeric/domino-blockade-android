@@ -342,7 +342,7 @@ class FirestoreLeaderboardRepository @Inject constructor(
         return ids.distinct().chunked(QUERY_IN_LIMIT).flatMap { batch ->
             val snapshot = collection.whereIn(com.google.firebase.firestore.FieldPath.documentId(), batch).get().await()
             snapshot.documents.map { it.toLeaderboardEntry() }
-        )
+        }
     }
 
     private fun com.google.firebase.firestore.DocumentSnapshot.toLeaderboardEntry(): LeaderboardEntry {

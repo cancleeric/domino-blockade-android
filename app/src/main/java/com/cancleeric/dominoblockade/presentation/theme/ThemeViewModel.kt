@@ -3,6 +3,7 @@ package com.cancleeric.dominoblockade.presentation.theme
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cancleeric.dominoblockade.domain.model.AppTheme
+import com.cancleeric.dominoblockade.domain.model.DominoSkin
 import com.cancleeric.dominoblockade.domain.model.DominoStyle
 import com.cancleeric.dominoblockade.domain.repository.ThemeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,11 +24,18 @@ class ThemeViewModel @Inject constructor(
     val dominoStyle: StateFlow<DominoStyle> = themeRepository.getDominoStyle()
         .stateIn(viewModelScope, SharingStarted.Eagerly, DominoStyle.DOTS)
 
+    val dominoSkin: StateFlow<DominoSkin> = themeRepository.getDominoSkin()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, DominoSkin.CLASSIC)
+
     fun selectTheme(theme: AppTheme) {
         viewModelScope.launch { themeRepository.setAppTheme(theme) }
     }
 
     fun selectDominoStyle(style: DominoStyle) {
         viewModelScope.launch { themeRepository.setDominoStyle(style) }
+    }
+
+    fun selectDominoSkin(skin: DominoSkin) {
+        viewModelScope.launch { themeRepository.setDominoSkin(skin) }
     }
 }
