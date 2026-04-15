@@ -52,7 +52,7 @@ fun QuestScreen(
                 title = { Text("Daily Challenges & Quests") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Navigate back")
                     }
                 }
             )

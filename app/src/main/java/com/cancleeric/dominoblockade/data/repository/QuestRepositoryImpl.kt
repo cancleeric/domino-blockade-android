@@ -364,8 +364,18 @@ private fun parseAchievementType(name: String?): AchievementType? {
         .getOrNull()
 }
 
+/**
+ * Converts XP to player level using level = (XP / 100) + 1.
+ * Negative XP values are clamped to zero, so the minimum level remains 1.
+ */
 internal fun questLevelFromXp(totalXp: Int): Int = (totalXp.coerceAtLeast(0) / XP_PER_LEVEL) + 1
 
+/**
+ * Calculates quest progress increment from task ID convention:
+ * - IDs containing `_play_` always increment by 1.
+ * - IDs containing `_win_` increment by 1 only when the match is won.
+ * - IDs containing `_blocked_` increment by 1 only for blocked matches.
+ */
 internal fun questProgressIncrementForTaskId(id: String, isWin: Boolean, isBlocked: Boolean): Int = when {
     id.contains("_play_") -> 1
     id.contains("_win_") && isWin -> 1
