@@ -16,4 +16,5 @@ interface ShopRepository {
     suspend fun syncWithRemote()
     suspend fun purchase(itemId: String): PurchaseResult
     suspend fun awardGameRewards(isWin: Boolean, unlockedAchievements: Int): Int
+    suspend fun grantCoins(amount: Int): Int
 }

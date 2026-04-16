@@ -14,6 +14,7 @@ import com.cancleeric.dominoblockade.data.local.dao.GameRecordDao
 import com.cancleeric.dominoblockade.data.local.dao.GameReplayDao
 import com.cancleeric.dominoblockade.data.local.dao.PlayerProfileDao
 import com.cancleeric.dominoblockade.data.local.dao.PlayerStatsDao
+import com.cancleeric.dominoblockade.data.local.dao.QuestDao
 import com.cancleeric.dominoblockade.data.local.dao.ShopDao
 import com.cancleeric.dominoblockade.data.local.dao.ThemeDao
 import dagger.Module
@@ -118,6 +119,27 @@ private val MIGRATION_7_8 = object : Migration(7, 8) {
     }
 }
 
+private val MIGRATION_8_9 = object : Migration(8, 9) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `quest_tasks` " +
+                "(`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `type` TEXT NOT NULL, " +
+                "`target` INTEGER NOT NULL, `progress` INTEGER NOT NULL, `rewardCoins` INTEGER NOT NULL, " +
+                "`rewardXp` INTEGER NOT NULL, `rewardAchievement` TEXT, `isCompleted` INTEGER NOT NULL, " +
+                "`isClaimed` INTEGER NOT NULL, `rotationDate` TEXT NOT NULL, `updatedAt` INTEGER NOT NULL, " +
+                "PRIMARY KEY(`id`))"
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `quest_profile` " +
+                "(`id` INTEGER NOT NULL, `totalXp` INTEGER NOT NULL, `level` INTEGER NOT NULL, " +
+                "`updatedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))"
+        )
+        db.execSQL(
+            "INSERT OR IGNORE INTO `quest_profile` (`id`, `totalXp`, `level`, `updatedAt`) VALUES (1, 0, 1, 0)"
+        )
+    }
+}
+
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
@@ -132,7 +154,8 @@ object DatabaseModule {
                 MIGRATION_4_5,
                 MIGRATION_5_6,
                 MIGRATION_6_7,
-                MIGRATION_7_8
+                MIGRATION_7_8,
+                MIGRATION_8_9
             )
             .fallbackToDestructiveMigration()
             .build()
@@ -160,6 +183,9 @@ object DatabaseModule {
 
     @Provides
     fun provideShopDao(db: AppDatabase): ShopDao = db.shopDao()
+
+    @Provides
+    fun provideQuestDao(db: AppDatabase): QuestDao = db.questDao()
 
     @Provides
     @Singleton
