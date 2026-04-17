@@ -150,8 +150,17 @@ private fun OnlineGameHeader(uiState: OnlineGameUiState, onLeave: () -> Unit) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val turnText = if (uiState.isMyTurn) "Your Turn" else "${uiState.opponentName}'s Turn"
-        Text(text = turnText, style = MaterialTheme.typography.titleMedium)
+        Column {
+            val turnText = if (uiState.isMyTurn) "Your Turn" else "${uiState.opponentName}'s Turn"
+            Text(text = turnText, style = MaterialTheme.typography.titleMedium)
+            if (uiState.spectatorCount > 0) {
+                Text(
+                    text = "\uD83D\uDC41 ${uiState.spectatorCount} watching",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
         OutlinedButton(onClick = onLeave) {
             Text("Leave")
         }

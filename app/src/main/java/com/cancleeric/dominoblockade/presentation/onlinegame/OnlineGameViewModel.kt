@@ -102,6 +102,7 @@ class OnlineGameViewModel @Inject constructor(
                     opponentName = opponent?.name ?: "",
                     opponentTileCount = opponent?.hand?.size ?: 0,
                     isRankedMatch = room.isRanked,
+                    spectatorCount = room.spectators.size,
                     isLoading = false
                 )
             }

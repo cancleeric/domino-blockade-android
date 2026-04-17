@@ -13,6 +13,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,12 +34,15 @@ private const val TITLE_SPACING_DP = 24
  *
  * @param onNavigateToGame Called once both players are ready with the roomId, localPlayerIndex,
  *   and localPlayerId.
+ * @param onNavigateToSpectator Called when the user joins as a spectator with the roomId and
+ *   spectatorId.
  * @param onNavigateBack Called when the user presses the back button.
  */
 @Composable
 fun LobbyScreen(
     onNavigateToGame: (roomId: String, localPlayerIndex: Int, localPlayerId: String) -> Unit,
     onNavigateBack: () -> Unit,
+    onNavigateToSpectator: (roomId: String, spectatorId: String) -> Unit = { _, _ -> },
     initialRoomCode: String? = null,
     modifier: Modifier = Modifier,
     viewModel: LobbyViewModel = hiltViewModel()
@@ -55,6 +59,13 @@ fun LobbyScreen(
         uiState.navigateToGame?.let { nav ->
             viewModel.resetNavigation()
             onNavigateToGame(nav.roomId, nav.localPlayerIndex, nav.localPlayerId)
+        }
+    }
+
+    LaunchedEffect(uiState.navigateToSpectator) {
+        uiState.navigateToSpectator?.let { nav ->
+            viewModel.resetSpectatorNavigation()
+            onNavigateToSpectator(nav.roomId, nav.spectatorId)
         }
     }
 
@@ -95,14 +106,21 @@ fun LobbyScreen(
         } else if (uiState.isQueueingRanked) {
             RankedQueueSection(onCancelQueue = viewModel::cancelRankedQueue)
         } else if (createdRoomId != null) {
-            WaitingSection(roomId = createdRoomId, status = uiState.roomStatus)
+            WaitingSection(
+                roomId = createdRoomId,
+                status = uiState.roomStatus,
+                spectators = uiState.spectators,
+                allowSpectators = uiState.allowSpectators,
+                onToggleSpectators = viewModel::toggleSpectatorPermission
+            )
         } else {
             LobbyActions(
                 mode = uiState.mode,
                 roomCode = uiState.roomCode,
                 onRoomCodeChange = viewModel::setRoomCode,
                 onCreateRoom = viewModel::createRoom,
-                onJoinRoom = viewModel::joinRoom
+                onJoinRoom = viewModel::joinRoom,
+                onJoinAsSpectator = viewModel::joinAsSpectator
             )
         }
         HorizontalDivider(modifier = Modifier.padding(top = SPACING_DP.dp))
@@ -151,7 +169,13 @@ private fun RankedQueueSection(onCancelQueue: () -> Unit) {
 }
 
 @Composable
-private fun WaitingSection(roomId: String, status: OnlineRoomStatus?) {
+private fun WaitingSection(
+    roomId: String,
+    status: OnlineRoomStatus?,
+    spectators: Map<String, String>,
+    allowSpectators: Boolean,
+    onToggleSpectators: () -> Unit
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(SPACING_DP.dp)
@@ -167,6 +191,28 @@ private fun WaitingSection(roomId: String, status: OnlineRoomStatus?) {
         if (status != OnlineRoomStatus.PLAYING) {
             CircularProgressIndicator()
         }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Allow spectators", style = MaterialTheme.typography.bodyMedium)
+            Switch(checked = allowSpectators, onCheckedChange = { onToggleSpectators() })
+        }
+        if (spectators.isNotEmpty()) {
+            Text(
+                text = "Watching (${spectators.size}):",
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.align(Alignment.Start)
+            )
+            spectators.values.forEach { name ->
+                Text(
+                    text = "\u2022 $name",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
+        }
     }
 }
 
@@ -176,7 +222,8 @@ private fun LobbyActions(
     roomCode: String,
     onRoomCodeChange: (String) -> Unit,
     onCreateRoom: () -> Unit,
-    onJoinRoom: () -> Unit
+    onJoinRoom: () -> Unit,
+    onJoinAsSpectator: () -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(SPACING_DP.dp),
@@ -206,6 +253,12 @@ private fun LobbyActions(
                 Button(onClick = onJoinRoom) {
                     Text("Join")
                 }
+            }
+            OutlinedButton(
+                onClick = onJoinAsSpectator,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Join as Spectator")
             }
         }
     }

@@ -36,6 +36,9 @@ class LobbyViewModelTest {
         override fun observeRankedAssignment(playerId: String): Flow<Pair<String, Int>?> =
             MutableSharedFlow()
         override suspend fun leaveRankedQueue(playerId: String) = Unit
+        override suspend fun joinAsSpectator(roomId: String, spectatorId: String, spectatorName: String) = true
+        override suspend fun leaveAsSpectator(roomId: String, spectatorId: String) = Unit
+        override suspend fun setSpectatorPermission(roomId: String, allowed: Boolean) = Unit
     }
 
     private lateinit var viewModel: LobbyViewModel
@@ -109,5 +112,40 @@ class LobbyViewModelTest {
         viewModel.setPlayerName("Alice")
         viewModel.createRoom()
         assertEquals("ROOM01", viewModel.uiState.value.createdRoomId)
+    }
+
+    @Test
+    fun `joinAsSpectator with empty name sets error`() = runTest {
+        viewModel.setRoomCode("ROOM01")
+        viewModel.joinAsSpectator()
+        assertNotNull(viewModel.uiState.value.error)
+        assertNull(viewModel.uiState.value.navigateToSpectator)
+    }
+
+    @Test
+    fun `joinAsSpectator with empty roomCode sets error`() = runTest {
+        viewModel.setPlayerName("Watcher")
+        viewModel.joinAsSpectator()
+        assertNotNull(viewModel.uiState.value.error)
+        assertNull(viewModel.uiState.value.navigateToSpectator)
+    }
+
+    @Test
+    fun `joinAsSpectator with valid data navigates to spectator`() = runTest {
+        viewModel.setPlayerName("Watcher")
+        viewModel.setRoomCode("ROOM01")
+        viewModel.joinAsSpectator()
+        assertNull(viewModel.uiState.value.error)
+        assertNotNull(viewModel.uiState.value.navigateToSpectator)
+        assertEquals("ROOM01", viewModel.uiState.value.navigateToSpectator?.roomId)
+    }
+
+    @Test
+    fun `resetSpectatorNavigation clears navigateToSpectator`() = runTest {
+        viewModel.setPlayerName("Watcher")
+        viewModel.setRoomCode("ROOM01")
+        viewModel.joinAsSpectator()
+        viewModel.resetSpectatorNavigation()
+        assertNull(viewModel.uiState.value.navigateToSpectator)
     }
 }

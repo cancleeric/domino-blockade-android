@@ -15,6 +15,8 @@ enum class OnlineRoomStatus { WAITING, PLAYING, FINISHED }
  * @property gameState Current game state, or null before the game has started.
  * @property disconnectedPlayerId Player ID written by Firebase onDisconnect when a player's
  *   connection drops. Cleared to null when the player reconnects.
+ * @property spectators Map of spectatorId to spectatorName for users watching the game.
+ * @property allowSpectators Whether the host allows spectators to join this room.
  */
 data class OnlineRoom(
     val roomId: String,
@@ -25,5 +27,7 @@ data class OnlineRoom(
     val status: OnlineRoomStatus = OnlineRoomStatus.WAITING,
     val isRanked: Boolean = false,
     val gameState: GameState? = null,
-    val disconnectedPlayerId: String? = null
+    val disconnectedPlayerId: String? = null,
+    val spectators: Map<String, String> = emptyMap(),
+    val allowSpectators: Boolean = true
 )

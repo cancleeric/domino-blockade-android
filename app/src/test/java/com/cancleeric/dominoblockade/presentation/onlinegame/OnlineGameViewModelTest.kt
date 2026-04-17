@@ -46,6 +46,9 @@ class OnlineGameViewModelTest {
         override suspend fun joinRankedQueue(playerId: String, playerName: String) = Unit
         override fun observeRankedAssignment(playerId: String): Flow<Pair<String, Int>?> = roomFlow.map { null }
         override suspend fun leaveRankedQueue(playerId: String) = Unit
+        override suspend fun joinAsSpectator(roomId: String, spectatorId: String, spectatorName: String) = true
+        override suspend fun leaveAsSpectator(roomId: String, spectatorId: String) = Unit
+        override suspend fun setSpectatorPermission(roomId: String, allowed: Boolean) = Unit
     }
 
     private val fakeLeaderboardRepository = object : LeaderboardRepository {

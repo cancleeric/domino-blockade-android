@@ -10,6 +10,11 @@ data class NavigateToOnlineGame(
     val localPlayerId: String
 )
 
+data class NavigateToSpectator(
+    val roomId: String,
+    val spectatorId: String
+)
+
 data class LobbyUiState(
     val playerName: String = "",
     val roomCode: String = "",
@@ -19,5 +24,8 @@ data class LobbyUiState(
     val error: String? = null,
     val createdRoomId: String? = null,
     val roomStatus: OnlineRoomStatus? = null,
-    val navigateToGame: NavigateToOnlineGame? = null
+    val navigateToGame: NavigateToOnlineGame? = null,
+    val navigateToSpectator: NavigateToSpectator? = null,
+    val spectators: Map<String, String> = emptyMap(),
+    val allowSpectators: Boolean = true
 )
