@@ -106,8 +106,10 @@ class LobbyViewModel @Inject constructor(
             val result = runCatching { onlineGameRepository.joinAsSpectator(code, localId, name) }
             val success = result.getOrNull()
             if (result.isFailure || success == false) {
-                val msg = if (success == false) "Spectators are not allowed in this room"
-                else "Room not found"
+                val msg = when {
+                    result.isFailure -> result.exceptionOrNull()?.message ?: "Room not found"
+                    else -> "Spectators are not allowed in this room"
+                }
                 _uiState.value = _uiState.value.copy(isLoading = false, error = msg)
                 return@launch
             }
@@ -136,7 +138,12 @@ class LobbyViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(allowSpectators = !current)
         viewModelScope.launch {
             runCatching { onlineGameRepository.setSpectatorPermission(roomId, !current) }
-                .onFailure { _uiState.value = _uiState.value.copy(allowSpectators = current) }
+                .onFailure {
+                    _uiState.value = _uiState.value.copy(
+                        allowSpectators = current,
+                        error = "Failed to update spectator permission"
+                    )
+                }
         }
     }
 

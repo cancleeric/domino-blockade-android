@@ -362,6 +362,10 @@ fun AppNavigation(
         ) { backStackEntry ->
             val roomId = backStackEntry.arguments?.getString("roomId").orEmpty()
             val spectatorId = backStackEntry.arguments?.getString("spectatorId").orEmpty()
+            if (roomId.isBlank() || spectatorId.isBlank()) {
+                navController.popBackStack()
+                return@composable
+            }
             SpectatorScreen(
                 roomId = roomId,
                 spectatorId = spectatorId,
