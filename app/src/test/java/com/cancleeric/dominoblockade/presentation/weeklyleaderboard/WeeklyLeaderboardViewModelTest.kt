@@ -172,12 +172,19 @@ class WeeklyLeaderboardViewModelTest {
     }
 
     @Test
-    fun `rank change notification is fired when rank changes`() = runTest(testDispatcher) {
+    fun `rank change notification is fired when rank changes after initial load`() = runTest(testDispatcher) {
         fakeRepository.setPlayerRank(8)
         val viewModel = WeeklyLeaderboardViewModel(fakeRepository, fakeAuthService, fakeNotifier)
         fakeAuthService.setCurrentUser(User(uid = "uid-1", displayName = "Alice", isAnonymous = false))
         advanceUntilIdle()
+        // First emission sets previousRank; no notification on initial load
+        assertEquals(0, fakeNotifier.events.size)
+
+        // Simulate rank change by emitting a new rank
+        fakeRepository.setPlayerRank(5)
+        advanceUntilIdle()
         assertTrue(fakeNotifier.events.isNotEmpty())
-        assertEquals(8, fakeNotifier.events.last().first)
+        assertEquals(5, fakeNotifier.events.last().first)
+        assertEquals(8, fakeNotifier.events.last().second)
     }
 }

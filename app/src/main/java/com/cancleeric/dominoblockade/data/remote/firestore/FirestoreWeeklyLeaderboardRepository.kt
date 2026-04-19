@@ -151,18 +151,22 @@ class FirestoreWeeklyLeaderboardRepository @Inject constructor(
             .get()
             .await()
 
+        // Fetch all profile snapshots before starting the batch to avoid reads inside batch
+        val profileData = snapshot.documents.map { doc ->
+            val profileRef = firestore.collection(COLLECTION_USER_PROFILES).document(doc.id)
+            val profileSnap = profileRef.get().await()
+            @Suppress("UNCHECKED_CAST")
+            val existingBadges = (profileSnap.get(FIELD_WEEKLY_BADGES) as? List<String>).orEmpty()
+            Triple(doc.id, profileRef, existingBadges)
+        }
+
         val batch = firestore.batch()
-        snapshot.documents.forEach { doc ->
-            val userId = doc.id
+        profileData.forEach { (userId, profileRef, existingBadges) ->
             batch.set(
                 scoresRef(weekId).document(userId),
                 mapOf(FIELD_HAS_BADGE to true),
                 SetOptions.merge()
             )
-            val profileRef = firestore.collection(COLLECTION_USER_PROFILES).document(userId)
-            val profileSnap = profileRef.get().await()
-            @Suppress("UNCHECKED_CAST")
-            val existingBadges = (profileSnap.get(FIELD_WEEKLY_BADGES) as? List<String>).orEmpty()
             if (!existingBadges.contains(weekId)) {
                 batch.set(
                     profileRef,

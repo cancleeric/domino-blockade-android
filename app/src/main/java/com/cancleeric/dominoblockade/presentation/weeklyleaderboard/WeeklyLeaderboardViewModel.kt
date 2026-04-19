@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -100,7 +101,8 @@ class WeeklyLeaderboardViewModel @Inject constructor(
             .onEach { rank ->
                 val previous = previousRank
                 _uiState.value = _uiState.value.copy(playerRank = rank, isLoading = false)
-                if (rank != null) {
+                // Only notify when rank changes after the initial load (previous != null)
+                if (rank != null && previous != null) {
                     notificationHelper.notifyRankChange(rank, previous)
                 }
                 previousRank = rank
@@ -122,7 +124,7 @@ class WeeklyLeaderboardViewModel @Inject constructor(
 
     private fun startCountdown() {
         viewModelScope.launch {
-            while (true) {
+            while (isActive) {
                 _uiState.value = _uiState.value.copy(
                     millisUntilReset = weeklyLeaderboardRepository.getMillisUntilWeekReset()
                 )
