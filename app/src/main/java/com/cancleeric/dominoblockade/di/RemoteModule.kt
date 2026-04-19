@@ -4,8 +4,10 @@ import com.cancleeric.dominoblockade.data.remote.auth.AuthService
 import com.cancleeric.dominoblockade.data.remote.auth.FirebaseAuthService
 import com.cancleeric.dominoblockade.data.remote.firestore.FirestoreLeaderboardRepository
 import com.cancleeric.dominoblockade.data.remote.firestore.FirestoreSocialRepository
+import com.cancleeric.dominoblockade.data.remote.firestore.FirestoreWeeklyLeaderboardRepository
 import com.cancleeric.dominoblockade.domain.repository.LeaderboardRepository
 import com.cancleeric.dominoblockade.domain.repository.SocialRepository
+import com.cancleeric.dominoblockade.domain.repository.WeeklyLeaderboardRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -27,4 +29,8 @@ abstract class RemoteModule {
     @Binds
     @Singleton
     abstract fun bindSocialRepository(impl: FirestoreSocialRepository): SocialRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindWeeklyLeaderboardRepository(impl: FirestoreWeeklyLeaderboardRepository): WeeklyLeaderboardRepository
 }

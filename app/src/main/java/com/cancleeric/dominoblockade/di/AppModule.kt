@@ -28,6 +28,8 @@ import com.cancleeric.dominoblockade.domain.repository.ThemeRepository
 import com.cancleeric.dominoblockade.domain.repository.TutorialRepository
 import com.cancleeric.dominoblockade.data.remote.firestore.FirestoreTournamentRepository
 import com.cancleeric.dominoblockade.domain.repository.TournamentRepository
+import com.cancleeric.dominoblockade.presentation.notification.RankChangeNotifier
+import com.cancleeric.dominoblockade.presentation.notification.WeeklyLeaderboardNotificationHelper
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -92,4 +94,8 @@ abstract class AppModule {
     @Binds
     @Singleton
     abstract fun bindQuestRepository(impl: QuestRepositoryImpl): QuestRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRankChangeNotifier(impl: WeeklyLeaderboardNotificationHelper): RankChangeNotifier
 }
