@@ -37,6 +37,7 @@ import com.cancleeric.dominoblockade.presentation.settings.SettingsScreen
 import com.cancleeric.dominoblockade.presentation.shop.ShopScreen
 import com.cancleeric.dominoblockade.presentation.social.SocialScreen
 import com.cancleeric.dominoblockade.presentation.theme.ThemeSelectionScreen
+import com.cancleeric.dominoblockade.presentation.spectator.SpectatorScreen
 import com.cancleeric.dominoblockade.presentation.tutorial.TutorialOverlay
 import com.cancleeric.dominoblockade.presentation.tutorial.TutorialViewModel
 
@@ -80,6 +81,9 @@ sealed class Screen(val route: String) {
     }
     object Shop : Screen("shop")
     object Quests : Screen("quests")
+    object Spectator : Screen("spectator/{roomId}/{spectatorId}") {
+        fun createRoute(roomId: String, spectatorId: String) = "spectator/$roomId/$spectatorId"
+    }
 }
 
 @Composable
@@ -280,6 +284,11 @@ fun AppNavigation(
                         popUpTo(Screen.Lobby.route) { inclusive = true }
                     }
                 },
+                onNavigateToSpectator = { roomId, spectatorId ->
+                    navController.navigate(Screen.Spectator.createRoute(roomId, spectatorId)) {
+                        popUpTo(Screen.Lobby.route) { inclusive = true }
+                    }
+                },
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -342,6 +351,29 @@ fun AppNavigation(
         composable(Screen.Quests.route) {
             QuestScreen(
                 onBack = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = Screen.Spectator.route,
+            arguments = listOf(
+                navArgument("roomId") { type = NavType.StringType },
+                navArgument("spectatorId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val roomId = backStackEntry.arguments?.getString("roomId").orEmpty()
+            val spectatorId = backStackEntry.arguments?.getString("spectatorId").orEmpty()
+            if (roomId.isBlank() || spectatorId.isBlank()) {
+                navController.popBackStack()
+                return@composable
+            }
+            SpectatorScreen(
+                roomId = roomId,
+                spectatorId = spectatorId,
+                onLeave = {
+                    navController.navigate(Screen.Menu.route) {
+                        popUpTo(Screen.Menu.route) { inclusive = true }
+                    }
+                }
             )
         }
     }

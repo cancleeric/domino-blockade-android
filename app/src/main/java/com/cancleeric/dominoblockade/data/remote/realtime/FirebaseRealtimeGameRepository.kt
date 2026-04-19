@@ -33,6 +33,8 @@ private const val KEY_CREATED_AT = "createdAt"
 private const val KEY_ROOM_ID = "roomId"
 private const val KEY_PLAYER_INDEX = "playerIndex"
 private const val KEY_CLAIMED_BY = "claimedBy"
+private const val KEY_SPECTATORS = "spectators"
+private const val KEY_ALLOW_SPECTATORS = "allowSpectators"
 private const val ROOM_CODE_LENGTH = 6
 private const val ROOM_CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
@@ -162,6 +164,26 @@ class FirebaseRealtimeGameRepository @Inject constructor(
     override suspend fun leaveRankedQueue(playerId: String) {
         database.getReference(PATH_RANKED_QUEUE).child(playerId).removeValue().await()
         database.getReference(PATH_RANKED_ASSIGNMENTS).child(playerId).removeValue().await()
+    }
+
+    override suspend fun joinAsSpectator(
+        roomId: String,
+        spectatorId: String,
+        spectatorName: String
+    ): Boolean {
+        val allowedSnapshot = roomsRef.child(roomId).child(KEY_ALLOW_SPECTATORS).get().await()
+        val allowed = allowedSnapshot.getValue(Boolean::class.java) != false
+        if (!allowed) return false
+        roomsRef.child(roomId).child(KEY_SPECTATORS).child(spectatorId).setValue(spectatorName).await()
+        return true
+    }
+
+    override suspend fun leaveAsSpectator(roomId: String, spectatorId: String) {
+        roomsRef.child(roomId).child(KEY_SPECTATORS).child(spectatorId).removeValue().await()
+    }
+
+    override suspend fun setSpectatorPermission(roomId: String, allowed: Boolean) {
+        roomsRef.child(roomId).child(KEY_ALLOW_SPECTATORS).setValue(allowed).await()
     }
 
     private suspend fun claimWaitingPlayer(

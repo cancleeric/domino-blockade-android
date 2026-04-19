@@ -29,6 +29,8 @@ private const val KEY_STATUS = "status"
 private const val KEY_IS_RANKED = "isRanked"
 private const val KEY_GAME_STATE = "gameState"
 private const val KEY_DISCONNECTED_PLAYER_ID = "disconnectedPlayerId"
+private const val KEY_SPECTATORS = "spectators"
+private const val KEY_ALLOW_SPECTATORS = "allowSpectators"
 
 internal fun dominoToMap(domino: Domino): Map<String, Int> =
     mapOf(KEY_LEFT to domino.left, KEY_RIGHT to domino.right)
@@ -117,6 +119,14 @@ internal fun snapshotToOnlineRoom(snapshot: DataSnapshot): OnlineRoom? {
     }
     val isRanked = snapshot.child(KEY_IS_RANKED).getValue(Boolean::class.java) == true
     val disconnectedPlayerId = snapshot.child(KEY_DISCONNECTED_PLAYER_ID).getValue(String::class.java)
+    val allowSpectators = snapshot.child(KEY_ALLOW_SPECTATORS).getValue(Boolean::class.java) != false
+    val spectatorsSnapshot = snapshot.child(KEY_SPECTATORS)
+    val spectators = mutableMapOf<String, String>()
+    for (child in spectatorsSnapshot.children) {
+        val specId = child.key ?: continue
+        val specName = child.getValue(String::class.java) ?: continue
+        spectators[specId] = specName
+    }
     return OnlineRoom(
         roomId = snapshot.key ?: "",
         hostId = hostId,
@@ -126,6 +136,8 @@ internal fun snapshotToOnlineRoom(snapshot: DataSnapshot): OnlineRoom? {
         status = status,
         isRanked = isRanked,
         gameState = gameState,
-        disconnectedPlayerId = disconnectedPlayerId
+        disconnectedPlayerId = disconnectedPlayerId,
+        spectators = spectators,
+        allowSpectators = allowSpectators
     )
 }

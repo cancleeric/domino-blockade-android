@@ -45,4 +45,19 @@ interface OnlineGameRepository {
 
     /** Removes a player from ranked queue and pending assignment. */
     suspend fun leaveRankedQueue(playerId: String)
+
+    /**
+     * Joins a room as a spectator. Returns true on success, false if spectators are not allowed.
+     */
+    suspend fun joinAsSpectator(roomId: String, spectatorId: String, spectatorName: String): Boolean
+
+    /**
+     * Removes a spectator from the room's spectator list.
+     */
+    suspend fun leaveAsSpectator(roomId: String, spectatorId: String)
+
+    /**
+     * Toggles whether spectators are allowed to join the room.
+     */
+    suspend fun setSpectatorPermission(roomId: String, allowed: Boolean)
 }

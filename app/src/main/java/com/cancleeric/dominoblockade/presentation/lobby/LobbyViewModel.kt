@@ -94,6 +94,32 @@ class LobbyViewModel @Inject constructor(
         }
     }
 
+    fun joinAsSpectator() {
+        val name = _uiState.value.playerName.trim()
+        val code = _uiState.value.roomCode.trim()
+        if (name.isEmpty() || code.isEmpty()) {
+            _uiState.value = _uiState.value.copy(error = "Enter your name and room code")
+            return
+        }
+        _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+        viewModelScope.launch {
+            val result = runCatching { onlineGameRepository.joinAsSpectator(code, localId, name) }
+            val success = result.getOrNull()
+            if (result.isFailure || success == false) {
+                val msg = when {
+                    result.isFailure -> result.exceptionOrNull()?.message ?: "Room not found"
+                    else -> "Spectators are not allowed in this room"
+                }
+                _uiState.value = _uiState.value.copy(isLoading = false, error = msg)
+                return@launch
+            }
+            _uiState.value = _uiState.value.copy(
+                isLoading = false,
+                navigateToSpectator = NavigateToSpectator(code, localId)
+            )
+        }
+    }
+
     fun dismissError() {
         _uiState.value = _uiState.value.copy(error = null)
     }
@@ -102,10 +128,33 @@ class LobbyViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(navigateToGame = null)
     }
 
+    fun resetSpectatorNavigation() {
+        _uiState.value = _uiState.value.copy(navigateToSpectator = null)
+    }
+
+    fun toggleSpectatorPermission() {
+        val current = _uiState.value.allowSpectators
+        val roomId = _uiState.value.createdRoomId ?: return
+        _uiState.value = _uiState.value.copy(allowSpectators = !current)
+        viewModelScope.launch {
+            runCatching { onlineGameRepository.setSpectatorPermission(roomId, !current) }
+                .onFailure {
+                    _uiState.value = _uiState.value.copy(
+                        allowSpectators = current,
+                        error = "Failed to update spectator permission"
+                    )
+                }
+        }
+    }
+
     private fun observeRoomForUpdates(roomId: String, localPlayerIndex: Int) {
         viewModelScope.launch {
             onlineGameRepository.observeRoom(roomId).collect { room ->
-                _uiState.value = _uiState.value.copy(roomStatus = room.status)
+                _uiState.value = _uiState.value.copy(
+                    roomStatus = room.status,
+                    spectators = room.spectators,
+                    allowSpectators = room.allowSpectators
+                )
                 handleRoomUpdate(room, roomId, localPlayerIndex)
             }
         }
