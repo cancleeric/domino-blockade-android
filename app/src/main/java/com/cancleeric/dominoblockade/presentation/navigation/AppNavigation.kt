@@ -38,6 +38,7 @@ import com.cancleeric.dominoblockade.presentation.shop.ShopScreen
 import com.cancleeric.dominoblockade.presentation.social.SocialScreen
 import com.cancleeric.dominoblockade.presentation.theme.ThemeSelectionScreen
 import com.cancleeric.dominoblockade.presentation.spectator.SpectatorScreen
+import com.cancleeric.dominoblockade.presentation.weeklyleaderboard.WeeklyLeaderboardScreen
 import com.cancleeric.dominoblockade.presentation.tutorial.TutorialOverlay
 import com.cancleeric.dominoblockade.presentation.tutorial.TutorialViewModel
 
@@ -81,6 +82,7 @@ sealed class Screen(val route: String) {
     }
     object Shop : Screen("shop")
     object Quests : Screen("quests")
+    object WeeklyLeaderboard : Screen("weeklyLeaderboard")
     object Spectator : Screen("spectator/{roomId}/{spectatorId}") {
         fun createRoute(roomId: String, spectatorId: String) = "spectator/$roomId/$spectatorId"
     }
@@ -157,7 +159,8 @@ fun AppNavigation(
                     },
                     onTournament = { navController.navigate(Screen.TournamentSetup.route) },
                     onShop = { navController.navigate(Screen.Shop.route) },
-                    onQuests = { navController.navigate(Screen.Quests.route) }
+                    onQuests = { navController.navigate(Screen.Quests.route) },
+                    onWeeklyLeaderboard = { navController.navigate(Screen.WeeklyLeaderboard.route) }
                 )
                 TutorialOverlay(
                     uiState = tutorialState,
@@ -351,6 +354,11 @@ fun AppNavigation(
         composable(Screen.Quests.route) {
             QuestScreen(
                 onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.WeeklyLeaderboard.route) {
+            WeeklyLeaderboardScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
         composable(
